@@ -1,6 +1,7 @@
 # Use of TRIP package for the post-process of the gps data
 rm(list = ls())
-source('C:/Users/Etudiant/Desktop/SMAC/GITHUB/PTEBAR_GPS/PETBAR_Script_Functions.R')
+source('C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR/PTEBAR_0-Functions_for_scripts.R')
+require(lubridate)
 
 gps <- read.csv2("C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_all.csv", dec = ".")
 summary(gps)
@@ -73,7 +74,7 @@ gps_list2$PAC12$time[1] <- as.POSIXct('2018-12-18 11:33:00')
 gps_list2$PAC12$period[1] <- 'incub'
 
 #### Visual explo ####
-#require(trip)
+
 require(mapview)
 
 # data conversion in SF LINESTRING
@@ -92,7 +93,7 @@ require(tidyverse)
 require(sf)
 track_lines <- gps2 %>% group_by(Logger_ID) %>% summarize(do_union = FALSE) %>% st_cast("LINESTRING")
 
-mapview(track_lines)
+mapview(gps2) + mapview(track_lines)
 
 # Loading of Reunion Island spatial polygons
 run <- st_read("C:/Users/Etudiant/Desktop/SMAC/SPATIAL_data_RUN/Admin/REU_adm0.shp")
@@ -104,7 +105,10 @@ head(gps2)
 
 # Points inside the island only
 in_run <- st_intersection(gps2, run)
-mapview(in_run)
+in_run$set <- paste(in_run$Logger_ID, in_run$Year, in_run$Month, in_run$Day, sep="")
+
+mapview(in_run,
+        zcol = 'set')
 
 # Points outside the island only
 out_run <- sf::st_difference(gps2, run)
