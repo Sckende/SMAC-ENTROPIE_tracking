@@ -13,7 +13,7 @@ gps$time <- as.POSIXct(gps$time)
 
 names(gps)
 #### here keeping only date, ID, lat & long, speed, searching_time, Voltage ####
-gps1 <- gps[, c(2, 9:13, 29)]
+gps1 <- gps[, c(2:13, 29)]
 
 #### Addition of a 'period' variable
 
@@ -23,6 +23,15 @@ gps1$period[month(gps1$time) %in% 9:10] <- 'prosp'
 gps1$period[month(gps1$time) %in% 11:12] <- 'incub'
 
 table(gps1$period, useNA = 'always')
+
+#### Line correction with winter period - Modification of DATE and PERIOD
+gps1[gps1$period == "winter",]
+
+gps1$time[gps1$period == "winter"] <- as.POSIXct('2018-12-18 11:33:00')
+gps1$period[gps1$period == "winter"] <- 'incub'
+
+table(gps1$period, useNA = 'always') # check point
+
 #### For each logger, % of missing data, max/min speed, ... ####
 #all(is.na(gps$Latitude) == is.na(gps$Longitude)) # check point
 
@@ -43,7 +52,7 @@ for (i in 1:length(gps_list)){
 names(bilan) <- c('log_ID', 'point_numb', 'NA_numb', 'prop_NA')
 bilan[order(as.numeric(bilan$point_numb)),]
 
-# Delete the duplicated rows for DATE/TIME based on the lower searching_time
+#### Delete the duplicated rows for DATE/TIME based on the lower searching_time ####
 bilan2 <- data.frame()
 
 for(i in 1:length(gps_list)){
@@ -69,17 +78,16 @@ k <- c('PAC04', 'PAC13', 'PAC05')
 no <- setdiff(names(gps_list), k)
 gps_list2 <- gps_list[no] # keeping list levels with data of interest
 
-#### CORRECTION OF FIRST DATE and PERIOD - PAC12
-gps_list2$PAC12$time[1] <- as.POSIXct('2018-12-18 11:33:00')
-gps_list2$PAC12$period[1] <- 'incub'
-
 #### Visual explo ####
 
 require(mapview)
 
 # data conversion in SF LINESTRING
 
-gps2 <- gps[!(gps$Logger_ID %in% c('PAC04', 'PAC13', 'PAC05')),]
+#gps2 <- gps[!(gps$Logger_ID %in% c('PAC04', 'PAC13', 'PAC05')),]
+# gps2 <- gps2[!is.na(gps2$Latitude),]
+
+gps2 <- do.call('rbind', gps_list2)
 gps2 <- gps2[!is.na(gps2$Latitude),]
 
 projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
@@ -91,36 +99,54 @@ head(gps2)
 # Creation of SF LINESTRINGS
 require(tidyverse)
 require(sf)
+require(mapview)
 track_lines <- gps2 %>% group_by(Logger_ID) %>% summarize(do_union = FALSE) %>% st_cast("LINESTRING")
 
-mapview(gps2) + mapview(track_lines)
+mapview(gps2) + mapview(track_lines, zcol = 'Logger_ID', burst = T, homebutton = F)
 
 # Loading of Reunion Island spatial polygons
 run <- st_read("C:/Users/Etudiant/Desktop/SMAC/SPATIAL_data_RUN/Admin/REU_adm0.shp")
 
-mapview(track_lines) + mapview(run)
+mapview(track_lines, zcol = 'Logger_ID', burst = T, homebutton = F) + mapview(run)
 
-#### Extract points outside of the Reunion Island ####
-head(gps2)
+#### Extract points inside of the Reunion Island ####
 
 # Points inside the island only
 in_run <- st_intersection(gps2, run)
 in_run$set <- paste(in_run$Logger_ID, in_run$Year, in_run$Month, in_run$Day, sep="")
+in_run$set2 <- paste(in_run$Logger_ID, in_run$time, sep="")
+names(in_run)
 
 mapview(in_run,
         zcol = 'set')
 
-# Points outside the island only
-out_run <- sf::st_difference(gps2, run)
-mapview(out_run,
-        zcol = 'Logger_ID')
+#### Merge the at-sea/on land information for gps points ####
+gps2$set2 <- paste(gps2$Logger_ID, gps2$time, sep = "") 
+gps2$run_loc[gps2$set2 %in% unique(in_run$set2)] <- 'in'
+gps2$run_loc[is.na(gps2$run_loc)] <- 'out'
 
-# track_lines_out <- out_run %>% group_by(Logger_ID) %>% summarize(do_union = FALSE) %>% st_cast("LINESTRING")
+
+# track_lines_out <- gps2[gps2$run_loc == 'out',] %>% group_by(Logger_ID) %>% summarize(do_union = FALSE) %>% st_cast("LINESTRING")
 # mapview(track_lines_out)
+
+# Creation of an unique variable per ind per date
+gps2$set1 <- paste(gps2$Logger_ID, date(gps2$time), sep = "")
+
+mapview(gps2[gps2$run_loc == 'in',],
+        zcol = 'set1',
+        burst = T,
+        homebutton = F)
+
+#### Addition of the nest coordinates ####
+nest <- read.table('C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_coord_nests_logger.txt', dec = '.', sep = '\t', h = T)
+
+gps2.1 <- merge(gps2, nest, all.x = T)
+
+#### Version 2.0 of the initial GPS database
+write.table(gps2.1, 'C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_DB_V2.txt')
 
 #### Number of fixes per day ####
 
-head(gps2)
 # computation
 list_fix_freq <- lapply(gps_list2, test)
 
