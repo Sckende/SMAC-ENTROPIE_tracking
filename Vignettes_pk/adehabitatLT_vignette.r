@@ -101,3 +101,49 @@ ib3 <- sett0(ib2,
              units = 'hour')
 plotltr(ib3, 'dt/3600') # regular trajectories !
  # ***WARNING*** - The functions setNA and sett0 are to be used to define a regular trajectory from a nearly regular trajectory. It is NOT intended to transform an irregular trajectory into a regular one (many users of adehabitat asked this question).
+
+#### ---- Special type of trajectory: same duration ----
+# In some cases, an object of class ltraj contains several regular bursts of the same duration characterized by relocations collected at the same time (same time lags between successive relocations, same number of relocations).
+# To check if an object is like that
+
+is.sd(ib3) # sd for 'same distance' - This object is not of the type sd (same duration). However, theoretically, all the trajectories should have been sampled at the same time points. It is regular, but there are mismatches between the time of the relocations. Because there are missing values at the beginning/end of the monitoring
+#We can use the function set.limits to dene the time of beginning and ending of the trajectories. This function adds NAs to the beginning and ending of the monitoring when required.
+
+ib4 <- set.limits(ib3,
+                  begin = '2003-06-01 00:00',
+                  dur = 14,
+                  units = 'day',
+                  pattern = '%Y-%m-%d %H:%M',
+                  tz = 'Europe/Paris')
+ib4 # all trajectories are now covering the same period
+is.sd(ib4)
+
+#  then it's possible to store some parameters of sd objects into a data frame with one reloc per row and one burst per column
+di <- sd2df(ib4, 'dist')
+head(di)
+
+sddt <- sd2df(ib4, 'rel.angle')
+head(sddt)
+
+sdr2n <- sd2df(ib4, 'R2n')
+head(sdr2n)
+
+#### ---- Metadata on the trajectories ----
+# it's possible to stock extra information about relocations in the ltraj object
+
+data(capreochiz)
+head(capreochiz)
+
+capreo <- as.ltraj(xy = capreochiz[, c('x', 'y')],
+                   date = capreochiz$date,
+                   id = 'Roe.Deer',
+                   infolocs = capreochiz[, 4:8])
+capreo
+
+inf <- infolocs(capreo)
+head(inf[[1]]) # The function removeinfo can be used to set the attribute infolocs of all bursts to NULL.
+
+plotltr(capreo, 'log(Dop)')
+
+
+#### Analyzing the trajectories ####

@@ -1,4 +1,6 @@
-# Use of TRIP package for the post-process of the gps data
+# Exploration of the raw GPS data of PTEBAR
+# Device deployment in 2018, December
+
 rm(list = ls())
 source('C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR/PTEBAR_0-Functions_for_scripts.R')
 require(lubridate)
@@ -35,15 +37,15 @@ table(gps1$period, useNA = 'always') # check point
 #### For each logger, % of missing data, max/min speed, ... ####
 #all(is.na(gps$Latitude) == is.na(gps$Longitude)) # check point
 
-gps_list <- split(gps1, gps1$Logger_ID)
+gps_list1 <- split(gps1, gps1$Logger_ID)
 
 # NA summary
 bilan <- data.frame()
 
-for (i in 1:length(gps_list)){
-  log_ID <- unique(gps_list[[i]]$Logger_ID)
-  point_numb <- nrow(gps_list[[i]])
-  NA_numb <- length(gps_list[[i]]$Latitude[is.na(gps_list[[i]]$Latitude)])
+for (i in 1:length(gps_list1)){
+  log_ID <- unique(gps_list1[[i]]$Logger_ID)
+  point_numb <- nrow(gps_list1[[i]])
+  NA_numb <- length(gps_list1[[i]]$Latitude[is.na(gps_list1[[i]]$Latitude)])
   prop_NA <- round(NA_numb/point_numb*100, digits = 1)
   
   bilan <- rbind(bilan, c(log_ID, point_numb, NA_numb, prop_NA))
@@ -54,11 +56,13 @@ bilan[order(as.numeric(bilan$point_numb)),]
 
 #### Delete the duplicated rows for DATE/TIME based on the lower searching_time ####
 bilan2 <- data.frame()
+gps_list1.1 <- list()
 
-for(i in 1:length(gps_list)){
-  t <- gps_list[[i]][!is.na(gps_list[[i]]$Latitude),]
-  t <- t[order(t$time, t$Searching_time, decreasing = F),]
-  t <- t[!duplicated(t$time),]
+for(i in 1:length(gps_list1)){
+  g <- gps_list1[[i]][order(gps_list1[[i]]$time, gps_list1[[i]]$Searching_time, decreasing = F),]
+  g <- g[!duplicated(g$time),]
+  t <- g[!is.na(g$Latitude),]
+
   
   log_ID <- unique(t$Logger_ID)
   point_numb <- nrow(t)
@@ -68,14 +72,20 @@ for(i in 1:length(gps_list)){
   speed_max <- max(t$Speed)
   
   bilan2 <- rbind(bilan2, c(log_ID, point_numb, time_min, time_max, speed_min, speed_max))
+  gps_list1.1[[i]] <- g
+  names(gps_list1.1)[i] <- unique(t$Logger_ID)
 }
 names(bilan2) <- c('log_ID', 'point_numb', 'time_min', 'time_max', 'speed_min', 'speed_max')
 bilan2[order(as.numeric(bilan2$point_numb)),]
 
+str(gps_list1.1)
+gps1.1 <- do.call('rbind', gps_list1.1)
+
+# write.table(gps1.1, 'C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_DB_V2_adehabLT.txt', sep = '\t')
 #### DELETION of PAC04, PAC13 & PAC05 ####
 # Due to low number of GPS fixes
 k <- c('PAC04', 'PAC13', 'PAC05')
-no <- setdiff(names(gps_list), k)
+no <- setdiff(names(gps_list1), k)
 gps_list2 <- gps_list[no] # keeping list levels with data of interest
 
 #### Visual explo ####
@@ -88,6 +98,7 @@ require(mapview)
 # gps2 <- gps2[!is.na(gps2$Latitude),]
 
 gps2 <- do.call('rbind', gps_list2)
+
 gps2 <- gps2[!is.na(gps2$Latitude),]
 
 projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
@@ -142,8 +153,8 @@ nest <- read.table('C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DAT
 
 gps2.1 <- merge(gps2, nest, all.x = T)
 
-#### Version 2.0 of the initial GPS database
-write.table(gps2.1, 'C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_DB_V2.txt')
+#### Version 2.0 of the initial GPS database *** WITHOUT DUPLICATED DATA AND NA ***
+#write.table(gps2.1, 'C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_DB_V2.txt')
 
 #### Number of fixes per day ####
 
