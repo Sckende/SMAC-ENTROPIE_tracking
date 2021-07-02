@@ -19,19 +19,44 @@ gps$time <- as.character(gps$time)
 
 gps$time <- as.POSIXct(gps$time, tz="Indian/Mauritius") 
 
-# gps$Logger_ID <- as.factor(gps$Logger_ID)
-gps1 <- gps[gps$Logger_ID == 'PAC10',]
-gps2 <- gps[gps$Logger_ID == 'PAC12',]
 # Check for duplicated date
 splitdata <- split(gps, gps$Logger_ID)
-splitdupz = lapply(splitdata, function(birdup)
-  which(duplicated(birdup$time)))
+
+splitdupz <- lapply(splitdata, function(birdup){
+  which(duplicated(birdup$time))})
 str(splitdupz)
 
 # creation of an object of class ltraj to store movements
 ptebar <- as.ltraj(xy = gps[, c('Longitude', 'Latitude')],
                   date = gps$time,
-                  id = gps$Logger_ID)
+                  id = gps$Logger_ID,
+                  infolocs = gps[, 14:17])
 
 plot(ptebar)
-x11(); plotltr(ptebar, 'dt')
+plot(ptebar[1])
+plot(ptebar[2])
+plot(ptebar[3])
+plot(ptebar[4])
+plot(ptebar[5])
+plot(ptebar[6])
+plot(ptebar[7])
+plot(ptebar[8])
+plot(ptebar[9])
+plot(ptebar[10])
+# x11(); 
+plotltr(ptebar, 'dt')
+plotltr(ptebar, 'dist')
+
+# Deletion of PAC04, PAC05 & PAC13 - 2, 3 & 8
+ptebar1 <- ptebar[c(1, 4:7, 9, 10)]
+plot(ptebar1)
+
+# Subset of bursts
+# Test with one individual - PAC06
+
+p <- ptebar1[2]
+p
+p[[1]]
+plot(p)
+
+pcutltraj()
