@@ -62,7 +62,7 @@ for(i in 1:length(gps_list1)){
   g <- gps_list1[[i]][order(gps_list1[[i]]$time, gps_list1[[i]]$Searching_time, decreasing = F),]
   g <- g[!duplicated(g$time),]
   t <- g[!is.na(g$Latitude),]
-
+  
   
   log_ID <- unique(t$Logger_ID)
   point_numb <- nrow(t)
@@ -80,8 +80,26 @@ bilan2[order(as.numeric(bilan2$point_numb)),]
 
 str(gps_list1.1)
 gps1.1 <- do.call('rbind', gps_list1.1)
+#which(duplicated(paste(gps1.1$time, gps1.1$Logger_ID))) # check point
+#### Addition of the nest coordinates ####
+nest <- read.table('C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_coord_nests_logger.txt', dec = '.', sep = '\t', h = T)
 
-# write.table(gps1.1, 'C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_DB_V2_adehabLT.txt', sep = '\t')
+# Conversion of nest coordinates in from UTM to decimal
+require(sf)
+require(sp)
+nest_utm <- SpatialPoints(cbind(nest$Lon_nest, nest$Lat_nest), 
+                          proj4string=CRS("+init=epsg:32740")) #epsg correspnding to the UTM 40 S
+#spTransform(utm, CRS("+proj=longlat +datum=WGS84"))
+LonLat <- spTransform(nest_utm, CRS('+init=epsg:4326')) # epsg corresponding to the mondial decimal reference
+class(LonLat)
+nest1 <- cbind(nest, LonLat)
+names(nest1)[5:6] <- c('X_nest', 'Y_nest')
+
+gps1.2 <- merge(gps1.1, nest1[, c('Logger_ID', 'nest', 'X_nest', 'Y_nest')], all.x = T)
+head(gps1.2)
+
+# write.table(gps1.2, 'C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_DB_V2_adehabLT.txt', sep = '\t')
+
 #### DELETION of PAC04, PAC13 & PAC05 ####
 # Due to low number of GPS fixes
 k <- c('PAC04', 'PAC13', 'PAC05')
@@ -147,11 +165,6 @@ mapview(gps2[gps2$run_loc == 'in',],
         zcol = 'set1',
         burst = T,
         homebutton = F)
-
-#### Addition of the nest coordinates ####
-nest <- read.table('C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_coord_nests_logger.txt', dec = '.', sep = '\t', h = T)
-
-gps2.1 <- merge(gps2, nest, all.x = T)
 
 #### Version 2.0 of the initial GPS database *** WITHOUT DUPLICATED DATA AND NA ***
 #write.table(gps2.1, 'C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_DB_V2.txt')
