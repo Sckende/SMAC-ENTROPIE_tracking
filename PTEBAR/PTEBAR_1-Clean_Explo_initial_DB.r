@@ -81,7 +81,9 @@ bilan2[order(as.numeric(bilan2$point_numb)),]
 str(gps_list1.1)
 gps1.1 <- do.call('rbind', gps_list1.1)
 #which(duplicated(paste(gps1.1$time, gps1.1$Logger_ID))) # check point
+
 #### Addition of the nest coordinates ####
+
 nest <- read.table('C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_coord_nests_logger.txt', dec = '.', sep = '\t', h = T)
 
 # Conversion of nest coordinates in from UTM to decimal
@@ -98,7 +100,64 @@ names(nest1)[5:6] <- c('X_nest', 'Y_nest')
 gps1.2 <- merge(gps1.1, nest1[, c('Logger_ID', 'nest', 'X_nest', 'Y_nest')], all.x = T)
 head(gps1.2)
 
-# write.table(gps1.2, 'C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_DB_V2_adehabLT.txt', sep = '\t')
+#### Addition of the at sea/on land status ####
+
+# Split the DF depending on NA in lon/lat data
+DF_NA <- gps1.2[is.na(gps1.2$Longitude),]
+DF <- gps1.2[!is.na(gps1.2$Longitude),]
+
+# Loading of Reunion Island spatial polygons
+run <- st_read("C:/Users/Etudiant/Desktop/SMAC/SPATIAL_data_RUN/Admin/REU_adm0.shp")
+project <- st_crs(run)
+
+DF_spat <- st_as_sf(DF,
+                    coords = c('Longitude', 'Latitude'),
+                    crs = project)
+on_run <- st_intersection(run, DF_spat)
+#mapview(on_run)
+
+DF_spat$local[DF_spat$geometry %in% on_run$geometry] <- 'land'
+DF_spat$local[is.na(DF_spat$local)] <- 'sea'
+table(DF_spat$local)
+mapview(DF_spat[DF_spat$local == 'land',])
+
+#### Addition of the inside/outside the colony status ####
+
+# Loading the colony shapefile and conversion of the crs 
+protec_col <- st_read("C:/Users/Etudiant/Desktop/SMAC/SPATIAL_data_RUN/APB_PTEBAR/APB_PTEBAR.shp") # 1 = Petite Ile & 2 = GBN + PTN
+protect_col_split <- st_cast(protec_col, 'POLYGON') # Coercion from multipolygon to polygon
+protect_GBN <- protect_col_split[3,]
+st_crs(protect_GBN) == project # UTM 
+jo <- as(protect_GBN, 'Spatial') # coercion from sf to sp in order to ...
+protect_GBN_dec <- spTransform(jo, # mofify the crs ...
+                               CRS('+init=epsg:4326')) # epsg corresponding to the mondial decimal reference
+protect_GBN_dec <- st_as_sf(protect_GBN_dec) # sf object
+
+st_crs(protect_GBN_dec) == project
+
+# inside vs outside the colony
+in_col <- st_intersection(protect_GBN_dec, DF_spat)
+# mapview(in_col) + mapview(protect_GBN_dec)
+
+DF_spat$colony[DF_spat$geometry %in% in_col$geometry] <- 'in'
+DF_spat$colony[is.na(DF_spat$colony)] <- 'out'
+table(DF_spat$colony)
+# mapview(DF_spat[DF_spat$colony == 'in',]) + mapview(protect_GBN_dec)
+
+# **** MERGE WITH THE NA DF **** ####
+# In order to obtain a complete df
+DF_NA$local <- NA
+DF_NA$colony <- NA
+
+DF1 <- as.data.frame(DF_spat)
+coord <- recup_coord(DF_spat$geometry)
+
+DF2 <- cbind(DF1[, 1:7], Latitude = coord$Latitude, Longitude = coord$Longitude, DF1[, 8:15], DF1[, 17:18])
+
+DF_fusion <- rbind(DF2, DF_NA)
+DF_fin <- DF_fusion[order(DF_fusion$Logger_ID, DF_fusion$time, decreasing = F),]
+
+# write.table(DF_fin, 'C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_DB_V2_adehabLT.txt', sep = '\t')
 
 #### DELETION of PAC04, PAC13 & PAC05 ####
 # Due to low number of GPS fixes
