@@ -75,7 +75,21 @@ plot(p.test[2])
 
 
 #### TEST ZONE ####
+# Find the multiple max of lat and lon
+require(ggpmisc)
+require(ggplot2)
+plot(df_ptest$y, type = 'l')
+peak.y <- df_ptest$y[ggpmisc:::find_peaks(df_ptest$y)]
+points(1:length(peak.y), peak.y) ### a continuer !
 
+plot(df_ptest$x, type = 'l')
+
+df_ptest$y[ggpmisc:::find_peaks(df_ptest$y)]
+df_ptest$x[ggpmisc:::find_peaks(df_ptest$y)]
+
+ggplot(data = df_ptest[!is.na(df_ptest),], aes(x = x, y = y)) + geom_line() + stat_peaks(col = "red")
+
+# Others tricks .... ?
 require(sf)
 require(sp)
 require(mapview)
