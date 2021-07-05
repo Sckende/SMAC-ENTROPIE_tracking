@@ -97,3 +97,19 @@ barp_list <- function(x){
          bty = 'n',
          ncol = 2)
 }
+
+#### Conversion of geometry variable from sf dataframe object to couple of coordinates ####
+
+recup_coord <- function(geom_var){
+  c <- as.character(geom_var) # geom_var correspond à la colonne geom du df de classe sf
+  cc <- NULL
+  for (i in 1:length(c)){
+    cut <- stringr::str_sub(c[i], 3, stringr::str_length(c[i])-1)
+    cutcut <- as.numeric(stringr::str_split(cut, ',', simplify = T))
+    cc <- rbind(cc, cutcut)
+  }
+  cc <- as.data.frame(cc, row.names = F)
+  names(cc) <- c('Longitude', 'Latitude')
+  
+  return(cc)
+}
