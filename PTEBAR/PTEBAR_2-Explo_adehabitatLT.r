@@ -50,6 +50,7 @@ plotltr(ptebar, 'dist')
 # Deletion of PAC04, PAC05 & PAC13 - 2, 3 & 8
 ptebar1 <- ptebar[c(1, 4:7, 9, 10)]
 plot(ptebar1)
+plot(ptebar1[4])
 
 # Subset of bursts
 # Test with one individual - PAC06
@@ -58,5 +59,31 @@ p <- ptebar1[2]
 p
 p[[1]]
 plot(p)
+p
+p.test <- cutltraj(p, 'is.na(p[[1]]$x)')
+plot(p.test)
+df_ptest <- ld(p.test)
+plot(df_ptest$R2n)
 
-pcutltraj()
+tt <- 1:10
+tt
+cum(tt)
+cumsum(tt)
+
+cumsum(!is.na(p[[1]]$dist))
+
+p.dy <- p[[1]]$dx[!is.na(p[[1]]$dx)]
+cumsum(p.dy)       
+plot(p.dy)
+plot(cumsum(p.dy))
+
+
+
+require(sf)
+require(mapview)
+
+protec_col <- st_read("C:/Users/Etudiant/Desktop/SMAC/SPATIAL_data_RUN/APB_PTEBAR/APB_PTEBAR.shp") # 1 = Petite Ile & 2 = GBN + PTN
+
+mapview(protec_col, zcol = 'ARRETE_PRO', burst = T)
+
+mapview(protec_col[protec_col$ARRETE_PRO == 2,])
