@@ -30,7 +30,7 @@ str(splitdupz)
 ptebar <- as.ltraj(xy = gps[, c('Longitude', 'Latitude')],
                   date = gps$time,
                   id = gps$Logger_ID,
-                  infolocs = gps[, 14:17])
+                  infolocs = gps[, 14:19])
 
 plot(ptebar)
 plot(ptebar[1])
@@ -55,35 +55,57 @@ plot(ptebar1[4])
 # Subset of bursts
 # Test with one individual - PAC06
 
-p <- ptebar1[2]
+# p <- ptebar1[2]
+p <- ptebar1[1]
 p
 p[[1]]
 plot(p)
 p
-p.test <- cutltraj(p, 'is.na(p[[1]]$x)')
-plot(p.test)
-df_ptest <- ld(p.test)
-plot(df_ptest$R2n)
+info <- as.data.frame(infolocs(p))
+# df_p <- ld(p)
 
-tt <- 1:10
-tt
-cum(tt)
-cumsum(tt)
+table(info$colony == 'in')
+colo_test <- function(colo_var){
+  return(colo_var == 'in')
+}
 
-cumsum(!is.na(p[[1]]$dist))
-
-p.dy <- p[[1]]$dx[!is.na(p[[1]]$dx)]
-cumsum(p.dy)       
-plot(p.dy)
-plot(cumsum(p.dy))
+p.test <- cutltraj(p, 'colo_test(as.data.frame(infolocs(p))$colony)')
+plot(p.test[1])
+plot(p.test[2])
 
 
+#### TEST ZONE ####
 
 require(sf)
+require(sp)
 require(mapview)
 
 protec_col <- st_read("C:/Users/Etudiant/Desktop/SMAC/SPATIAL_data_RUN/APB_PTEBAR/APB_PTEBAR.shp") # 1 = Petite Ile & 2 = GBN + PTN
+protect_col_split <- st_cast(protec_col, 'POLYGON')
+protect_GBN <- protect_col_split[3,]
+st_crs(protect_GBN) # UTM 
 
-mapview(protec_col, zcol = 'ARRETE_PRO', burst = T)
+jo <- as(protect_GBN, 'Spatial') # coercion from sf to sp in order to ...
+protect_GBN_dec <- spTransform(jo, # mofify the crs ...
+                               CRS('+init=epsg:4326')) # epsg corresponding to the mondial decimal reference
+projcrs <- st_crs(protect_GBN_dec)
+protect_GBN_dec <- st_as_sf(protect_GBN_dec) # sf object
 
-mapview(protec_col[protec_col$ARRETE_PRO == 2,])
+
+ttt <- ld(p.test[2])
+ttt_spa <- st_as_sf(ttt[!is.na(ttt$x),],
+                    coords = c('x', 'y'),
+                    crs = projcrs)
+mapview(ttt_spa) + mapview(protect_GBN_dec)
+plot(p.test[3])
+plot(p.test[4])
+plot(p.test[5])
+
+df_ptest <- ld(p.test)
+table(df_ptest$colony[df_ptest$burst == 'PAC06.02'])
+df_ptest[df_ptest$colony == 'in',]
+
+
+
+
+
