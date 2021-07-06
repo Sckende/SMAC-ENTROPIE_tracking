@@ -161,6 +161,9 @@ DF2 <- cbind(DF1[, 1:7], Latitude = coord$Latitude, Longitude = coord$Longitude,
 DF_fusion <- rbind(DF2, DF_NA)
 DF_fin <- DF_fusion[order(DF_fusion$Logger_ID, DF_fusion$time, decreasing = F),]
 
+# Addition of date variable
+DF_fusion$date <- paste(DF_fusion$Year, DF_fusion$Month, DF_fusion$Day, sep = '-')
+
 # write.table(DF_fin, 'C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_DB_V2_adehabLT.txt', sep = '\t')
 
 #### DELETION of PAC04, PAC13 & PAC05 ####
