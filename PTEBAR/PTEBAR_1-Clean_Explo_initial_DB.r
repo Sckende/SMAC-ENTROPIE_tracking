@@ -119,6 +119,7 @@ on_run <- st_intersection(run, DF_spat)
 DF_spat$local[DF_spat$geometry %in% on_run$geometry] <- 'land'
 DF_spat$local[is.na(DF_spat$local)] <- 'sea'
 table(DF_spat$local)
+require(mapview)
 mapview(DF_spat[DF_spat$local == 'land',])
 
 #### Addition of the inside/outside the colony status ####
@@ -142,7 +143,10 @@ in_col <- st_intersection(protect_GBN_dec, DF_spat)
 DF_spat$colony[DF_spat$geometry %in% in_col$geometry] <- 'in'
 DF_spat$colony[is.na(DF_spat$colony)] <- 'out'
 table(DF_spat$colony)
-# mapview(DF_spat[DF_spat$colony == 'in',]) + mapview(protect_GBN_dec)
+
+mapview(DF_spat[DF_spat$colony == 'in',]) + mapview(protect_GBN_dec)
+mapview(DF_spat[DF_spat$Logger_ID == 'PAC03',],
+        zcol = 'colony')
 
 # **** MERGE WITH THE NA DF **** ####
 # In order to obtain a complete df
