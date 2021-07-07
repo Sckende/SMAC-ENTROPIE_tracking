@@ -19,12 +19,73 @@ gps$time <- as.character(gps$time)
 
 gps$time <- as.POSIXct(gps$time, tz="Indian/Mauritius") 
 
+
 # Check for duplicated date
 splitdata <- split(gps, gps$Logger_ID)
 
 splitdupz <- lapply(splitdata, function(birdup){
   which(duplicated(birdup$time))})
 str(splitdupz)
+
+# Dates explorations
+head(gps)
+plot(gps$time)
+table(gps$date)
+
+time_details <- list()
+j <- 0
+for(i in unique(gps$Logger_ID)){
+  j <- j + 1
+  data <- gps[gps$Logger_ID == i,]
+  
+  t <- as.data.frame(table(data$date))
+  names(t) <- c('date', 'fix')
+  t_NA <- as.data.frame(table(data$date[is.na(data$Latitude)]))
+  names(t_NA) <- c('date', 'NA_count') 
+  ttot <- merge(t, t_NA, all.x = T) 
+  ttot$NA_count[is.na(ttot$NA_count)] <- 0
+    
+  hh <- table(data$Hour)
+  hh_NA <- table(data$Hour[is.na(data$Latitude)])
+  
+  time_details[[j]] <- list(date = ttot, hours = hh)
+  names(time_details)[j] <- i
+}
+
+
+for(i in 1:length(time_details)){
+  par(mfrow = c(2, 1))
+  
+  data <- time_details[[i]]
+  
+  barplot(data$date$fix,
+          names.arg = data$date$date,
+          ylim = c(0, max(data$date$fix)),
+          las = 2,
+          main = names(time_details)[i])
+  barplot(data$date$NA_count,
+          add = T,
+          col = 'red',
+          las = 2,
+          ylim = c(0, max(data$date$fix)))
+  
+  barplot(data$hours)
+}
+
+
+x11(); par(mfrow = c(3, 4))
+for(i in 1:length(time_details)){
+  data <- time_details[[i]]
+  
+  barplot(data$hours,
+          main = names(time_details)[i])
+  # barplot(data$date$NA_count,
+  #         add = T,
+  #         col = 'red',
+  #         las = 2,
+  #         ylim = c(0, max(data$date$fix)))
+}
+
 
 # creation of an object of class ltraj to store movements
 ptebar <- as.ltraj(xy = gps[, c('Longitude', 'Latitude')],
