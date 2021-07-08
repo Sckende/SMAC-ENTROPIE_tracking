@@ -29,10 +29,12 @@ table(gps1$period, useNA = 'always')
 #### Line correction with winter period - Modification of DATE and PERIOD
 gps1[gps1$period == "winter",]
 
+gps1$Month[gps1$period == "winter"] <- 12
 gps1$time[gps1$period == "winter"] <- as.POSIXct('2018-12-18 11:33:00')
 gps1$period[gps1$period == "winter"] <- 'incub'
 
 table(gps1$period, useNA = 'always') # check point
+summary(gps1$time)
 
 #### For each logger, % of missing data, max/min speed, ... ####
 #all(is.na(gps$Latitude) == is.na(gps$Longitude)) # check point
