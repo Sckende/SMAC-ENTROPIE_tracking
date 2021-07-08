@@ -1,31 +1,78 @@
+# ------------------------------------- #
 #### GPS fixes frequencies function ####
+# ----------------------------------- #
 # allows the computation of number of GPS fixes per day
 # x = df with a 'date' variable
 
 # For first PETBAR GPS data, date range =  
-test <- function(x){
-  x$date <- as.Date(strftime(x$time, "%Y-%m-%d"))
-  sequen <- data.frame(date = seq.Date(from = min(x$date), to = max(x$date), by = 1), n = 0)
-  
-  mm <- dplyr::count(x, date)
-  mm <- rbind(mm, sequen[!(sequen$date %in% mm$date),])
-  mm <- mm[order(mm$date, decreasing = F),]
-  mm <- cbind(Logger_ID = unique(x$Logger_ID), mm)
-  return(mm)
-}
+# test <- function(x){
+#   x$date <- as.Date(strftime(x$time, "%Y-%m-%d"))
+#   sequen <- data.frame(date = seq.Date(from = min(x$date), to = max(x$date), by = 1), n = 0)
+#   
+#   mm <- dplyr::count(x, date)
+#   mm <- rbind(mm, sequen[!(sequen$date %in% mm$date),])
+#   mm <- mm[order(mm$date, decreasing = F),]
+#   mm <- cbind(Logger_ID = unique(x$Logger_ID), mm)
+#   return(mm)
+# }
 
 # For first PETBAR GPS data
 # x = df with a 'date' variable, date_min & date_max with a "%Y-%m-%d" format
-test_V2 <- function(x, date_min, date_max){
-  x$date <- as.Date(strftime(x$time, "%Y-%m-%d"))
-  sequen <- data.frame(date = seq.Date(from = as.Date(strftime(date_min, "%Y-%m-%d")), to = as.Date(strftime(date_max, "%Y-%m-%d")), by = 1), n = 0)
+# test_V2 <- function(x, date_min, date_max){
+#   x$date <- as.Date(strftime(x$time, "%Y-%m-%d"))
+#   sequen <- data.frame(date = seq.Date(from = as.Date(strftime(date_min, "%Y-%m-%d")), to = as.Date(strftime(date_max, "%Y-%m-%d")), by = 1), n = 0)
+#   
+#   xx <- x[x$date %in% sequen$date,]
+#   mm <- dplyr::count(xx, date)
+#   mm <- rbind(mm, sequen[!(sequen$date %in% mm$date),])
+#   mm <- mm[order(mm$date, decreasing = F),]
+#   mm <- cbind(Logger_ID = unique(x$Logger_ID), mm)
+#   return(mm)
+# }
+
+# Last version of function with NA integration
+# x is dataframe with a minimum of 'Logger_ID' and 'time' variables
+fix_freq <- function(x, date_min, date_max, NA_use = TRUE){
   
-  xx <- x[x$date %in% sequen$date,]
-  mm <- dplyr::count(xx, date)
-  mm <- rbind(mm, sequen[!(sequen$date %in% mm$date),])
-  mm <- mm[order(mm$date, decreasing = F),]
-  mm <- cbind(Logger_ID = unique(x$Logger_ID), mm)
-  return(mm)
+  if(!lubridate::is.POSIXct(x$time)){
+    stop('Time has to correspond to a POSIXct class')
+  }
+  if(!lubridate::is.POSIXct(date_min)){
+    stop('Date_min has to correspond to a POSIXct class')
+  }
+  if(!lubridate::is.POSIXct(date_max)){
+    stop('Date_max has to correspond to a POSIXct class')
+  }
+  
+  sequen <- data.frame(date = seq.Date(from = lubridate::date(min_date),
+                                       to = lubridate::date(max_date),
+                                       by = 1),
+                       n = 0,
+                       row.names = NULL)
+  # For all fixes 
+  xx <- x[lubridate::date(x$time) %in% sequen$date,]
+  mm <- dplyr::count(xx, date(xx$time))
+  names(mm)[1] <- 'date'
+  mm1 <- rbind(mm, sequen[!(sequen$date %in% mm$date),])
+  
+  # For fixes with NA in Lon/Lat
+  x_NA <- x[is.na(x$Latitude),]
+  xx_NA <- x_NA[lubridate::date(x_NA$time) %in% sequen$date,]
+  mm_NA <- dplyr::count(xx_NA, date(xx_NA$time))
+  names(mm_NA)[1] <- 'date'
+  mm_NA1 <- rbind(mm_NA, sequen[!(sequen$date %in% mm_NA$date),])
+  names(mm_NA1)[2] <- 'n_NA'
+  
+  if(NA_use == TRUE){
+    df <- cbind(unique(x$Logger_ID), merge(mm1, mm_NA1))
+    names(df)[1] <- 'Logger_ID'
+    return(df)
+  }else{
+    df <- cbind(unique(x$Logger_ID),mm1)
+    names(df)[1] <- 'Logger_ID'
+    return()
+  }
+  
 }
 
 
@@ -77,26 +124,64 @@ col_choice <- function(x){
 # barplot(df$n,
 #         col = col_choice(df$date))
 
+# --------------------------------------- #
 #### Barplot of gps fixes frequencies ####
-# x = df with variables 'date', 'n', 'Logger_ID'
-barp_list <- function(x){
+# ------------------------------------- #
+
+# x = df with variables 'date', 'n', 'Logger_ID' and 'n_NA'
+# use_NA = TRUE if we want to see the frequence of NA for Lon/Lat
+barp_fix_freq <- function(x, use_NA = FALSE){
   pal <- viridis::viridis(4) # only for the legend
   par(oma = c(0,0,0,0)) # Set right margin
   
-  barplot(x$n,
-          names.arg = x$date,
-          ylim = c(0, 350),
-          main = unique(x$Logger_ID),
-          las = 2,
-          cex.names = 0.8,
-          col = col_choice(x$date),
-          ylab = 'GPS fixes number')
-  legend('top',
-         legend = c('non-breed', 'prosp', 'incub', 'rear'),
-         fill = pal,
-         bty = 'n',
-         ncol = 2)
+  if(use_NA == FALSE) print('Sure do not want to see NAs ?')
+  
+  # barplot(x$n,
+  #         names.arg = x$date,
+  #         ylim = c(0, max(x$n) + 10),
+  #         main = unique(x$Logger_ID),
+  #         las = 2,
+  #         cex.names = 0.8,
+  #         col = col_choice(x$date),
+  #         ylab = 'GPS fixes number')
+  
+  if(use_NA == TRUE){
+    
+    # barplot(x$n_NA,
+    #         col = 'red',
+    #         axes = F,
+    #         add = T)
+    # 
+    # legend('top',
+    #        legend = c('non-breed', 'prosp', 'incub', 'rear', 'NA'),
+    #        fill = c(pal, '#FF0000'),
+    #        bty = 'n',
+    #        ncol = 2) 
+    fig <- plot_ly(x, x = ~date, y = ~n_NA, type = 'bar', name = 'Fixes with NA', marker = list(color = 'red'))
+    fig <- fig %>% add_trace(y = x$n - x$n_NA, name = '', marker = list(color = col_choice(x$date)))
+    fig <- fig %>% layout(yaxis = list(title = 'Count'),
+                          barmode = 'stack',
+                          showlegend = T)
+    fig <- fig %>% layout(legend = list(title = list(text = '<b> Fixes types </b>')),
+                          title = list(text = unique(x$Logger_ID)))
+    fig
+    
+  } else {
+  
+    # legend('top',
+    #        legend = c('non-breed', 'prosp', 'incub', 'rear'),
+    #        fill = pal,
+    #        bty = 'n',
+    #        ncol = 2) 
+    fig <- plot_ly(x, x = ~date, y = x$n, name = '', type = 'bar', marker = list(color = col_choice(x$date)))
+    fig <- fig %>% layout(yaxis = list(title = 'Count'),
+                          showlegend = F)
+    fig <- fig %>% layout(legend = list(title = list(text = '<b> Fixes types </b>')),
+                          title = list(text = unique(x$Logger_ID)))
+    fig
+  }
 }
+
 
 #### Conversion of geometry variable from sf dataframe object to couple of coordinates ####
 
@@ -113,3 +198,4 @@ recup_coord <- function(geom_var){
   
   return(cc)
 }
+
