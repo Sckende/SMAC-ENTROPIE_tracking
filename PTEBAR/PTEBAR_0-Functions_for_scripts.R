@@ -184,7 +184,7 @@ barp_fix_freq <- function(x, use_NA = FALSE){
 }
 
 
-#### Conversion of geometry variable from sf dataframe object to couple of coordinates ####
+#### Conversion of POINT geometry variable from sf dataframe object to couple of coordinates ####
 
 recup_coord <- function(geom_var){
   c <- as.character(geom_var) # geom_var correspond à la colonne geom du df de classe sf
