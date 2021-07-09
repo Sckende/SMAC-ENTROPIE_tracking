@@ -1,0 +1,93 @@
+---
+title: "PTEBAR - At-sea tracking"
+subtitle: "Data exploration - part 2"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+---
+
+```{r, include = F}
+if (knitr::is_html_output()) knitr::knit_hooks$set(
+  plot = function(x, options) {
+    cap  <- options$fig.cap  # figure caption
+    tags <- htmltools::tags
+    as.character(tags$figure(
+      tags$img(src = x, alt = cap),
+      tags$figcaption(cap)
+    ))
+  }
+)
+
+# packages
+require(knitr)
+require(mapview)
+require(tidyverse)
+require(sf)
+require(adehabitatLT)
+require(lubridate)
+```
+
+```{r, include = F}
+# source('C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR/PTEBAR_0-Functions_for_scripts.R')
+
+gps <- read.table("C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_DB_V2_adehabLT.txt", h = T, sep = '\t', dec = ".") # Non duplicated data with NAs in lat/Long
+
+# Conversion of dates
+# gps$time <- as.POSIXct(strptime(as.character(gps$time),
+#                                 '%Y-%m-%d %H:%M:%S'),
+#                        tz = 'Indian/Mauritius')
+# head(gps$time)
+# class(gps$time)
+
+gps$time <- strptime(paste(gps$time), "%Y-%m-%d %H:%M:%S")
+gps$time <- as.character(gps$time)
+
+gps$time <- as.POSIXct(gps$time, tz="Indian/Mauritius") 
+
+```
+
+```{r, echo = F}
+time_details <- list()
+j <- 0
+for(i in unique(gps$Logger_ID)){
+  j <- j + 1
+  data <- gps[gps$Logger_ID == i,]
+  
+  t <- as.data.frame(table(data$date))
+  names(t) <- c('date', 'fix')
+  t_NA <- as.data.frame(table(data$date[is.na(data$Latitude)]))
+  names(t_NA) <- c('date', 'NA_count') 
+  ttot <- merge(t, t_NA, all.x = T) 
+  ttot$NA_count[is.na(ttot$NA_count)] <- 0
+    
+  hh <- table(data$Hour)
+  hh_NA <- table(data$Hour[is.na(data$Latitude)])
+  
+  time_details[[j]] <- list(date = ttot, hours = hh)
+  names(time_details)[j] <- i
+}
+
+```
+
+```{r, echo = F}
+for(i in 1:length(time_details)){
+  par(mfrow = c(2, 1))
+  
+  data <- time_details[[i]]
+  
+  barplot(data$date$fix,
+          names.arg = data$date$date,
+          ylim = c(0, max(data$date$fix)),
+          las = 2,
+          main = names(time_details)[i])
+  barplot(data$date$NA_count,
+          add = T,
+          col = 'red',
+          las = 2,
+          ylim = c(0, max(data$date$fix)))
+  
+  barplot(data$hours)
+}
+```
