@@ -44,21 +44,21 @@ fix_freq <- function(x, date_min, date_max, NA_use = TRUE){
     stop('Date_max has to correspond to a POSIXct class')
   }
   
-  sequen <- data.frame(date = seq.Date(from = lubridate::date(min_date),
-                                       to = lubridate::date(max_date),
+  sequen <- data.frame(date = seq.Date(from = lubridate::date(date_min),
+                                       to = lubridate::date(date_max),
                                        by = 1),
                        n = 0,
                        row.names = NULL)
   # For all fixes 
   xx <- x[lubridate::date(x$time) %in% sequen$date,]
-  mm <- dplyr::count(xx, date(xx$time))
+  mm <- dplyr::count(xx, lubridate::date(xx$time))
   names(mm)[1] <- 'date'
   mm1 <- rbind(mm, sequen[!(sequen$date %in% mm$date),])
   
   # For fixes with NA in Lon/Lat
   x_NA <- x[is.na(x$Latitude),]
   xx_NA <- x_NA[lubridate::date(x_NA$time) %in% sequen$date,]
-  mm_NA <- dplyr::count(xx_NA, date(xx_NA$time))
+  mm_NA <- dplyr::count(xx_NA, lubridate::date(xx_NA$time))
   names(mm_NA)[1] <- 'date'
   mm_NA1 <- rbind(mm_NA, sequen[!(sequen$date %in% mm_NA$date),])
   names(mm_NA1)[2] <- 'n_NA'
@@ -131,6 +131,7 @@ col_choice <- function(x){
 # x = df with variables 'date', 'n', 'Logger_ID' and 'n_NA'
 # use_NA = TRUE if we want to see the frequence of NA for Lon/Lat
 barp_fix_freq <- function(x, use_NA = FALSE){
+  require(plotly)
   pal <- viridis::viridis(4) # only for the legend
   par(oma = c(0,0,0,0)) # Set right margin
   
@@ -167,7 +168,7 @@ barp_fix_freq <- function(x, use_NA = FALSE){
     fig
     
   } else {
-  
+    
     # legend('top',
     #        legend = c('non-breed', 'prosp', 'incub', 'rear'),
     #        fill = pal,
@@ -198,4 +199,3 @@ recup_coord <- function(geom_var){
   
   return(cc)
 }
-
