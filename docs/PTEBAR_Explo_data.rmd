@@ -1,6 +1,6 @@
 ---
 title: "PTEBAR - At-sea tracking"
-subtitle: "Data exploration - part 1"
+subtitle: "Data exploration - Raw tracks"
 output:
   html_document:
     toc: true
@@ -112,7 +112,7 @@ Cette mission a permis de redéployer l'antenne réceptrice de données GPS sur 
 Le **tableau 4** fait le bilan des données GPS déployés sur les 10 individus nichant au Grand Bénarre en décembre 2018.  
   
 ```{r setup, include = FALSE}
-source('C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR_0-Functions_for_scripts.R')
+source('C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR/PTEBAR_0-Functions_for_scripts.R')
 
 gps <- read.csv2("C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_all.csv", dec = ".")
 
