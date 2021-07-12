@@ -271,18 +271,3 @@ mapview(out_run,
 ``` 
 Carte 3. Représentation des trajets en mer et de la fréquence d'acquisition des points GPS pour les 7 balises GPS.  
   
-# Fréquence d'enregistrement par GPS
-
-```{r, include = F}
-list_fix_freq <- lapply(gps_list2, fix_freq,
-                        date_min = min(do.call('rbind', gps_list2)$time),
-                        date_max = max(do.call('rbind', gps_list2)$time))
-```
-
-```{r, echo = F, message = F, warning = F}
-l <- htmltools::tagList()
-for(i in 1:length(list_fix_freq)){
-  l[[i]] <- barp_fix_freq(list_fix_freq[[i]], use_NA = T)
-}
-l
-```

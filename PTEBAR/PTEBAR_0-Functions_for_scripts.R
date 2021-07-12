@@ -159,7 +159,7 @@ barp_fix_freq <- function(x, use_NA = FALSE){
     #        bty = 'n',
     #        ncol = 2) 
     fig <- plot_ly(x, x = ~date, y = ~n_NA, type = 'bar', name = 'Fixes with NA', marker = list(color = 'red'))
-    fig <- fig %>% add_trace(y = x$n - x$n_NA, name = '', marker = list(color = col_choice(x$date)))
+    fig <- fig %>% add_trace(y = x$n - x$n_NA, name = 'Color/breeding period', marker = list(color = col_choice(x$date)))
     fig <- fig %>% layout(yaxis = list(title = 'Count'),
                           barmode = 'stack',
                           showlegend = T)

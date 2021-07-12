@@ -27,8 +27,14 @@ require(tidyverse)
 require(sf)
 require(adehabitatLT)
 require(lubridate)
-```
+require(htmltools)
+require(plotly)
 
+source('C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR/PTEBAR_0-Functions_for_scripts.R')
+```
+# Fréquence d'acquisition de positions par jour  
+  
+  
 ```{r, include = F}
 # source('C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR/PTEBAR_0-Functions_for_scripts.R')
 
@@ -49,45 +55,48 @@ gps$time <- as.POSIXct(gps$time, tz="Indian/Mauritius")
 ```
 
 ```{r, echo = F}
-time_details <- list()
-j <- 0
-for(i in unique(gps$Logger_ID)){
-  j <- j + 1
-  data <- gps[gps$Logger_ID == i,]
-  
-  t <- as.data.frame(table(data$date))
-  names(t) <- c('date', 'fix')
-  t_NA <- as.data.frame(table(data$date[is.na(data$Latitude)]))
-  names(t_NA) <- c('date', 'NA_count') 
-  ttot <- merge(t, t_NA, all.x = T) 
-  ttot$NA_count[is.na(ttot$NA_count)] <- 0
-    
-  hh <- table(data$Hour)
-  hh_NA <- table(data$Hour[is.na(data$Latitude)])
-  
-  time_details[[j]] <- list(date = ttot, hours = hh)
-  names(time_details)[j] <- i
-}
 
+gps_list <- split(gps, gps$Logger_ID)
+freq_list <- lapply(gps_list, fix_freq,
+                        date_min = min(gps$time),
+                        date_max = max(gps$time))
+
+```
+```{r, echo = F}
+l <- tagList()
+for(i in 1:length(freq_list)){
+  l[[i]] <- barp_fix_freq(freq_list[[i]], use_NA = T)
+}
+l
 ```
 
 ```{r, echo = F}
-for(i in 1:length(time_details)){
-  par(mfrow = c(2, 1))
+hour_seq <- data.frame(hour = seq(0, 23, 1), Freq = 0)
+hour_freq_list <- list()
+for (i in 1:length(gps_list)){
+  hf <- data.frame(table(hour(gps_list[[i]]$time)))
+  names(hf)[1] <- 'hour'
+  hf$hour <- as.numeric(hf$hour)
   
-  data <- time_details[[i]]
-  
-  barplot(data$date$fix,
-          names.arg = data$date$date,
-          ylim = c(0, max(data$date$fix)),
-          las = 2,
-          main = names(time_details)[i])
-  barplot(data$date$NA_count,
-          add = T,
-          col = 'red',
-          las = 2,
-          ylim = c(0, max(data$date$fix)))
-  
-  barplot(data$hours)
+  hour_freq_list[[i]] <- rbind(hf, hour_seq[!(hour_seq$hour %in% hf$hour),])
+  names(hour_freq_list)[i] <- unique(gps_list[[i]]$Logger_ID)
 }
+```
+# Fréquence d'acquisition de positions par heure  
+  
+```{r, echo = F}
+l2 <- tagList()
+for(i in 1:length(hour_freq_list)){
+  
+  fig <- plot_ly(hour_freq_list[[i]],
+                 x = ~hour,
+                 y = ~Freq,
+                 type = 'bar',
+                 name = '') 
+  fig <- fig %>% layout(title = list(text = names(hour_freq_list)[i]))
+
+  l2[[i]] <- fig
+}
+
+l2
 ```
