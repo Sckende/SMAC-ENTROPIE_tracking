@@ -76,7 +76,7 @@ hour_freq_list <- list()
 for (i in 1:length(gps_list)){
   hf <- data.frame(table(hour(gps_list[[i]]$time)))
   names(hf)[1] <- 'hour'
-  hf$hour <- as.numeric(hf$hour)
+  hf$hour <- as.numeric(as.character(hf$hour))
   
   hour_freq_list[[i]] <- rbind(hf, hour_seq[!(hour_seq$hour %in% hf$hour),])
   names(hour_freq_list)[i] <- unique(gps_list[[i]]$Logger_ID)
