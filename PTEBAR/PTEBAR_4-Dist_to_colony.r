@@ -55,7 +55,7 @@ for(k in 1:length(unique(gps$Logger_ID))){
     names(results)[k] <- log
   }
   
-# Visualisation on map
+# Visualization on map
 # Loading of Reunion Island spatial polygons
 run <- st_read("C:/Users/Etudiant/Desktop/SMAC/SPATIAL_data_RUN/Admin/REU_adm0.shp")
 project <- st_crs(run)
@@ -72,3 +72,73 @@ for (i in 1:length(results)){
 }
 
 
+#### Computation of distance from the colony ####
+# Merge data in single DF
+gps2 <- data.frame()
+for (i in 1:length(results)){
+  d <- results[[i]]$data
+  
+  gps2 <- rbind(gps2, d)
+}
+summary(gps2)
+
+# Creation of spatial objects
+run <- st_read("C:/Users/Etudiant/Desktop/SMAC/SPATIAL_data_RUN/Admin/REU_adm0.shp")
+project <- st_crs(run)
+gps2.spat <- st_as_sf(gps2,
+                      coords = c('Longitude', 'Latitude'),
+                      crs = project)
+# nest DF
+nest <- gps[, c('nest', 'X_nest', 'Y_nest', 'Logger_ID')]
+nest <- nest[!duplicated(nest),]
+nest
+nest_spat <- st_as_sf(nest,
+                      coords = c('X_nest', 'Y_nest'),
+                      crs = project)
+
+gps2.spat.list <- split(gps2.spat, gps2.spat$Logger_ID)
+
+for (i in 1:length(gps2.spat.list)){
+  dist_colo <- NA
+  behav <- NA
+  data <- gps2.spat.list[[i]]
+  log <- names(gps2.spat.list)[i]
+  p.nest <- nest_spat$geometry[nest_spat$Logger_ID == log]
+  
+  for(j in 1:length(data$Logger_ID)){
+    p1 <- data$geometry[j]
+    dist_colo[j] <- max(st_distance(c(p.nest, p1)))
+  }
+  gps2.spat.list[[i]]$dist_colo <- dist_colo
+  
+  for(k in 2:length(data$Logger_ID)){
+    if(dist_colo[k] >= dist_colo[k - 1]){
+      behav[k] <- 'FORTH'
+    } else {
+      behav[k] <- 'BACK'    
+    }}
+  gps2.spat.list[[i]]$behav <- behav  
+}
+
+mapview(gps2.spat.list[[5]],
+        zcol = 'behav')
+
+# Write data for rmarkdown documents
+  # Retrieve the gps points
+# rmdoc <- do.call('rbind', gps2.spat.list)
+# rmdoc1 <- cbind(rmdoc, recup_coord(rmdoc$geometry))
+# 
+# write.table(rmdoc1,
+#             'C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/data/PTEBAR_GPS_behav.txt',
+#             sep = '\t')
+
+test <- read.table('C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/data/PTEBAR_GPS_behav.txt',
+                   h = T,
+                   sep = '\t')
+head(test)
+test.spat <- st_as_sf(test,
+                      coords = c('Longitude', 'Latitude'),
+                      crs = project)
+mapview(test.spat[test.spat$Logger_ID == 'PAC10',],
+        zcol = 'behav')
+unique(test.spat$Logger_ID)
