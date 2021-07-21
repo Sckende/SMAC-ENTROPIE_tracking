@@ -123,9 +123,11 @@ for (i in 1:length(gps2.spat.list)){
 mapview(gps2.spat.list[[5]],
         zcol = 'behav')
 
+
 # Write data for rmarkdown documents
   # Retrieve the gps points
 # rmdoc <- do.call('rbind', gps2.spat.list)
+# rmdoc$behav[is.na(rmdoc$behav)] <- 'FORTH'
 # rmdoc1 <- cbind(rmdoc, recup_coord(rmdoc$geometry))
 # 
 # write.table(rmdoc1,
@@ -142,3 +144,10 @@ test.spat <- st_as_sf(test,
 mapview(test.spat[test.spat$Logger_ID == 'PAC10',],
         zcol = 'behav')
 unique(test.spat$Logger_ID)
+
+head(test.spat)
+
+mapview(test.spat[test.spat$local == 'land',],
+        zcol = 'behav')
+
+test.spat[is.na(test.spat$behav),]

@@ -49,48 +49,62 @@ data.spat <- st_as_sf(data,
 
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC03',],
-        zcol = 'attr')
+        zcol = 'attr',
+        layer.name = 'Track per day',
+        burst = T)
 ```
   
 ## PAC06  
   
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC06',],
-        zcol = 'attr')
+        zcol = 'attr',
+        layer.name = 'Track per day',
+        burst = T)
 ```
   
 ## PAC10
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC10',],
-        zcol = 'attr')
+        zcol = 'attr',
+        layer.name = 'Track per day',
+        burst = T)
 ```
   
 ## PAC11  
   
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC11',],
-        zcol = 'attr')
+        zcol = 'attr',
+        layer.name = 'Track per day',
+        burst = T)
 ```
   
 ## PAC12  
   
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC12',],
-        zcol = 'attr')
+        zcol = 'attr',
+        layer.name = 'Track per day',
+        burst = T)
 ```
   
 ## PAC15  
   
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC15',],
-        zcol = 'attr')
+        zcol = 'attr',
+        layer.name = 'Track per day',
+        burst = T)
 ```
   
 ## PAC16  
   
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC16',],
-        zcol = 'attr')
+        zcol = 'attr',
+        layer.name = 'Track per day',
+        burst = T)
 ```
   
   
@@ -100,46 +114,61 @@ mapview(data.spat[data.spat$Logger_ID == 'PAC16',],
 
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC03',],
-        zcol = 'behav')
+        zcol = 'behav',
+        layer.name = 'Behaviour')
 ```
   
 ## PAC06  
   
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC06',],
-        zcol = 'behav')
+        zcol = 'behav',
+        layer.name = 'Behaviour')
 ```
   
 ## PAC10
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC10',],
-        zcol = 'behav')
+        zcol = 'behav',
+        layer.name = 'Behaviour')
 ```
   
 ## PAC11  
   
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC11',],
-        zcol = 'behav')
+        zcol = 'behav',
+        layer.name = 'Behaviour')
 ```
   
 ## PAC12  
   
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC12',],
-        zcol = 'behav')
+        zcol = 'behav',
+        layer.name = 'Behaviour')
 ```
   
 ## PAC15  
   
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC15',],
-        zcol = 'behav')
+        zcol = 'behav',
+        layer.name = 'Behaviour')
 ```
   
 ## PAC16  
   
 ```{r, echo = F}
 mapview(data.spat[data.spat$Logger_ID == 'PAC16',],
-        zcol = 'behav')
+        zcol = 'behav',
+        layer.name = 'Behaviour')
+```
+  
+# On land behaviours  
+  
+```{r, echo = F}
+mapview(data.spat[data.spat$local == 'land',],
+        zcol = 'behav',
+        layer.name = 'Behaviour')
 ```
