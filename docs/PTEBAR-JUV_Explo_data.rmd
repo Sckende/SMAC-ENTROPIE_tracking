@@ -1,0 +1,202 @@
+---
+title: "PTEBAR-JUV - Data explo"
+author: "CCJ"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+---
+
+```{r, include = F}
+if (knitr::is_html_output()) knitr::knit_hooks$set(
+  plot = function(x, options) {
+    cap  <- options$fig.cap  # figure caption
+    tags <- htmltools::tags
+    as.character(tags$figure(
+      tags$img(src = x, alt = cap),
+      tags$figcaption(cap)
+    ))
+  }
+)
+
+# packages
+require(knitr)
+require(mapview)
+require(tidyverse)
+require(sf)
+```
+
+# Mise en contexte
+  
+## Mission 1 - Grand Bénare - 6 et 7 avril 2017  
+  
+9 balises déployées  
+  
+## Mission 2 - Grand Bénare - 4 et 5 avril 2018
+  
+9 balises déployées  
+  
+Setting des balises ?
+ 
+```{r tableau_1, echo = F}
+tab1 <- data.frame(device = c(166566,
+166568,
+166569,
+166570,
+166571,
+166572,
+166573,
+162074,
+166567,
+162072,
+162073,
+162071,
+162070,
+166562,
+166565,
+166564,
+166563,
+166561
+),
+                   deploy = c("06/04/2017 16:00",
+"06/04/2017 17:00",
+"06/04/2017 17:15",
+"06/04/2017 17:30",
+"07/04/2017 07:30",
+"07/04/2017 08:00",
+"07/04/2017 08:25",
+"07/04/2017 09:15",
+"07/04/2017 09:30",
+"04/04/2018 12:00",
+"04/04/2018 12:30",
+"04/04/2018 13:30",
+"04/04/2018 14:00",
+"04/04/2018 15:00",
+"04/04/2018 15:30",
+"04/04/2018 16:00",
+"04/04/2018 16:30",
+"05/04/2018 09:00"
+),
+                   start = c("06/04/2017 12:00",
+"06/04/2017 12:02",
+"06/04/2017 12:03",
+"06/04/2017 12:04",
+"06/04/2017 12:05",
+"06/04/2017 12:06",
+"06/04/2017 12:07",
+"07/04/2017 08:00",
+"06/04/2017 12:01",
+"04/04/2018 10:00",
+"04/04/2018 10:00",
+"04/04/2018 10:00",
+"04/04/2018 10:00",
+"04/04/2018 10:00",
+"04/04/2018 10:00",
+"04/04/2018 10:00",
+"04/04/2018 10:00",
+"04/04/2018 10:00"
+),
+                   attach = c("fils_teflon",
+"plaque_Tesa",
+"plaque_Tesa",
+"plaque_Tesa",
+"plaque_Tesa",
+"harnais",
+"plaque_Tesa",
+"plaque_Tesa",
+"harnais",
+"harnais_boucle",
+"harnais_noeud_9cm",
+"harnais_noeud_8cm",
+"harnais_noeud_8cm",
+"harnais_noeud_9cm",
+"harnais_noeud_9cm",
+"harnais_noeud_9cm",
+"harnais_noeud_9cm",
+"harnais_noeud_9cm"
+),
+                   
+                   burrow = c("arrivee",
+"23",
+"22",
+"11",
+"pied_dyke",
+"67_sup1" ,
+"17",
+"au_dessus_8",
+"non_indicated",
+"GBR-01",
+"GBR-108",
+"GBR-79",
+"GBR-72",
+"GBR-74",
+"GBR-122",
+"GBR-101",
+"GBR-23",
+"GBR-142"
+),
+                   ring = c("FX20999",
+"non_indicated",
+"FX25042",
+"FX25017",
+"FX25115",
+"FX25116",
+"FX25040",
+"FX25016",
+"FX25035",
+"FX24858",
+"FX24813",
+"FX24816",
+"FX24819",
+"FX24818",
+"FX24872",
+"FX24821",
+"FX24810",
+"FX24878"
+),
+                   weight = c(380,
+510,
+420,
+510,
+570,
+400,
+440,
+600,
+440,
+398.2,
+474.6,
+446.6,
+423.2,
+419.8,
+450.4,
+430.3,
+447.5,
+425.9
+),
+                   wing = c(277,
+274,
+287,
+271,
+274,
+294,
+284,
+272,
+292,
+279,
+285,
+296,
+291,
+285,
+297,
+292,
+285,
+295
+)
+)
+knitr::kable(tab1,
+             caption = 'Tab. 1. Résumé de la méthode de déploiement des balises argos en avril 2017 et 2018.',
+             row.names = F)
+```
+  
+   
