@@ -111,6 +111,9 @@ dim(argos2)
 argos3 <- argos2[argos2$Date >= argos2$deploy,]
 dim(argos3) # Deletion of 22 rows
 
+?diff() # (n + 1) - n
+diff(argos3$Date[argos3$Vessel == '162070'])
+
 # ----------------------------------------------- #
 #### Rapid visual exploration of trajectories ####
 # --------------------------------------------- #
@@ -152,3 +155,29 @@ mapview(argos_sp,
           homebutton = F)
   # mapview(track_lines[track_lines$Vessel == '166568',]) # Back and forth from Reunion Island before to go toward Tanzania
   
+# ---------------------------------------------- #
+#### Extra information for each trajectories ####
+# -------------------------------------------- #
+
+# Tracking duration in hours & in days
+# From the deployement date to the last date of recording
+  
+  arg_bil2$duration_trip_day <- arg_bil2$max_date - arg_bil2$deploy  
+  
+# Max distance from Reunion island and in how many time 
+  test <- arg_bil2$Vessel[arg_bil2$n_loc == min(arg_bil2$n_loc)]
+  test_df <- argos_sp[argos_sp$Vessel == test,]
+  max(st_distance(test_df)) # st_distance() computes the distance between each points based on the great circle distances method (take the curvature of the earth into account)
+
+max_dist <- function(x){
+  max(st_distance(x))
+}
+
+argos_sp_list <- split(argos_sp, argos_sp$Vessel)
+
+argos_max_dist <- lapply(argos_sp_list, max_dist) # WWARNING - quite long process - Need to be improved - distance in meter
+
+argos_max_dist_df <- cbind(as.data.frame(do.call('rbind', argos_max_dist), row.names = F), names(argos_max_dist))
+
+names(argos_max_dist_df) <- c('max_dist', 'Vessel')
+# *** WARNING *** see https://www.r-bloggers.com/2020/02/three-ways-to-calculate-distances-in-r/ for methods in computation of distance
