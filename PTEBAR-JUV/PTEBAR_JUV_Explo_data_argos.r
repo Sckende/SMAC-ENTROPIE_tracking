@@ -165,19 +165,28 @@ mapview(argos_sp,
   arg_bil2$duration_trip_day <- arg_bil2$max_date - arg_bil2$deploy  
   
 # Max distance from Reunion island and in how many time 
-  test <- arg_bil2$Vessel[arg_bil2$n_loc == min(arg_bil2$n_loc)]
-  test_df <- argos_sp[argos_sp$Vessel == test,]
-  max(st_distance(test_df)) # st_distance() computes the distance between each points based on the great circle distances method (take the curvature of the earth into account)
-
-max_dist <- function(x){
-  max(st_distance(x))
-}
-
-argos_sp_list <- split(argos_sp, argos_sp$Vessel)
-
-argos_max_dist <- lapply(argos_sp_list, max_dist) # WWARNING - quite long process - Need to be improved - distance in meter
-
-argos_max_dist_df <- cbind(as.data.frame(do.call('rbind', argos_max_dist), row.names = F), names(argos_max_dist))
-
-names(argos_max_dist_df) <- c('max_dist', 'Vessel')
-# *** WARNING *** see https://www.r-bloggers.com/2020/02/three-ways-to-calculate-distances-in-r/ for methods in computation of distance
+  argos_sp_list <- split(argos_sp, argos_sp$Vessel)
+  
+  # library(pbapply) # progress bar for apply functions
+  # argos_dist_mat <- pblapply(argos_sp_list, st_distance) # Matrix distance for each device - *** WARNING *** Long process
+  # saveRDS(argos_dist_mat, "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Distance_matrices.rds")
+  # st_distance() computes the distance between each points based on the great circle distances method (take the curvature of the earth into account)
+  
+  argos_dist_mat <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Distance_matrices.rds") # import distance matrices for juvenile petrels
+  matrix_data <- data.frame()
+  
+  for(i in 1:length(argos_dist_mat)){
+    id <- names(argos_dist_mat[i]) # name of the device
+    matr <- argos_dist_mat[[i]] # distance matrix for the device
+    
+    max_dist <- max(matr[1,]) # max of the first row of the matrix, i.e. distance between the first point (breeding colony at Reunion Island) and each following points
+    loc_max_dist <- which(matr[1,] == max_dist) # Location or point number where the maximal distance from the Reunion Island is obtained
+    
+    matr_diag_sec <- diag(matr[, -1]) # secondary diagonal of the matrix containing the distance between each consecutive points
+    dist_travel <- max(cumsum(matr_diag_sec)) # max of the cumulative sum for obtaining the total traveled distance
+    
+    matrix_data <- rbind(matrix_data, c(id, max_dist, loc_max_dist, dist_travel))
+  }
+names(matrix_data) <- c('Vessel', 'max_dist', 'loc_max_dist', 'dist_travel')
+View(matrix_data)  
+  
