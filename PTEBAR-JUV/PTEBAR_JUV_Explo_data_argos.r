@@ -160,11 +160,11 @@ mapview(argos_sp,
 # -------------------------------------------- #
 
 # Tracking duration in hours & in days
-# From the deployement date to the last date of recording
+# From the deployment date to the last date of recording
   
   arg_bil2$duration_trip_day <- arg_bil2$max_date - arg_bil2$deploy  
   
-# Max distance from Reunion island and in how many time 
+# Max distance from Reunion island and total distance traveled 
   argos_sp_list <- split(argos_sp, argos_sp$Vessel)
   
   # library(pbapply) # progress bar for apply functions
@@ -188,5 +188,24 @@ mapview(argos_sp,
     matrix_data <- rbind(matrix_data, c(id, max_dist, loc_max_dist, dist_travel))
   }
 names(matrix_data) <- c('Vessel', 'max_dist', 'loc_max_dist', 'dist_travel')
+matrix_data$max_dist_km <- as.numeric(matrix_data$max_dist)/1000 # conversion in km
+matrix_data$dist_travel_km <- as.numeric(matrix_data$dist_travel)/1000 # conversion in km
 View(matrix_data)  
   
+# Timing to reach the maximal distance from the breeding colony
+
+for (i in 1:nrow(matrix_data)){
+  id <- matrix_data$Vessel[i]
+  loc <- as.numeric(matrix_data$loc_max_dist[i])
+  
+  matrix_data$date_loc[i] <- as.character(argos_sp$Date[argos_sp$Vessel == id][loc]) # date corresponding to the nth loc where the maximal distance is reached
+  matrix_data$date_deploy[i] <- unique(as.character(argos3$deploy[argos3$Vessel == id])) # deployment date of the argos device
+}
+
+matrix_data$date_loc <- as.POSIXct(matrix_data$date_loc,
+                         format = "%Y-%m-%d %H:%M:%S") # Date format
+
+matrix_data$date_deploy <- as.POSIXct(matrix_data$date_deploy,
+                           format = "%Y-%m-%d %H:%M:%S") # Date format
+
+matrix_data$timing_for_max <- matrix_data$date_loc - matrix_data$date_deploy
