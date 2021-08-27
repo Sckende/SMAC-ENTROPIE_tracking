@@ -9,6 +9,7 @@ output:
 ---
 
 ```{r, include = F}
+# Output figure in HTML5
 if (knitr::is_html_output()) knitr::knit_hooks$set(
   plot = function(x, options) {
     cap  <- options$fig.cap  # figure caption

@@ -130,17 +130,25 @@ track_lines <- argos_sp %>%
     summarize(do_union = FALSE) %>%
     st_cast("LINESTRING") # Creation of SF LINESTRINGS
 
+# saveRDS(track_lines,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_track_lines_data.rds")
 
 
-mapview(argos_sp,
+# map_points <- 
+  mapview(argos_sp,
         zcol = 'Vessel',
         burst = T,
         homebutton = F) 
+# saveRDS(map_points,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_raw_map_points.rds")
 # + 
+# map_lines <-  
   mapview(track_lines,
           zcol = 'Vessel',
           burst = T,
           homebutton = F)
+# saveRDS(map_lines,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_raw_map_lines.rds")
 
 # ------------------------------------------------------- #
 #### Rapid visual exploration of trajectories on land ####
@@ -216,5 +224,5 @@ total <- left_join(arg_bil2, matrix_data, by = 'Vessel')
 View(total)
 
 # Save the df
-saveRDS(total,
-        "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_bilan.rds")
+# saveRDS(total,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_bilan.rds")
