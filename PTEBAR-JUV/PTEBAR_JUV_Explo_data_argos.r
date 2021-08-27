@@ -209,3 +209,12 @@ matrix_data$date_deploy <- as.POSIXct(matrix_data$date_deploy,
                            format = "%Y-%m-%d %H:%M:%S") # Date format
 
 matrix_data$timing_for_max <- matrix_data$date_loc - matrix_data$date_deploy
+
+# Combine the both summary df
+arg_bil2$Vessel <- as.character(arg_bil2$Vessel)
+total <- left_join(arg_bil2, matrix_data, by = 'Vessel')
+View(total)
+
+# Save the df
+saveRDS(total,
+        "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_bilan.rds")
