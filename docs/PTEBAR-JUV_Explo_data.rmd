@@ -29,27 +29,22 @@ require(tidyverse)
 require(sf)
 ```
 
-# Mise en contexte
-  
-## Mission 1 - Grand Bénare - 6 et 7 avril 2017  
-  
-9 balises déployées  
-  
-## Mission 2 - Grand Bénare - 4 et 5 avril 2018
-  
-9 balises déployées  
-  
-Setting des balises ?
+# Point méthodo  
  
-
 ```{r, echo = F}
 tabb <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_bilan.rds")
 
-tabb1 <- tabb[, c('Vessel', 'start', 'deploy', 'n_loc', 'attach', 'burrow', 'ring', 'weight', 'wing', 'remark')]
+tabb1 <- as.data.frame(tabb[, c('Vessel', 'start', 'deploy', 'n_loc', 'attach', 'burrow', 'ring', 'weight', 'wing', 'remark')])[, -11]
 
 kable(tabb1)
+```
 
-tabb2 <- tabb[, c('Vessel', 'max_date', 'min_lat', 'max_lat', 'min_lon', 'max_lon', 'max_speed', 'max_dist_km', 'date_loc', 'timing_for_max', 'dist_travel_km', 'duration_trip_day')]
+# Résumé des données argos
+```{r, echo = F}
+tabb2 <- as.data.frame(tabb[, c('Vessel', 'max_date', 'min_lat', 'max_lat', 'min_lon', 'max_lon', 'max_speed', 'max_dist_km', 'date_loc', 'timing_for_max', 'dist_travel_km', 'duration_trip_day')])[, -13]
+
+# Round numerical values
+
 
 kable(tabb2)
 ```
