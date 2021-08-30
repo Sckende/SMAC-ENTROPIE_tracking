@@ -24,6 +24,7 @@ if (knitr::is_html_output()) knitr::knit_hooks$set(
 # packages
 require(knitr)
 require(mapview)
+require(leafpop)
 require(tidyverse)
 require(sf)
 ```
@@ -60,12 +61,16 @@ kable(tabb2)
 # 
 # map_lines
 
-track_lines <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_track_lines_data.rds")
+track_lines_bilan_juv <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_bilan.rds")
 
-  mapview(track_lines,
+  mapview(track_lines_bilan_juv,
           zcol = 'Vessel',
           burst = T,
-          homebutton = F)
+          homebutton = F,
+          popup = popupTable(track_lines_bilan_juv,
+                             feature.id = FALSE,
+                             row.numbers = FALSE,
+                             zcol = c('Vessel', 'max_dist', 'duration_trip_day')))
 
 in_run <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_in_Run_points_data.rds")
   
