@@ -4,6 +4,8 @@
 rm(list = ls())
 
 library('mapview')
+library('leaflet')
+library('leafpop')
 library('sf')
 library('lubridate')
 library('dplyr')
@@ -123,17 +125,25 @@ argos_sp <- sf::st_as_sf(argos3,
                      coords = c('Longitude', 'Latitude'),
                      crs = projcrs)
 
-argos_sp$Vessel <- as.factor(argos_sp$Vessel)
+# argos_sp$Vessel <- as.factor(argos_sp$Vessel)
 
 track_lines <- argos_sp %>%
     group_by(Vessel) %>% 
     summarize(do_union = FALSE) %>%
     st_cast("LINESTRING") # Creation of SF LINESTRINGS
 
+track_lines <- left_join(track_lines, arg_bil2, by = 'Vessel')
+
+track_lines$popup_info <- paste0("<b>PTT</b> ",
+                                 track_lines$Vessel,
+                                 "<br/>",
+                                 "<b>Durée de l'enregistrement </b>",
+                                 track_lines$max_date - track_lines$deploy)
 # saveRDS(track_lines,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_track_lines_data.rds")
 
-
+argos_sp$Vessel <- as.factor(argos_sp$Vessel)
+track_lines$Vessel <- as.factor(track_lines$Vessel)
 # map_points <- 
   mapview(argos_sp,
         zcol = 'Vessel',
@@ -145,8 +155,14 @@ track_lines <- argos_sp %>%
 # map_lines <-  
   mapview(track_lines,
           zcol = 'Vessel',
-          burst = T,
-          homebutton = F)
+          # homebutton = F,
+          popup = popupTable(track_lines,
+                             zcol = 'popup_info',
+                             feature.id = FALSE,
+                             row.numbers = FALSE,
+                             className = 'mapview-popup'),
+          burst = TRUE
+          )
 # saveRDS(map_lines,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_raw_map_lines.rds")
 
@@ -156,6 +172,9 @@ track_lines <- argos_sp %>%
   run <- st_read("C:/Users/ccjuhasz/Desktop/SMAC/SPATIAL_data_RUN/Admin/REU_adm0.shp")
 
   in_run <- st_intersection(argos_sp, run)
+  
+  # saveRDS(in_run,
+  #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_in_Run_points_data.rds")
   
   mapview(in_run,
           zcol = 'Vessel',
@@ -218,11 +237,16 @@ matrix_data$date_deploy <- as.POSIXct(matrix_data$date_deploy,
 
 matrix_data$timing_for_max <- matrix_data$date_loc - matrix_data$date_deploy
 
-# Combine the both summary df
+# Combine the both summary df ... 
 arg_bil2$Vessel <- as.character(arg_bil2$Vessel)
 total <- left_join(arg_bil2, matrix_data, by = 'Vessel')
-View(total)
 
+# ... and addition of the spatial lines
+track_lines$Vessel <- as.character(track_lines$Vessel)
+
+# total_sp <- st_as_sf(total,
+#                      wkt = 'geometry')
+total_sp <- left_join(track_lines[, c('Vessel', 'geometry')], total, by = 'Vessel' )
 # Save the df
-# saveRDS(total,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_bilan.rds")
+# saveRDS(total_sp,
+# "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_bilan.rds")
