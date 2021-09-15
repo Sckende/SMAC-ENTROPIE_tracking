@@ -65,11 +65,12 @@ tabb2$max_date <- date(tabb2$max_date)
 tabb2$date_loc <- date(tabb2$date_loc)
 
 
-kable(tabb2,
-      digits = 2,
-      align = 'cccccccccccc'
-      , table.attr = 'class=\"striped\"'
-      , format = 'html'
+kable(tabb2
+      , digits = 2
+      , col.names = c('Device', 'Date max', 'Lat min', 'Lat max', 'Lon min', 'Lon max', 'Speed max', 'Dist max', 'Date dist max', 'Nb jr pour max loc', 'Dist tot', 'Duree trajet')
+      # align = 'cccccccccccc'
+      # , table.attr = 'class=\"striped\"'
+      # , format = 'html'
       )
 ```
 # Visualisation des trajets
