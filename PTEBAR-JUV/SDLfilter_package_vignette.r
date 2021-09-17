@@ -65,6 +65,9 @@ names(argos)[1:5] <- c('id', 'DateTime', 'lat', 'lon', 'qi')
 argos.dup <- dupfilter(argos)
 dim(argos.dup)
 
+table(argos.dup$id)
+table(argos$id)
+
 projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 argos.dup.sp <- st_as_sf(argos.dup,
                          coords = c('lon', 'lat'),
@@ -85,3 +88,11 @@ VLP <- vmaxlp(argos.dup)
 turtle.dd <- ddfilter(turtle.dup,
                       vmax = V,
                       vmaxlp = VLP)
+
+
+# -------------------------------- #
+argos.qual <- argos[argos$qi %in% c('0', '1', '2', '3', 'A', 'B'),]
+dup_argos.qual <- argos.qual[duplicated(paste(argos.qual$id, argos.qual$DateTime)),]
+
+argos.qual.sing <- argos.qual[!duplicated(argos.qual[c(1, 2)]),] # Remove duplicated rows based on ID and DateTime
+table(argos.qual.sing$id)
