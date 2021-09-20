@@ -96,3 +96,32 @@ dup_argos.qual <- argos.qual[duplicated(paste(argos.qual$id, argos.qual$DateTime
 
 argos.qual.sing <- argos.qual[!duplicated(argos.qual[c(1, 2)]),] # Remove duplicated rows based on ID and DateTime
 table(argos.qual.sing$id)
+summary(argos.qual.sing)
+
+library(adehabitatHR)
+
+projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+argos.sp <- st_as_sf(argos.qual.sing,
+                     coords = c('lon', 'lat'),
+                     crs = projcrs)
+class(argos.sp)
+
+library(sp)
+coords <- SpatialPoints(argos.qual.sing[, c('lon', 'lat')])
+argos.sp2 <- SpatialPointsDataFrame(coords, argos.qual.sing)
+
+# adehabitatHR - The Minimum Convex Polygon Method
+
+cp <- mcp(argos.sp2[,1], percent = 95)
+class(cp)
+
+# plot(cp)
+# plot(argos.sp2, add = T)
+
+mapview::mapview(cp,
+                 zcol = 'id',
+                 burst = T)
+
+as.data.frame(cp)
+
+# adehabitatHR - Kernel method
