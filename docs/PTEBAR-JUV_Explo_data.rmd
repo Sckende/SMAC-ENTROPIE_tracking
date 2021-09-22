@@ -47,6 +47,7 @@ background-color: red;
 
 # Point méthodo  
  
+Les balises ont été programmées pour commencer à enregistrer les localisations AVANT leur déploiement (**start** < **deploy**). Il est donc nécessaire de retirer les localisations enregistrées avant la date de déploiement pour chaque balise. Présence d'informations non exactes (type d'attache & date de déploiement pour un individu) lors de la comparaison entre l'annexe du papier de Henri W. et les metadonnées du Life.
 ```{r, echo = F}
 tabb <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_bilan.rds")
 
