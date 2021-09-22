@@ -10,20 +10,20 @@ library('sf')
 library('lubridate')
 library('dplyr')
 
-# Loading and treatment of data 1
+#### Loading and treatment of data 1 - METADATA #### 
 infos_argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_deploiement.txt",
                         h = T,
                         sep = "\t")
 names(infos_argos)
 
 infos_argos$deploy <- as.POSIXct(infos_argos$deploy,
-                                 format = "%d/%m/%Y %H:%M") # Date format
+                                 format = "%d/%m/%Y %H:%M") # Date format - This is the most important date here since the devices started before the deployment
 infos_argos$start <- as.POSIXct(infos_argos$start,
                                  format = "%d/%m/%Y %H:%M") # Date format
 summary(infos_argos)
 
 
-# Loading and treatment of data 2
+#### Loading and treatment of data 2 - Raw localisations ####
 argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_TRACK_argos.txt",
                     h = T,
                     sep = '\t',
@@ -31,11 +31,13 @@ argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_
 
 head(argos)
 
-argos$Date <- as.POSIXct(argos$Date,
-                         format = "%d/%m/%Y %H:%M") # Date format
-
+# ---- Keep the good date variable
 argos$DATE_1 <- as.POSIXct(argos$DATE_1,
                          format = "%d/%m/%Y %H:%M") # Date format
+names(argos)
+argos <- argos[, -2] # Deletion of the second useless date variable
+
+names(argos)[9] <- 'Date' # Modification of the name of the date variable
 
 class(argos$Date)
 summary(argos$Date)
@@ -43,17 +45,43 @@ barplot(table(argos$Date))
 year(head(argos$Date))
 table(year(argos$Date))
 
+# ---- Check for the coordinates of positions
 summary(argos)
 all(is.na(argos$Latitude)) # No NA for Latitude
 all(is.na(argos$Longitude)) # No NA for Longitude
 
-y19 <- argos[year(argos$Date) == 2019,]
-dim(y19)
+# ---- Check for min trajectory date vs deployment date
+argos <- left_join(argos, infos_argos[, c('device', 'deploy')], by = c('Vessel' = 'device'))
 
-# Summary of device recordings
-head(argos)
+arg.list <- split(argos, argos$Vessel) 
 
-arg_bil <- argos %>% group_by(Vessel) %>% 
+# deletion of locations recorded before the deployment
+
+new.arg.list <- lapply(arg.list, function(x){
+  x <- x[x$Date >= unique(x$deploy),]
+})
+
+# *** Mystère avec le 162072 *** -> the device seemed to be turn on in 2017 and never turn off until the deployment in 2018
+
+# ---- Check for the delay betw each location
+
+lapply(new.arg.list, function(x){
+  summary(as.numeric(diff(x$Date)))
+}) # One loc / hour for all devices !!!
+
+# ---- Check for the localisation class
+argos2 <- do.call('rbind', new.arg.list)
+table(argos2$Class, useNA = 'always')
+
+argos2.qual <- argos2[argos2$Class %in% c('0', '1', '2', '3', 'A', 'B'),] # Keeping only a minimal lacolisation class 
+
+# ---- Check for duplicated data based on the c('Vessel', 'Date')
+argos2.qual[duplicated(c('Vessel', 'Date')),] # NO DUPLICATED DATA
+
+# ---- Summary of device recordings
+head(argos2.qual)
+
+arg_bil <- argos2.qual %>% group_by(Vessel) %>% 
   summarise(n_loc = n(),
             min_date = min(Date),
             max_date = max(Date),
@@ -66,62 +94,28 @@ arg_bil <- argos %>% group_by(Vessel) %>%
 no_speed <- arg_bil$Vessel[arg_bil$max_speed == '-Inf']
 argos$Speed[argos$Vessel %in% no_speed]
 
-# Device id check up - infos_argos vs. argos_location
-unique(argos$Vessel) %in% infos_argos$device
-vessel_no_data <- setdiff(infos_argos$device, unique(argos$Vessel)) # 3 devices with no raw data obtained
+# ---- Device id check up - infos_argos vs. argos_location
+unique(argos2.qual$Vessel) %in% infos_argos$device
+vessel_no_data <- setdiff(infos_argos$device, unique(argos2.qual$Vessel)) # 3 devices with no raw data obtained
 infos_argos[infos_argos$device %in% vessel_no_data,]
 
-# Implementation of the summary dataframe
+# ---- Implementation of the summary dataframe
 arg_bil2 <- left_join(arg_bil, infos_argos, by = c('Vessel' = 'device'))
 View(arg_bil2)
 names(arg_bil2)
 
-# Dates check up - all deployment dates have to be greater than dates of device start
-all(arg_bil2$deploy > arg_bil2$start) # ok
-arg_bil2$deploy - arg_bil2$start # Gap in hours between the device start and the deployment
-
-# Dates check up - device start < min date of trajectories
-# **** WARNINGS **** #
-all(arg_bil2$min_date > arg_bil2$start) # problem here with 3 devices displaying min_date of trajectories < start date of the device
-pb_argos <- arg_bil2[arg_bil2$min_date < arg_bil2$start,]
-View(pb_argos)
-
-# Details case by case
-# First device - 162072
-pb_162072 <- argos[argos$Vessel == 162072,]
-head(pb_162072) # Weird first row 
-#---#
-pb_162072$Date > arg_bil2$start[arg_bil2$Vessel == 162072] # => Only the first row is concerned
-
-# Second device - 166566
-pb_166566 <- argos[argos$Vessel == 166566,]
-head(pb_166566)
-#---#
-pb_166566$Date > arg_bil2$start[arg_bil2$Vessel == 166566] # => Only the two first rows are concerned
-
-# Third device - 166568
-pb_166568 <- argos[argos$Vessel == 166568,]
-head(pb_166568)
-#---#
-pb_166568$Date > arg_bil2$start[arg_bil2$Vessel == 166568] # => Only the first rows is concerned
-
-# For each trajectories, deletion of location before the date of the device deployment
-dim(argos)
-argos2 <- left_join(argos, arg_bil2[, c('Vessel', 'deploy')], by = 'Vessel')
-dim(argos2)
-
-argos3 <- argos2[argos2$Date >= argos2$deploy,]
-dim(argos3) # Deletion of 22 rows
-
-?diff() # (n + 1) - n
-diff(argos3$Date[argos3$Vessel == '162070'])
+# ---- Save the cleaned & updated version of ARGOS data
+write.table(argos2.qual,
+           "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_TRACK_argos_CLEANED.txt",
+           sep = '\t',
+           dec = '.')
 
 # ----------------------------------------------- #
 #### Rapid visual exploration of trajectories ####
 # --------------------------------------------- #
 
 projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
-argos_sp <- sf::st_as_sf(argos3,
+argos_sp <- sf::st_as_sf(argos2.qual,
                      coords = c('Longitude', 'Latitude'),
                      crs = projcrs)
 
@@ -144,15 +138,15 @@ track_lines$popup_info <- paste0("<b>PTT</b> ",
 
 argos_sp$Vessel <- as.factor(argos_sp$Vessel)
 track_lines$Vessel <- as.factor(track_lines$Vessel)
-# map_points <- 
-  mapview(argos_sp,
+
+mapview(argos_sp,
         zcol = 'Vessel',
         burst = T,
         homebutton = F) 
 # saveRDS(map_points,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_raw_map_points.rds")
 # + 
-# map_lines <-  
+
   mapview(track_lines,
           zcol = 'Vessel',
           # homebutton = F,
@@ -226,7 +220,7 @@ for (i in 1:nrow(matrix_data)){
   loc <- as.numeric(matrix_data$loc_max_dist[i])
   
   matrix_data$date_loc[i] <- as.character(argos_sp$Date[argos_sp$Vessel == id][loc]) # date corresponding to the nth loc where the maximal distance is reached
-  matrix_data$date_deploy[i] <- unique(as.character(argos3$deploy[argos3$Vessel == id])) # deployment date of the argos device
+  matrix_data$date_deploy[i] <- unique(as.character(argos2.qual$deploy[argos2.qual$Vessel == id])) # deployment date of the argos device
 }
 
 matrix_data$date_loc <- as.POSIXct(matrix_data$date_loc,
