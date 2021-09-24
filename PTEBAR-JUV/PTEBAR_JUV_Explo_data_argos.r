@@ -1,5 +1,6 @@
 # Exploration des données Argos déployées sur des juvéniles pétrel de Barau en avril 2017 et 2018
 # Data à l'origine du papier de Weimerskirch et al 2016 - Wettability of juvenile plumage as a major cause of mortality threatens endangered Barau’s petrel
+# *** La variable 'Date' correspond à la date/heure de la prise de location alors que la variable 'DATE_1' correspond aux extrapolations pour chaque heure faites à partir des données brutes
 
 rm(list = ls())
 
@@ -23,7 +24,7 @@ infos_argos$start <- as.POSIXct(infos_argos$start,
 summary(infos_argos)
 
 
-#### Loading and treatment of data 2 - Raw localisations ####
+#### Loading and treatment of data 2 - Extrapolated localisations ####
 argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_TRACK_argos.txt",
                     h = T,
                     sep = '\t',
@@ -32,12 +33,14 @@ argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_
 head(argos)
 
 # ---- Keep the good date variable
+argos$Date <- as.POSIXct(argos$Date,
+                           format = "%d/%m/%Y %H:%M") # Date format
 argos$DATE_1 <- as.POSIXct(argos$DATE_1,
                          format = "%d/%m/%Y %H:%M") # Date format
 names(argos)
-argos <- argos[, -2] # Deletion of the second useless date variable
-
-names(argos)[9] <- 'Date' # Modification of the name of the date variable
+# argos <- argos[, -2] # Deletion of the second useless date variable
+# 
+# names(argos)[9] <- 'Date' # Modification of the name of the date variable
 
 class(argos$Date)
 summary(argos$Date)
@@ -62,6 +65,8 @@ new.arg.list <- lapply(arg.list, function(x){
 })
 
 # *** Mystère avec le 162072 *** -> the device seemed to be turn on in 2017 and never turn off until the deployment in 2018
+
+
 
 # ---- Check for the delay betw each location
 
@@ -109,10 +114,38 @@ write.table(argos2.qual,
            "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_TRACK_argos_CLEANED.txt",
            sep = '\t',
            dec = '.')
+# ------------------------------------------------------------ #
+#### Rapid visual exploration of extrapolated trajectories ####
+# ---------------------------------------------------------- #
+argos.raw.list <- lapply(arg.list, function(x){
+  x <- x[!duplicated(x$Date),]
+})
 
-# ----------------------------------------------- #
-#### Rapid visual exploration of trajectories ####
-# --------------------------------------------- #
+argos.raw <- do.call('rbind', argos.raw.list)
+
+projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+argos.raw.sp <- sf::st_as_sf(argos.raw,
+                         coords = c('Longitude', 'Latitude'),
+                         crs = projcrs)
+argos.raw.sp$Vessel <- as.factor(argos.raw.sp$Vessel)
+
+mapview(argos.raw.sp,
+        zcol = 'Vessel',
+        burst = T,
+        legend = F)
+
+argos.raw.track <- argos.raw.sp %>%
+  group_by(Vessel) %>% 
+  summarize(do_union = FALSE) %>%
+  st_cast("LINESTRING") # Creation of SF LINESTRINGS
+
+mapview(argos.raw.track,
+        zcol = 'Vessel',
+        burst = T,
+        legend = F)
+# ------------------------------------------------------------ #
+#### Rapid visual exploration of extrapolated trajectories ####
+# ---------------------------------------------------------- #
 
 projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 argos_sp <- sf::st_as_sf(argos2.qual,
