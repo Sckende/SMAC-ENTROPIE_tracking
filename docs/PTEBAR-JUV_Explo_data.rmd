@@ -48,7 +48,11 @@ background-color: red;
 
 # Point méthodo  
  
-Les balises ont été programmées pour commencer à enregistrer les localisations AVANT leur déploiement (**start** < **deploy**). Il est donc nécessaire de retirer les localisations enregistrées avant la date de déploiement pour chaque balise. Présence d'informations non exactes (type d'attache & date de déploiement pour un individu) lors de la comparaison entre l'annexe du papier de Henri W. et les metadonnées du Life.
+Duty cycle: 10/24  
+
+Les balises ont été programmées pour commencer à enregistrer les localisations AVANT leur déploiement (**start** < **deploy**). Il est donc nécessaire de retirer les localisations enregistrées avant la date de déploiement pour chaque balise. Présence d'informations non exactes (type d'attache & date de déploiement pour un individu) lors de la comparaison entre l'annexe du papier de Henri W. et les metadonnées du Life.  
+Les données présentées ici, sont des données extrapolées pour obtenir une localisation par heure, à partir des données brutes d'ARGOS (extrapolation effectuée par P. Pinet).
+
 ```{r, echo = F}
 tabb <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_bilan.rds")
 
@@ -164,7 +168,7 @@ plot.ls <- lapply(argos.ls, function(x){
   x.sp <- st_as_sf(x,
                    coords = c('Longitude', 'Latitude'),
                    crs = projcrs)
-  x.plot <- mapview(x.sp) + mapview(tabb4[tabb4$Vessel == unique(x.sp$Vessel),])
+  x.plot <- mapview(x.sp, legend = F) + mapview(tabb4[tabb4$Vessel == unique(x.sp$Vessel),], legend = F)
   
   x.plot
   
