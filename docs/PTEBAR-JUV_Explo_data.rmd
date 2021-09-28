@@ -46,10 +46,14 @@ background-color: red;
 }
 ```
 
-# Point méthodo  
+# Méthodologie  
  
-Duty cycle: 10/24  
-
+Duty cycle des balises ARGOS: 10/24
+Le déploiement des balises ont eu lieu au cours de 2 périodes d'envol (2017 & 2018) sur des juvéniles issus de la colonie de pétrels de Barau du Grand Benare.  
+  
+Les 6-7 avril 2017, 10 balises ARGOS (5g, avec panneau solaire) ont été installées sur des juvéniles prêts à l'envol (plumage complet). 8 individus ont été équipé à l'aide de tape **Tesa** et de glue **Loctite** et 2 individus, à l'aide d'un harnais en **Teflon**. Les oiseaux se sont envolés entre 2 & 13 jours (moy. 7 jours) après avoir été équipé.  
+En 2018, 9 individus ont été équipés entre le 4 & 5 avril, tous avec un harnais en **Teflon**. Ils ont quitté la colonie dans les 2 à 8 jours (moy. 5.5 jours) qui ont suivis.  
+  
 Les balises ont été programmées pour commencer à enregistrer les localisations AVANT leur déploiement (**start** < **deploy**). Il est donc nécessaire de retirer les localisations enregistrées avant la date de déploiement pour chaque balise. Présence d'informations non exactes (type d'attache & date de déploiement pour un individu) lors de la comparaison entre l'annexe du papier de Henri W. et les metadonnées du Life.  
 Les données présentées ici, sont des données extrapolées pour obtenir une localisation par heure, à partir des données brutes d'ARGOS (extrapolation effectuée par P. Pinet).
 

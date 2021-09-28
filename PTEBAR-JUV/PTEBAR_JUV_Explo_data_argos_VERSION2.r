@@ -119,12 +119,17 @@ RAW.argos <- do.call('rbind', argos.raw.list)
 #             sep = '\t')
 
 # ---- Summary of raw data ----
+RAW.argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_retrieve_RAW_data.txt",
+                        sep = '\t',
+                        h = T)
+RAW.argos$Vessel <- as.factor(RAW.argos$Vessel)
+
 RAW.argos %>%
   group_by(Vessel) %>%
   count()
 
-# ---- Visualization
-RAW.argos$Vessel <- as.factor(RAW.argos$Vessel)
+# ---- Visualization of points & tracks of RAW data ----
+
 RAW.sp <- sf::st_as_sf(RAW.argos,
                        coords = c('Longitude', 'Latitude'),
                        crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0") # Spatial Points
