@@ -58,7 +58,7 @@ Les balises ont été programmées pour commencer à enregistrer les localisatio
 Les données présentées ici, sont des données extrapolées pour obtenir une localisation par heure, à partir des données brutes d'ARGOS (extrapolation effectuée par P. Pinet).
 
 ```{r, echo = F}
-tabb <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_bilan.rds")
+tabb <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ex_DATA/PTEBAR_JUV_Infos_bilan.rds")
 
 tabb1 <- as.data.frame(tabb[, c('Vessel', 'start', 'deploy', 'n_loc', 'attach', 'burrow', 'ring', 'weight', 'wing', 'remark')])[, -11]
 
@@ -152,55 +152,39 @@ tabb4$popup_info <- paste0("<b>PTT</b> ",
 ## Points & trajet par individu  
   
 ```{r, echo=F}
-argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_TRACK_argos_CLEANED.txt",
-                 h = T,
-                 sep = '\t',
-                 dec = '.')[, c(1:4, 9, 17)]
 
-argos$Vessel <- as.factor(argos$Vessel)
-
-argos$Date <- as.POSIXct(argos$Date,
-                         format = '%Y-%m-%d %H:%M:%S')
-argos$deploy <- as.POSIXct(argos$deploy,
-                           format = '%Y-%m-%d %H:%M:%S')
-
-argos.ls <- split(argos, argos$Vessel)
-projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.rds")
 
 
-plot.ls <- lapply(argos.ls, function(x){
-  x.sp <- st_as_sf(x,
-                   coords = c('Longitude', 'Latitude'),
-                   crs = projcrs)
-  x.plot <- mapview(x.sp, legend = F) + mapview(tabb4[tabb4$Vessel == unique(x.sp$Vessel),], legend = F)
+argos.track <- do.call('rbind', argos) %>% group_by(Vessel) %>%  summarize(do_union = F) %>% st_cast('LINESTRING')
+
+  x.plot <- lapply(argos, function(x){
+    
+    mapview(x,
+        zcol = 'odd',
+        col.regions = c('dodgerblue4', 'olivedrab'),
+        popup = 'point.group',
+        legend = F,
+        layer.name = unique(as.character(x$Vessel))) + mapview(argos.track[argos.track$Vessel == unique(as.character(x$Vessel)),],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track')
+    
+  })
+
   
-  x.plot
-  
-})
-
-# for(p in 1:length(plot.ls)){
-#   plot.ls[[p]]
-# }
-
-# mapshot() # conversion of mapview object in html
-plot.ls[[1]]
-plot.ls[[2]]
-plot.ls[[3]]
-plot.ls[[4]]
-plot.ls[[5]]
-plot.ls[[6]]
-plot.ls[[7]]
-plot.ls[[8]]
-plot.ls[[9]]
-plot.ls[[10]]
-plot.ls[[11]]
-plot.ls[[12]]
-plot.ls[[13]]
-plot.ls[[14]]
-plot.ls[[15]]
-
-# 
-
-
-
+x.plot[[1]]
+x.plot[[2]]
+x.plot[[3]]
+x.plot[[4]]
+x.plot[[5]]
+x.plot[[6]]
+x.plot[[7]]
+x.plot[[8]]
+x.plot[[9]]
+x.plot[[10]]
+x.plot[[11]]
+x.plot[[12]]
+x.plot[[13]]
+x.plot[[14]]
+x.plot[[15]]
 ```

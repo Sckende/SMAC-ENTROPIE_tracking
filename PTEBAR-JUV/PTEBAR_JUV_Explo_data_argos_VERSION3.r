@@ -24,7 +24,7 @@ table(wargos$Class, useNA = 'always') # **** here we lost the PTT 166562 (2 locs
 
 wargos <- wargos[!(wargos$Class %in% c('U', 'Z')),]
 
-# Deletion of PTTs ith almost no data
+# Deletion of PTTs with almost no data
 wargos %>% group_by(PTT) %>% count() # 2 PTTs are concerned 
 # 162074 (2 locs)
 # 166567 (5 locs)
