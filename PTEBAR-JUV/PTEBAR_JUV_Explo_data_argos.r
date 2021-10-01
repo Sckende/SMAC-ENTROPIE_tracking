@@ -1,6 +1,6 @@
 # Exploration des données Argos déployées sur des juvéniles pétrel de Barau en avril 2017 et 2018
 # Data à l'origine du papier de Weimerskirch et al 2016 - Wettability of juvenile plumage as a major cause of mortality threatens endangered Barau’s petrel
-# *** La variable 'Date' correspond à la date/heure de la prise de location alors que la variable 'DATE_1' correspond aux extrapolations pour chaque heure faites à partir des données brutes
+# Utilisation des données récupérées auprès de P. Pinet
 
 rm(list = ls())
 
@@ -8,8 +8,10 @@ library('mapview')
 library('leaflet')
 library('leafpop')
 library('sf')
+library('sp')
 library('lubridate')
 library('dplyr')
+library('adehabitatHR')
 
 #### Loading and treatment of data 1 - METADATA #### 
 infos_argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_deploiement.txt",
@@ -19,28 +21,22 @@ names(infos_argos)
 
 infos_argos$deploy <- as.POSIXct(infos_argos$deploy,
                                  format = "%d/%m/%Y %H:%M") # Date format - This is the most important date here since the devices started before the deployment
-infos_argos$start <- as.POSIXct(infos_argos$start,
-                                 format = "%d/%m/%Y %H:%M") # Date format
 summary(infos_argos)
 
 
-#### Loading and treatment of data 2 - Extrapolated localisations ####
-argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_TRACK_argos.txt",
+#### Loading and treatment of data 2 - RAW cleaned localisations ####
+argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.txt",
                     h = T,
                     sep = '\t',
                     dec = '.')
 
 head(argos)
-
-# ---- Keep the good date variable
+names(argos)[1] <- 'PTT'
+# ---- Date class
 argos$Date <- as.POSIXct(argos$Date,
-                           format = "%d/%m/%Y %H:%M") # Date format
-argos$DATE_1 <- as.POSIXct(argos$DATE_1,
-                         format = "%d/%m/%Y %H:%M") # Date format
-names(argos)
-# argos <- argos[, -2] # Deletion of the second useless date variable
-# 
-# names(argos)[9] <- 'Date' # Modification of the name of the date variable
+                           format = "%Y-%m-%d %H:%M") # Date format
+argos$deploy <- as.POSIXct(argos$deploy,
+                         format = "%Y-%m-%d %H:%M") # Date format
 
 class(argos$Date)
 summary(argos$Date)
@@ -48,72 +44,55 @@ barplot(table(argos$Date))
 year(head(argos$Date))
 table(year(argos$Date))
 
-# ---- Check for the coordinates of positions
-summary(argos)
-all(is.na(argos$Latitude)) # No NA for Latitude
-all(is.na(argos$Longitude)) # No NA for Longitude
-
-# ---- Check for min trajectory date vs deployment date
-argos <- left_join(argos, infos_argos[, c('device', 'deploy')], by = c('Vessel' = 'device'))
-
-arg.list <- split(argos, argos$Vessel) 
-
-# deletion of locations recorded before the deployment
-
-new.arg.list <- lapply(arg.list, function(x){
-  x <- x[x$Date >= unique(x$deploy),]
-})
-
-# *** Mystère avec le 162072 *** -> the device seemed to be turn on in 2017 and never turn off until the deployment in 2018
-
-
-
-# ---- Check for the delay betw each location
-
-lapply(new.arg.list, function(x){
-  summary(as.numeric(diff(x$Date)))
-}) # One loc / hour for all devices !!!
-
-# ---- Check for the localisation class
-argos2 <- do.call('rbind', new.arg.list)
-table(argos2$Class, useNA = 'always')
-
-argos2.qual <- argos2[argos2$Class %in% c('0', '1', '2', '3', 'A', 'B'),] # Keeping only a minimal lacolisation class 
-
-# ---- Check for duplicated data based on the c('Vessel', 'Date')
-argos2.qual[duplicated(c('Vessel', 'Date')),] # NO DUPLICATED DATA
-
 # ---- Summary of device recordings
-head(argos2.qual)
 
-arg_bil <- argos2.qual %>% group_by(Vessel) %>% 
+arg_bil <- argos %>% group_by(PTT) %>% 
   summarise(n_loc = n(),
-            min_date = min(Date),
-            max_date = max(Date),
+            min_date = date(min(Date)),
+            max_date = date(max(Date)),
             max_lat = max(Latitude),
             min_lat = min(Latitude),
             max_lon = max(Longitude),
-            min_lon = min(Longitude),
-            max_speed = max(Speed, na.rm = T))
+            min_lon = min(Longitude))
 
-no_speed <- arg_bil$Vessel[arg_bil$max_speed == '-Inf']
-argos$Speed[argos$Vessel %in% no_speed]
+# ---- Addition of the area of the MCP (Minimum Complex Polygon) for each individuals
 
-# ---- Device id check up - infos_argos vs. argos_location
-unique(argos2.qual$Vessel) %in% infos_argos$device
-vessel_no_data <- setdiff(infos_argos$device, unique(argos2.qual$Vessel)) # 3 devices with no raw data obtained
-infos_argos[infos_argos$device %in% vessel_no_data,]
+# Spatial Dataframe conversion
+reun <- data.frame(Longitude = 55.42, Latitude = -21.12)
+reun <- SpatialPoints(reun)
+projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 
-# ---- Implementation of the summary dataframe
-arg_bil2 <- left_join(arg_bil, infos_argos, by = c('Vessel' = 'device'))
-View(arg_bil2)
-names(arg_bil2)
+argos.sf <- st_as_sf(argos,
+                     coords = c('Longitude', 'Latitude'),
+                     crs = projcrs) # step 1
+class(argos.sf)
 
-# ---- Save the cleaned & updated version of ARGOS data
-write.table(argos2.qual,
-           "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_TRACK_argos_CLEANED.txt",
-           sep = '\t',
-           dec = '.')
+
+coords <- SpatialPoints(argos[, c('Longitude', 'Latitude')])
+argos.sp <- SpatialPointsDataFrame(coords, argos)
+
+class(argos.sp)
+
+# Computation of the Minimum Convex Polygon with adehabitatHR
+
+cp <- mcp(argos.sp[, 1],
+          percent = 95,
+          unin = 'km',
+          unout = 'km2')
+plot(cp)
+plot(argos.sp, add = TRUE)
+
+plot(cp[cp$id == '162071',])
+plot(argos.sp[argos$PTT == '162071',], add = TRUE, col = 'darkgrey')
+plot(reun, col = 'red', add = T) # BUG HERE !
+
+
+
+
+#### TO CONTINUE FROM HERE #####
+
+
+
 # ------------------------------------------------------------ #
 #### Rapid visual exploration of extrapolated trajectories ####
 # ---------------------------------------------------------- #

@@ -48,40 +48,41 @@ background-color: red;
 
 # Méthodologie  
  
-Duty cycle des balises ARGOS: 10/24
+Duty cycle des balises ARGOS: **10/24**  
 Le déploiement des balises ont eu lieu au cours de 2 périodes d'envol (2017 & 2018) sur des juvéniles issus de la colonie de pétrels de Barau du Grand Benare.  
   
 Les 6-7 avril 2017, 10 balises ARGOS (5g, avec panneau solaire) ont été installées sur des juvéniles prêts à l'envol (plumage complet). 8 individus ont été équipé à l'aide de tape **Tesa** et de glue **Loctite** et 2 individus, à l'aide d'un harnais en **Teflon**. Les oiseaux se sont envolés entre 2 & 13 jours (moy. 7 jours) après avoir été équipé.  
 En 2018, 9 individus ont été équipés entre le 4 & 5 avril, tous avec un harnais en **Teflon**. Ils ont quitté la colonie dans les 2 à 8 jours (moy. 5.5 jours) qui ont suivis.  
   
-Les balises ont été programmées pour commencer à enregistrer les localisations AVANT leur déploiement (**start** < **deploy**). Il est donc nécessaire de retirer les localisations enregistrées avant la date de déploiement pour chaque balise. Présence d'informations non exactes (type d'attache & date de déploiement pour un individu) lors de la comparaison entre l'annexe du papier de Henri W. et les metadonnées du Life.  
-Les données présentées ici, sont des données extrapolées pour obtenir une localisation par heure, à partir des données brutes d'ARGOS (extrapolation effectuée par P. Pinet).
-
+Les balises ont été programmées pour commencer à enregistrer les localisations AVANT leur déploiement (**start** < **deploy**). Il est donc nécessaire de retirer les localisations enregistrées avant la date de déploiement pour chaque balise.  
+  
 ```{r, echo = F}
-tabb <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ex_DATA/PTEBAR_JUV_Infos_bilan.rds")
+tabb <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_deploiement.txt",
+                h = T,
+                sep = '\t',
+                dec = '.')
 
-tabb1 <- as.data.frame(tabb[, c('Vessel', 'start', 'deploy', 'n_loc', 'attach', 'burrow', 'ring', 'weight', 'wing', 'remark')])[, -11]
 
-kable(tabb1, align = 'ccccccccc')
+kable(tabb, align = 'ccccccccc')
 ```
 
 # Résumé des données argos
 ```{r, echo = F, class.source = 'test'}
-tabb2 <- as.data.frame(tabb[, c('Vessel', 'max_date', 'min_lat', 'max_lat', 'min_lon', 'max_lon', 'max_speed', 'max_dist_km', 'date_loc', 'timing_for_max', 'dist_travel_km', 'duration_trip_day')])[, -13]
-
-tabb2$duration_trip_day <- as.numeric(tabb2$duration_trip_day)
-tabb2$timing_for_max <- as.numeric(tabb2$timing_for_max)
-tabb2$max_date <- date(tabb2$max_date)
-tabb2$date_loc <- date(tabb2$date_loc)
-
-
-kable(tabb2
-      , digits = 2
-      , col.names = c('Device', 'Date max', 'Lat min', 'Lat max', 'Lon min', 'Lon max', 'Speed max', 'Dist max', 'Date dist max', 'Nb jr pour max loc', 'Dist tot', 'Duree trajet')
-      # align = 'cccccccccccc'
-      # , table.attr = 'class=\"striped\"'
-      # , format = 'html'
-      )
+# tabb2 <- as.data.frame(tabb[, c('Vessel', 'max_date', 'min_lat', 'max_lat', 'min_lon', 'max_lon', 'max_speed', 'max_dist_km', 'date_loc', 'timing_for_max', 'dist_travel_km', 'duration_trip_day')])[, -13]
+# 
+# tabb2$duration_trip_day <- as.numeric(tabb2$duration_trip_day)
+# tabb2$timing_for_max <- as.numeric(tabb2$timing_for_max)
+# tabb2$max_date <- date(tabb2$max_date)
+# tabb2$date_loc <- date(tabb2$date_loc)
+# 
+# 
+# kable(tabb2
+#       , digits = 2
+#       , col.names = c('Device', 'Date max', 'Lat min', 'Lat max', 'Lon min', 'Lon max', 'Speed max', 'Dist max', 'Date dist max', 'Nb jr pour max loc', 'Dist tot', 'Duree trajet')
+#       # align = 'cccccccccccc'
+#       # , table.attr = 'class=\"striped\"'
+#       # , format = 'html'
+#       )
 ```
 # Visualisation des trajets  
   
