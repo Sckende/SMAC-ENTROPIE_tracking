@@ -13,7 +13,10 @@ library('lubridate')
 library('dplyr')
 library('adehabitatHR')
 
+# ------------------------------------------------- #
 #### Loading and treatment of data 1 - METADATA #### 
+# ----------------------------------------------- #
+
 infos_argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_deploiement.txt",
                         h = T,
                         sep = "\t")
@@ -23,8 +26,18 @@ infos_argos$deploy <- as.POSIXct(infos_argos$deploy,
                                  format = "%d/%m/%Y %H:%M") # Date format - This is the most important date here since the devices started before the deployment
 summary(infos_argos)
 
+infos_argos2 <- infos_argos[, -9]
+infos_argos2 <- infos_argos2[, c(2, 1, 3:8)]
 
+# --------------- #
+#### RMD file ####
+# ------------- #
+# saveRDS(infos_argos2,
+#         'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/infos_argos.rds')
+
+# ------------------------------------------------------------------ #
 #### Loading and treatment of data 2 - RAW cleaned localisations ####
+# ---------------------------------------------------------------- #
 argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.txt",
                     h = T,
                     sep = '\t',
@@ -55,6 +68,141 @@ arg_bil <- argos %>% group_by(PTT) %>%
             max_lon = max(Longitude),
             min_lon = min(Longitude))
 
+# ---------------------------------------------- #
+#### Extra information for each trajectories ####
+# -------------------------------------------- #
+arg_bil2 <- left_join(arg_bil,
+                      infos_argos2[, c(2, 3)],
+                      by = 'PTT')
+
+# ---- Tracking duration in days
+# From the deployment date to the last date of recording
+
+arg_bil2$duration_trip_day <- arg_bil2$max_date - date(arg_bil2$deploy)  
+
+# ---- Max distance from Reunion island and total distance traveled 
+# Conversion in sf Spatial Object
+projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+argos.sf <- st_as_sf(argos,
+                     coords = c('Longitude', 'Latitude'),
+                     crs = projcrs)
+class(argos.sf)
+
+argos_sf_list <- split(argos.sf, argos.sf$PTT)
+
+# argos_dist_mat <- lapply(argos_sf_list, st_distance) # Matrix distance for each device - *** WARNING *** Long process
+# st_distance() computes the distance between each points based on the great circle distances method (take the curvature of the earth into account)
+
+# saveRDS(argos_dist_mat, "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Distance_matrices.rds")
+
+
+argos_dist_mat <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Distance_matrices.rds") # import distance matrices for juvenile petrels
+matrix_data <- data.frame()
+
+for(i in 1:length(argos_dist_mat)){
+  id <- names(argos_dist_mat[i]) # name of the device
+  matr <- argos_dist_mat[[i]] # distance matrix for the device
+  
+  max_dist <- max(matr[1,]) # max of the first row of the matrix, i.e. distance between the first point (breeding colony at Reunion Island) and each following points
+  loc_max_dist <- which(matr[1,] == max_dist) # Location or point number where the maximal distance from the Reunion Island is obtained
+  
+  matr_diag_sec <- diag(matr[, -1]) # secondary diagonal of the matrix containing the distance between each consecutive points
+  dist_travel <- max(cumsum(matr_diag_sec)) # max of the cumulative sum for obtaining the total traveled distance
+  
+  matrix_data <- rbind(matrix_data, c(id, max_dist, loc_max_dist, dist_travel))
+}
+names(matrix_data) <- c('PTT', 'max_dist', 'loc_max_dist', 'dist_travel')
+matrix_data$max_dist_km <- as.numeric(matrix_data$max_dist)/1000 # conversion in km
+matrix_data$dist_travel_km <- as.numeric(matrix_data$dist_travel)/1000 # conversion in km
+View(matrix_data)  
+
+# ---- Timing to reach the maximal distance from the breeding colony
+
+for (i in 1:nrow(matrix_data)){
+  id <- matrix_data$PTT[i]
+  loc <- as.numeric(matrix_data$loc_max_dist[i])
+  
+  matrix_data$date_loc[i] <- as.character(argos.sf$Date[argos.sf$PTT == id][loc]) # date corresponding to the nth loc where the maximal distance is reached
+  matrix_data$date_deploy[i] <- unique(as.character(infos_argos2$deploy[infos_argos2$PTT == id])) # deployment date of the argos device
+}
+
+matrix_data$date_loc <- as.POSIXct(matrix_data$date_loc,
+                                   format = "%Y-%m-%d %H:%M:%S") # Date format
+
+matrix_data$date_deploy <- as.POSIXct(matrix_data$date_deploy,
+                                      format = "%Y-%m-%d %H:%M:%S") # Date format
+
+matrix_data$timing_for_max <- date(matrix_data$date_loc) - date(matrix_data$date_deploy)
+
+# ---- Combine the both summary df 
+matrix_data$PTT <- as.integer(matrix_data$PTT)
+arg_bil3 <- left_join(arg_bil2,
+                      matrix_data[, c(1, 5, 6, 9)],
+                      by = 'PTT')
+arg_bil3$dep_year <- year(arg_bil3$deploy)
+arg_bil3 <- arg_bil3[order(arg_bil3$deploy),]
+# -------------- #
+#### RMD file ####
+# -------------- #
+# saveRDS(arg_bil3,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Bilan_ARGOS_data.rds")
+
+# ------------------------------------------------------ #
+#### Production of Spatial Trackline object for maps ####
+# ---------------------------------------------------- #
+argos.sf.track <- argos.sf %>%
+  group_by(PTT) %>% 
+  summarize(do_union = FALSE) %>%
+  st_cast("LINESTRING") # Creation of SF LINESTRINGS
+
+argos.sf.track$PTT <- as.factor(argos.sf.track$PTT)
+mapview(argos.sf.track,
+        zcol = 'PTT',
+        burst = T,
+        legend = F)
+
+# ---------------- #
+#### RMD files ####
+# -------------- #
+
+# saveRDS(argos.sf,
+# "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_points_ARGOS.rds")
+
+# saveRDS(argos.sf.track,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_tracks_ARGOS.rds")
+
+# ----------------------------- #
+#### Minimum Complex Polygon ####
+# ---------------------------- #
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # ---- Addition of the area of the MCP (Minimum Complex Polygon) for each individuals
 
 # Spatial Dataframe conversion
@@ -82,7 +230,7 @@ cp <- mcp(argos.sp[, 1],
 plot(cp)
 plot(argos.sp, add = TRUE)
 
-plot(cp[cp$id == '162071',])
+plot(cp[cp$id == '162071',], add = T)
 plot(argos.sp[argos$PTT == '162071',], add = TRUE, col = 'darkgrey')
 plot(reun, col = 'red', add = T) # BUG HERE !
 
@@ -188,71 +336,4 @@ mapview(argos_sp,
           homebutton = F)
   # mapview(track_lines[track_lines$Vessel == '166568',]) # Back and forth from Reunion Island before to go toward Tanzania
   
-# ---------------------------------------------- #
-#### Extra information for each trajectories ####
-# -------------------------------------------- #
 
-# Tracking duration in hours & in days
-# From the deployment date to the last date of recording
-  
-  arg_bil2$duration_trip_day <- arg_bil2$max_date - arg_bil2$deploy  
-  
-# Max distance from Reunion island and total distance traveled 
-  argos_sp_list <- split(argos_sp, argos_sp$Vessel)
-  
-  # library(pbapply) # progress bar for apply functions
-  # argos_dist_mat <- pblapply(argos_sp_list, st_distance) # Matrix distance for each device - *** WARNING *** Long process
-  # saveRDS(argos_dist_mat, "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Distance_matrices.rds")
-  # st_distance() computes the distance between each points based on the great circle distances method (take the curvature of the earth into account)
-  
-  argos_dist_mat <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Distance_matrices.rds") # import distance matrices for juvenile petrels
-  matrix_data <- data.frame()
-  
-  for(i in 1:length(argos_dist_mat)){
-    id <- names(argos_dist_mat[i]) # name of the device
-    matr <- argos_dist_mat[[i]] # distance matrix for the device
-    
-    max_dist <- max(matr[1,]) # max of the first row of the matrix, i.e. distance between the first point (breeding colony at Reunion Island) and each following points
-    loc_max_dist <- which(matr[1,] == max_dist) # Location or point number where the maximal distance from the Reunion Island is obtained
-    
-    matr_diag_sec <- diag(matr[, -1]) # secondary diagonal of the matrix containing the distance between each consecutive points
-    dist_travel <- max(cumsum(matr_diag_sec)) # max of the cumulative sum for obtaining the total traveled distance
-    
-    matrix_data <- rbind(matrix_data, c(id, max_dist, loc_max_dist, dist_travel))
-  }
-names(matrix_data) <- c('Vessel', 'max_dist', 'loc_max_dist', 'dist_travel')
-matrix_data$max_dist_km <- as.numeric(matrix_data$max_dist)/1000 # conversion in km
-matrix_data$dist_travel_km <- as.numeric(matrix_data$dist_travel)/1000 # conversion in km
-View(matrix_data)  
-  
-# Timing to reach the maximal distance from the breeding colony
-
-for (i in 1:nrow(matrix_data)){
-  id <- matrix_data$Vessel[i]
-  loc <- as.numeric(matrix_data$loc_max_dist[i])
-  
-  matrix_data$date_loc[i] <- as.character(argos_sp$Date[argos_sp$Vessel == id][loc]) # date corresponding to the nth loc where the maximal distance is reached
-  matrix_data$date_deploy[i] <- unique(as.character(argos2.qual$deploy[argos2.qual$Vessel == id])) # deployment date of the argos device
-}
-
-matrix_data$date_loc <- as.POSIXct(matrix_data$date_loc,
-                         format = "%Y-%m-%d %H:%M:%S") # Date format
-
-matrix_data$date_deploy <- as.POSIXct(matrix_data$date_deploy,
-                           format = "%Y-%m-%d %H:%M:%S") # Date format
-
-matrix_data$timing_for_max <- matrix_data$date_loc - matrix_data$date_deploy
-
-# Combine the both summary df ... 
-arg_bil2$Vessel <- as.character(arg_bil2$Vessel)
-total <- left_join(arg_bil2, matrix_data, by = 'Vessel')
-
-# ... and addition of the spatial lines
-track_lines$Vessel <- as.character(track_lines$Vessel)
-
-# total_sp <- st_as_sf(total,
-#                      wkt = 'geometry')
-total_sp <- left_join(track_lines[, c('Vessel', 'geometry')], total, by = 'Vessel' )
-# Save the df
-# saveRDS(total_sp,
-# "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_bilan.rds")
