@@ -18,8 +18,8 @@ library('adehabitatHR')
 # ----------------------------------------------- #
 
 infos_argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_deploiement.txt",
-                        h = T,
-                        sep = "\t")
+                          h = T,
+                          sep = "\t")
 names(infos_argos)
 
 infos_argos$deploy <- as.POSIXct(infos_argos$deploy,
@@ -47,9 +47,9 @@ head(argos)
 names(argos)[1] <- 'PTT'
 # ---- Date class
 argos$Date <- as.POSIXct(argos$Date,
-                           format = "%Y-%m-%d %H:%M") # Date format
-argos$deploy <- as.POSIXct(argos$deploy,
                          format = "%Y-%m-%d %H:%M") # Date format
+argos$deploy <- as.POSIXct(argos$deploy,
+                           format = "%Y-%m-%d %H:%M") # Date format
 
 class(argos$Date)
 summary(argos$Date)
@@ -252,8 +252,8 @@ argos.raw <- do.call('rbind', argos.raw.list)
 
 projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 argos.raw.sp <- sf::st_as_sf(argos.raw,
-                         coords = c('Longitude', 'Latitude'),
-                         crs = projcrs)
+                             coords = c('Longitude', 'Latitude'),
+                             crs = projcrs)
 argos.raw.sp$Vessel <- as.factor(argos.raw.sp$Vessel)
 
 mapview(argos.raw.sp,
@@ -276,15 +276,15 @@ mapview(argos.raw.track,
 
 projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 argos_sp <- sf::st_as_sf(argos2.qual,
-                     coords = c('Longitude', 'Latitude'),
-                     crs = projcrs)
+                         coords = c('Longitude', 'Latitude'),
+                         crs = projcrs)
 
 # argos_sp$Vessel <- as.factor(argos_sp$Vessel)
 
 track_lines <- argos_sp %>%
-    group_by(Vessel) %>% 
-    summarize(do_union = FALSE) %>%
-    st_cast("LINESTRING") # Creation of SF LINESTRINGS
+  group_by(Vessel) %>% 
+  summarize(do_union = FALSE) %>%
+  st_cast("LINESTRING") # Creation of SF LINESTRINGS
 
 track_lines <- left_join(track_lines, arg_bil2, by = 'Vessel')
 
@@ -307,33 +307,33 @@ mapview(argos_sp,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_raw_map_points.rds")
 # + 
 
-  mapview(track_lines,
-          zcol = 'Vessel',
-          # homebutton = F,
-          popup = popupTable(track_lines,
-                             zcol = 'popup_info',
-                             feature.id = FALSE,
-                             row.numbers = FALSE,
-                             className = 'mapview-popup'),
-          burst = TRUE
-          )
+mapview(track_lines,
+        zcol = 'Vessel',
+        # homebutton = F,
+        popup = popupTable(track_lines,
+                           zcol = 'popup_info',
+                           feature.id = FALSE,
+                           row.numbers = FALSE,
+                           className = 'mapview-popup'),
+        burst = TRUE
+)
 # saveRDS(map_lines,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_raw_map_lines.rds")
 
 # ------------------------------------------------------- #
 #### Rapid visual exploration of trajectories on land ####
 # ----------------------------------------------------- #
-  run <- st_read("C:/Users/ccjuhasz/Desktop/SMAC/SPATIAL_data_RUN/Admin/REU_adm0.shp")
+run <- st_read("C:/Users/ccjuhasz/Desktop/SMAC/SPATIAL_data_RUN/Admin/REU_adm0.shp")
 
-  in_run <- st_intersection(argos_sp, run)
-  
-  # saveRDS(in_run,
-  #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_in_Run_points_data.rds")
-  
-  mapview(in_run,
-          zcol = 'Vessel',
-          burst = T,
-          homebutton = F)
-  # mapview(track_lines[track_lines$Vessel == '166568',]) # Back and forth from Reunion Island before to go toward Tanzania
-  
+in_run <- st_intersection(argos_sp, run)
+
+# saveRDS(in_run,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_in_Run_points_data.rds")
+
+mapview(in_run,
+        zcol = 'Vessel',
+        burst = T,
+        homebutton = F)
+# mapview(track_lines[track_lines$Vessel == '166568',]) # Back and forth from Reunion Island before to go toward Tanzania
+
 
