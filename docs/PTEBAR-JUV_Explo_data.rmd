@@ -48,61 +48,76 @@ background-color: red;
 
 # Méthodologie  
  
-Duty cycle des balises ARGOS: **10/24**  
-Le déploiement des balises ont eu lieu au cours de 2 périodes d'envol (2017 & 2018) sur des juvéniles issus de la colonie de pétrels de Barau du Grand Benare.  
+Afin de comprendre et décrire le comportement des pétrels de Barau dans leurs premiers stades de vie, 19 balises ARGOS (5g avec panneau solaire, duty cycle **10/24**) ont été déployées sur des juvéniles prêts à l'envol (plumage complet), à partir de la colonie de reproduction du Grand Benare en 2017 et 2018.  
+    
+Les 6-7 avril 2017, 10 balises ARGOS ont été déployées. Huit individus ont été équipés à l'aide de tape **Tesa** et de glue **Loctite** et 2 individus, à l'aide d'un harnais en **Teflon**. Les oiseaux se sont envolés entre 2 & 13 jours (moy. 7 jours) après avoir été équipés.  
   
-Les 6-7 avril 2017, 10 balises ARGOS (5g, avec panneau solaire) ont été installées sur des juvéniles prêts à l'envol (plumage complet). 8 individus ont été équipé à l'aide de tape **Tesa** et de glue **Loctite** et 2 individus, à l'aide d'un harnais en **Teflon**. Les oiseaux se sont envolés entre 2 & 13 jours (moy. 7 jours) après avoir été équipé.  
 En 2018, 9 individus ont été équipés entre le 4 & 5 avril, tous avec un harnais en **Teflon**. Ils ont quitté la colonie dans les 2 à 8 jours (moy. 5.5 jours) qui ont suivis.  
   
-Les balises ont été programmées pour commencer à enregistrer les localisations AVANT leur déploiement (**start** < **deploy**). Il est donc nécessaire de retirer les localisations enregistrées avant la date de déploiement pour chaque balise.  
   
 ```{r, echo = F}
-tabb <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Infos_deploiement.txt",
-                h = T,
-                sep = '\t',
-                dec = '.')
+tabb <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_infos_argos.rds")
 
 
-kable(tabb, align = 'ccccccccc')
+kable(tabb, align = 'cccccccc')
 ```
 
-# Résumé des données argos
+# Résumé des données argos  
+  
+Les balises ont été programmées pour commencer à enregistrer les localisations AVANT leur déploiement. Il est donc nécessaire de retirer les localisations enregistrées avant la date de déploiement pour chaque balise.  
+  
 ```{r, echo = F, class.source = 'test'}
-# tabb2 <- as.data.frame(tabb[, c('Vessel', 'max_date', 'min_lat', 'max_lat', 'min_lon', 'max_lon', 'max_speed', 'max_dist_km', 'date_loc', 'timing_for_max', 'dist_travel_km', 'duration_trip_day')])[, -13]
-# 
-# tabb2$duration_trip_day <- as.numeric(tabb2$duration_trip_day)
-# tabb2$timing_for_max <- as.numeric(tabb2$timing_for_max)
-# tabb2$max_date <- date(tabb2$max_date)
-# tabb2$date_loc <- date(tabb2$date_loc)
-# 
-# 
-# kable(tabb2
+tabb2 <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Bilan_ARGOS_data.rds")[, c(1, 2, 4:8, 10:14)]
+
+
+
+r <- apply(tabb2[, c(4:7, 9:10)],
+           2,
+           round,
+           digits = 2)
+
+
+tabb3 <- cbind(tabb2[, -c(4:7, 9:10)], r)
+
+tabb3 <- tabb3[, c(6, 1:3, 7:10, 12, 4, 11, 5)]
+
+
+
+kable(tabb3
 #       , digits = 2
-#       , col.names = c('Device', 'Date max', 'Lat min', 'Lat max', 'Lon min', 'Lon max', 'Speed max', 'Dist max', 'Date dist max', 'Nb jr pour max loc', 'Dist tot', 'Duree trajet')
-#       # align = 'cccccccccccc'
+      , col.names = c('depYear','PTT', 'loc', 'dMax', 'maxLat', 'minLat', 'maxLon', 'minLon', 'distTrav', 'tripDay', 'maxDist', 'maxDistDay')
+      , align = 'cccccccccccc'
 #       # , table.attr = 'class=\"striped\"'
 #       # , format = 'html'
-#       )
+      )
 ```
+  
+* **depYear** - Année de déploiement de la balise  
+* **PTT** - Identifiant de la balise ARGOS  
+* **loc** - Nombre de localisations enregistrées (sans les localisations de classe U et Z)  
+* **dMax** - Dernière date où une localisation a été enregistrée  
+* **max/minLat** - Latitude maximale et minimale  
+* **max/minLon** - Longitude maximale et minimale  
+* **distTrav** - Distance totale parcourue (km)  
+* **tripDay** - Nombre de jours pour parcourir la distance totale  
+* **maxDist** - Distance maximale atteinte par rapport à la colonie (km)  
+* **maxDistDay** - Nombre de jours pour atteindre le point le plus éloigné par rapport à la colonie  
+  
+  
 # Visualisation des trajets  
   
 ## Déploiement en 2017  
   
 ```{r, echo=F}
 
-# map_lines <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_raw_map_lines.rds")
-# 
-# map_lines
+map_lines <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_tracks_ARGOS.rds")
 
-tabb3 <- dplyr::left_join(tabb[, c('Vessel', 'min_date', 'geometry')], tabb2, by = 'Vessel')
-
-# Round numerical values
-tabb4 <- cbind(tabb3[, c(1:4, 11)], apply(as.data.frame(tabb3[,c( 'min_lat', 'max_lat', 'min_lon', 'max_lon', 'max_speed', 'max_dist_km', 'timing_for_max', 'dist_travel_km', 'duration_trip_day')])[, -10], 2, round, digit = 2))
-
+tabb3$PTT <- as.factor(tabb3$PTT)
+tabb4 <- dplyr::left_join(map_lines, tabb3, by = 'PTT')
 
 
 tabb4$popup_info <- paste0("<b>PTT</b> ",
-                                 tabb4$Vessel,
+                                 tabb4$PTT,
                                  "<br/>",
                                  "<b>Durée de l'enregistrement </b>",
                                  tabb4$duration_trip_day, " jours",
@@ -111,42 +126,36 @@ tabb4$popup_info <- paste0("<b>PTT</b> ",
                                  "<br/>",
                                  "<b>Range longitude [</b>", tabb4$min_lon, "; ", tabb4$max_lon, "<b>]</b>",
                            "</br>",
-                           "<b>Vitesse maximale atteinte </b>", tabb4$max_speed, " unité ?",
-                           "</br>",
                            "<b>Distance maximale à la colonie </b>", tabb4$max_dist_km, " atteint km en ", tabb4$timing_for_max, " jours",
                            "</br>",
                            "<b>Distance totale parcourue </b>", tabb4$dist_travel_km, " km")
 
-  mapview(tabb4[year(tabb4$min_date) == 2017,],
-          zcol = 'Vessel',
+  mapview(tabb4[tabb4$dep_year == 2017,],
+          zcol = 'PTT',
           burst = T,
           homebutton = F,
-          popup = popupTable(tabb4[year(tabb4$min_date) == 2017,],
+          popup = popupTable(tabb4[tabb4$dep_year == 2017,],
                              zcol = 'popup_info',
                              feature.id = FALSE,
                              row.numbers = FALSE,
-                             className = 'mapview-popup'))
+                             className = 'mapview-popup')
+          )
 ```  
   
 ## Déploiement en 2018  
   
 ```{r, echo=F}
-    mapview(tabb4[year(tabb4$min_date) == 2018,],
-          zcol = 'Vessel',
+    mapview(tabb4[tabb4$dep_year == 2018,],
+          zcol = 'PTT',
           burst = T,
           homebutton = F,
-          popup = popupTable(tabb4[year(tabb4$min_date) == 2018,],
+          popup = popupTable(tabb4[tabb4$dep_year == 2018,],
                              zcol = 'popup_info',
                              feature.id = FALSE,
                              row.numbers = FALSE,
                              className = 'mapview-popup'))
 
-# in_run <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_in_Run_points_data.rds")
-#   
-#   mapview(in_run,
-#           zcol = 'Vessel',
-#           burst = T,
-#           homebutton = F)
+
 
 ```
   
