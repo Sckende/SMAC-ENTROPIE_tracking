@@ -172,9 +172,9 @@ mapview(argos.sf.track,
 # saveRDS(argos.sf.track,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_tracks_ARGOS.rds")
 
-# ----------------------------------------------- #
-#### Minimum Convex Polygon & home range size ####
-# --------------------------------------------- #
+# ----------------------------- #
+#### Minimum Convex Polygon ####
+# --------------------------- #
 
 # ---- Computation of the area of the MCP (Minimum Complex Polygon) for each individuals
 
@@ -185,19 +185,11 @@ argos.sp <- SpatialPointsDataFrame(coords = coords,
                                    data = argos)
 class(argos.sp)
 
-# Spatial Point creation for localisatiopn of the colony
-reun <- data.frame(Longitude = 55.42, Latitude = -21.12)
-reun <- SpatialPoints(reun,
-                      proj4string = CRS(projcrs))
-class(reun)
-
 # Computation and plot of the Minimum Convex Polygon with adehabitatHR
 PTT <- unique(argos$PTT)
 
 cp <- mcp(argos.sp[, 1],
-          percent = 100,
-          unin = 'km',
-          unout = 'km2')
+          percent = 100)
 cp
 mapview(cp,
         zcol = 'id',
@@ -212,11 +204,46 @@ mapview(cp[cp$id == '166572',], legend = F) + mapview(argos.sf[argos.sf$PTT == '
 mapview(list(cp[cp$id == '166572',], argos.sf[argos.sf$PTT == '166572',]), col.regions = viridis(length(PTT))[6],
         layer.name = c('Minimim Convex Polygon', 'Relocations'))
 
+# ---------------------- #
+#### Home Range size ####
+# -------------------- #
 
+# Need to convert the CRS : latlong to UTM to obtain a good estimation of area
+
+projUTM <- CRS('+init=epsg:4326')
 area <- mcp.area(argos.sp[, 1])
 plot(argos.sp, add = TRUE)
 
-#### TO CONTINUE FROM HERE #####
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
