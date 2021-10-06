@@ -190,7 +190,7 @@ mapview(argos.sf.track,
 
 # Spatial Points Data frame creation to use in mcp function
 coords <- SpatialPoints(argos[, c('Longitude', 'Latitude')],
-                        proj4string = CRS(projcrs))
+                        proj4string = CRS(projLatLon))
 coords.UTM <- spTransform(coords,
                           CRS(projUTM))
 argos.sp <- SpatialPointsDataFrame(coords = coords,
@@ -200,29 +200,39 @@ argos.sp.UTM <- SpatialPointsDataFrame(coords = coords.UTM,
 class(argos.sp)
 
 # Computation and plot of the Minimum Convex Polygon with adehabitatHR
+# *** WARNING **** Have to use UTM coordinates to have the good units
 PTT <- unique(argos$PTT)
-
-
-cp <- mcp(argos.sp[, 1],
-             percent = 100)
-cp
 
 cpUTM <- mcp(argos.sp.UTM[, 1],
           percent = 100,
           unin = 'm',
           unout = 'km2')
 cpUTM
-mapview(cp,
+mapview(cpUTM,
         zcol = 'id',
         burst = T)
-# saveRDS(cp,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Minimum_convex_polygons.rds")
+cpUTM95 <- mcp(argos.sp.UTM[, 1],
+             percent = 95,
+             unin = 'm',
+             unout = 'km2')
+
+cpUTM80 <- mcp(argos.sp.UTM[, 1],
+             percent = 80,
+             unin = 'm',
+             unout = 'km2')
+
+# saveRDS(cpUTM,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Minimum_convex_polygons100.rds")
+# saveRDS(cpUTM95,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Minimum_convex_polygons95.rds")
+# saveRDS(cpUTM80,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Minimum_convex_polygons80.rds")
 
 # Combine polygon and points for individual plot
 
-mapview(cp[cp$id == '166572',], legend = F) + mapview(argos.sf[argos.sf$PTT == '166572',], legend = F)
+mapview(cpUTM[cpUTM$id == '166572',], legend = F) + mapview(argos.sf[argos.sf$PTT == '166572',], legend = F)
 
-mapview(list(cp[cp$id == '166572',], argos.sf[argos.sf$PTT == '166572',]), col.regions = viridis(length(PTT))[6],
+mapview(list(cpUTM[cpUTM$id == '166572',], argos.sf[argos.sf$PTT == '166572',]), col.regions = viridis(length(PTT))[6],
         layer.name = c('Minimim Convex Polygon', 'Relocations'))
 
 # ---------------------- #
@@ -230,12 +240,6 @@ mapview(list(cp[cp$id == '166572',], argos.sf[argos.sf$PTT == '166572',]), col.r
 # -------------------- #
 
 # Need to convert the CRS : latlong to UTM to obtain a good estimation of area
-
-
-
-
-area <- mcp.area(argos.sp[, 1])
-plot(argos.sp, add = TRUE)
 
 
 
