@@ -41,22 +41,27 @@ library(adehabitatHR)
 ```{r, echo = F}
 argos.sf <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_points_ARGOS.rds")
 
-cpp <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Minimum_convex_polygons.rds")
+cpp100 <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Minimum_convex_polygons100.rds")
+cpp95 <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Minimum_convex_polygons95.rds")
+cpp80 <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Minimum_convex_polygons80.rds")
 
-PTT <- cpp$id
+PTT <- cpp100$id
 colors <- viridis(length(PTT))
 
 argos.sf.list <- split(argos.sf, argos.sf$PTT)
 
 x.plot <- lapply(argos.sf.list, function(x){
   
-  mapview(list(x, cpp[cpp$id == unique(x$PTT),]),
+  mapview(list(x,
+               cpp100[cpp100$id == unique(x$PTT),],
+               cpp95[cpp95$id == unique(x$PTT),],
+               cpp80[cpp80$id == unique(x$PTT),]),
           col.regions = colors[which(PTT == unique(x$PTT))],
-          layer.name = c('Relocations', 'Minimum Convex Polygon 100'))
+          layer.name = c('Relocations', 'MCP 100', 'MCP 95', 'MCP 80'))
 })
 
 
-mapview(cpp,
+mapview(cpp100,
         zcol = 'id',
         burst = T,
         legend = F)
