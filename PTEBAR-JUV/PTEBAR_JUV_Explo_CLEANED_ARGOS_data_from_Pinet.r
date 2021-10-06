@@ -83,11 +83,21 @@ arg_bil2$duration_trip_day <- arg_bil2$max_date - date(arg_bil2$deploy)
 
 # ---- Max distance from Reunion island and total distance traveled 
 # Conversion in sf Spatial Object
-projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+projLatLon <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+# UTM 43S corresponding to the center of the Indian ocean
+# UTM 43 => 32743 
+projUTM <- '+init=epsg:32743'
+
+# Non projected spatial object
 argos.sf <- st_as_sf(argos,
                      coords = c('Longitude', 'Latitude'),
-                     crs = projcrs)
+                     crs = projLatLon)
 class(argos.sf)
+
+# Projected spatial object
+argos.sf.UTM <- st_transform(argos.sf,
+                             crs = 32743)
+
 
 argos_sf_list <- split(argos.sf, argos.sf$PTT)
 
@@ -181,16 +191,27 @@ mapview(argos.sf.track,
 # Spatial Points Data frame creation to use in mcp function
 coords <- SpatialPoints(argos[, c('Longitude', 'Latitude')],
                         proj4string = CRS(projcrs))
+coords.UTM <- spTransform(coords,
+                          CRS(projUTM))
 argos.sp <- SpatialPointsDataFrame(coords = coords,
+                                   data = argos)
+argos.sp.UTM <- SpatialPointsDataFrame(coords = coords.UTM,
                                    data = argos)
 class(argos.sp)
 
 # Computation and plot of the Minimum Convex Polygon with adehabitatHR
 PTT <- unique(argos$PTT)
 
+
 cp <- mcp(argos.sp[, 1],
-          percent = 100)
+             percent = 100)
 cp
+
+cpUTM <- mcp(argos.sp.UTM[, 1],
+          percent = 100,
+          unin = 'm',
+          unout = 'km2')
+cpUTM
 mapview(cp,
         zcol = 'id',
         burst = T)
@@ -210,7 +231,9 @@ mapview(list(cp[cp$id == '166572',], argos.sf[argos.sf$PTT == '166572',]), col.r
 
 # Need to convert the CRS : latlong to UTM to obtain a good estimation of area
 
-projUTM <- CRS('+init=epsg:4326')
+
+
+
 area <- mcp.area(argos.sp[, 1])
 plot(argos.sp, add = TRUE)
 
