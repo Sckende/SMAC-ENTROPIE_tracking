@@ -1,0 +1,162 @@
+---
+title: "PTEBAR-JUV - First analysis"
+author: "CCJ"
+date: "06/10/2021"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+---
+
+```{r, include = F}
+# Output figure in HTML5
+if (knitr::is_html_output()) knitr::knit_hooks$set(
+  plot = function(x, options) {
+    cap  <- options$fig.cap  # figure caption
+    tags <- htmltools::tags
+    as.character(tags$figure(
+      tags$img(src = x, alt = cap),
+      tags$figcaption(cap)
+    ))
+  }
+)
+
+# packages
+require(knitr)
+require(mapview)
+require(leafpop)
+require(tidyverse)
+require(dplyr)
+require(sf)
+require(sp)
+require(viridis)
+require(lubridate)
+require(htmltools)
+library(adehabitatHR)
+```
+  
+# Représentation globale  
+  
+```{r, echo = F}
+argos.sf <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_points_ARGOS.rds")
+
+cpp <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Minimum_convex_polygons.rds")
+
+PTT <- cpp$id
+colors <- viridis(length(PTT))
+
+argos.sf.list <- split(argos.sf, argos.sf$PTT)
+
+x.plot <- lapply(argos.sf.list, function(x){
+  
+  mapview(list(x, cpp[cpp$id == unique(x$PTT),]),
+          col.regions = colors[which(PTT == unique(x$PTT))],
+          layer.name = c('Relocations', 'Minimum Convex Polygon 100'))
+})
+
+
+mapview(cpp,
+        zcol = 'id',
+        burst = T,
+        legend = F)
+```
+  
+# Déploiement 2017  
+  
+## PTT 166566  
+  
+  
+```{r, echo=F}   
+x.plot[[9]]
+```
+  
+## PTT 166568  
+  
+```{r, echo=F}
+x.plot[[10]]
+```
+  
+## PTT 166569  
+  
+```{r, echo=F}
+x.plot[[11]]
+```
+  
+## PTT 166570  
+  
+```{r, echo=F}
+x.plot[[12]]
+```
+  
+## PTT 166571  
+  
+```{r, echo=F}
+x.plot[[13]]
+```
+  
+## PTT 166572  
+  
+```{r, echo=F}
+x.plot[[14]]
+```
+  
+## PTT 166573  
+  
+```{r, echo=F}
+x.plot[[15]]
+    
+```
+  
+  
+# Déploiement 2018 
+  
+## PTT 162070  
+  
+```{r, echo = F}  
+x.plot[[1]]
+```
+  
+## PTT 162071  
+  
+```{r, echo=F}
+x.plot[[2]]
+```
+  
+## PTT 162072  
+  
+```{r, echo=F}
+x.plot[[3]]
+```
+  
+## PTT 162073  
+  
+```{r, echo=F}
+x.plot[[4]]
+```
+  
+## PTT 166561  
+  
+```{r, echo=F}
+x.plot[[5]]
+```
+  
+## PTT 166563  
+  
+```{r, echo=F}
+x.plot[[6]]
+```
+  
+## PTT 166564  
+  
+```{r, echo=F}
+x.plot[[7]]
+```
+  
+## PTT 166565  
+  
+```{r, echo=F}
+x.plot[[8]]
+```
+ 
+  
