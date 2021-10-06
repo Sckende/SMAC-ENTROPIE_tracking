@@ -12,6 +12,7 @@ library('sp')
 library('lubridate')
 library('dplyr')
 library('adehabitatHR')
+library('viridis')
 
 # ------------------------------------------------- #
 #### Loading and treatment of data 1 - METADATA #### 
@@ -171,71 +172,49 @@ mapview(argos.sf.track,
 # saveRDS(argos.sf.track,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_tracks_ARGOS.rds")
 
-# ----------------------------- #
-#### Minimum Complex Polygon ####
-# ---------------------------- #
+# ----------------------------------------------- #
+#### Minimum Convex Polygon & home range size ####
+# --------------------------------------------- #
 
+# ---- Computation of the area of the MCP (Minimum Complex Polygon) for each individuals
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ---- Addition of the area of the MCP (Minimum Complex Polygon) for each individuals
-
-# Spatial Dataframe conversion
-reun <- data.frame(Longitude = 55.42, Latitude = -21.12)
-reun <- SpatialPoints(reun)
-projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
-
-argos.sf <- st_as_sf(argos,
-                     coords = c('Longitude', 'Latitude'),
-                     crs = projcrs) # step 1
-class(argos.sf)
-
-
-coords <- SpatialPoints(argos[, c('Longitude', 'Latitude')])
-argos.sp <- SpatialPointsDataFrame(coords, argos)
-
+# Spatial Points Data frame creation to use in mcp function
+coords <- SpatialPoints(argos[, c('Longitude', 'Latitude')],
+                        proj4string = CRS(projcrs))
+argos.sp <- SpatialPointsDataFrame(coords = coords,
+                                   data = argos)
 class(argos.sp)
 
-# Computation of the Minimum Convex Polygon with adehabitatHR
+# Spatial Point creation for localisatiopn of the colony
+reun <- data.frame(Longitude = 55.42, Latitude = -21.12)
+reun <- SpatialPoints(reun,
+                      proj4string = CRS(projcrs))
+class(reun)
+
+# Computation and plot of the Minimum Convex Polygon with adehabitatHR
+PTT <- unique(argos$PTT)
 
 cp <- mcp(argos.sp[, 1],
-          percent = 95,
+          percent = 100,
           unin = 'km',
           unout = 'km2')
-plot(cp)
+cp
+mapview(cp,
+        zcol = 'id',
+        burst = T)
+# saveRDS(cp,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Minimum_convex_polygons.rds")
+
+# Combine polygon and points for individual plot
+
+mapview(cp[cp$id == '166572',], legend = F) + mapview(argos.sf[argos.sf$PTT == '166572',], legend = F)
+
+mapview(list(cp[cp$id == '166572',], argos.sf[argos.sf$PTT == '166572',]), col.regions = viridis(length(PTT))[6],
+        layer.name = c('Minimim Convex Polygon', 'Relocations'))
+
+
+area <- mcp.area(argos.sp[, 1])
 plot(argos.sp, add = TRUE)
-
-plot(cp[cp$id == '162071',], add = T)
-plot(argos.sp[argos$PTT == '162071',], add = TRUE, col = 'darkgrey')
-plot(reun, col = 'red', add = T) # BUG HERE !
-
-
-
 
 #### TO CONTINUE FROM HERE #####
 
