@@ -50,9 +50,9 @@ background-color: red;
  
 Afin de comprendre et décrire le comportement des pétrels de Barau dans leurs premiers stades de vie, 19 balises ARGOS (5g avec panneau solaire, duty cycle **10/24**) ont été déployées sur des juvéniles prêts à l'envol (plumage complet), à partir de la colonie de reproduction du Grand Benare en 2017 et 2018.  
     
-Les 6-7 avril 2017, 10 balises ARGOS ont été déployées. Huit individus ont été équipés à l'aide de tape **Tesa** et de glue **Loctite** et 2 individus, à l'aide d'un harnais en **Teflon**. Les oiseaux se sont envolés entre 2 & 13 jours (moy. 7 jours) après avoir été équipés.  
+Les 6-7 avril 2017, 10 balises ARGOS ont été déployées. Huit individus ont été équipés à l'aide de tape **Tesa** et de glue **Loctite** et 2 individus, à l'aide d'un harnais en **Teflon**. Huit oiseaux se sont envolés entre 2 & 13 jours (moy. 7 jours) après avoir été équipés. Deux n'ont jamais émis de signaux suggérant qu'ils sont morts sur la colonie (PTT 166567 & PTT xxxxxx). 
   
-En 2018, 9 individus ont été équipés entre le 4 & 5 avril, tous avec un harnais en **Teflon**. Ils ont quitté la colonie dans les 2 à 8 jours (moy. 5.5 jours) qui ont suivis.  
+En 2018, 9 individus ont été équipés entre le 4 & 5 avril, tous avec un harnais en **Teflon**. Tous ont quitté la colonie dans les 2 à 8 jours (moy. 5.5 jours) qui ont suivis.  
   
   
 ```{r, echo = F}
@@ -159,7 +159,11 @@ tabb4$popup_info <- paste0("<b>PTT</b> ",
 
 ```
   
-## Points & trajet par individu  
+# Points & trajet par individu  
+  
+Les successions de couleurs représentent un groupe de points enregistré avec un délai minimum de 10h entre le dernier point du groupe G et le premier point du groupe G+1.  
+ 
+## Déploiement 2017  
   
 ```{r, echo=F}
 
@@ -177,24 +181,104 @@ argos.track <- do.call('rbind', argos) %>% group_by(Vessel) %>%  summarize(do_un
         legend = F,
         layer.name = unique(as.character(x$Vessel))) + mapview(argos.track[argos.track$Vessel == unique(as.character(x$Vessel)),],
                                                                color = 'darkgrey',
-                                                               layer.name = 'Track')
-    
+                                                               layer.name = 'Track'
+                                                               )
   })
-
-  
-x.plot[[1]]
-x.plot[[2]]
-x.plot[[3]]
-x.plot[[4]]
-x.plot[[5]]
-x.plot[[6]]
-x.plot[[7]]
-x.plot[[8]]
-x.plot[[9]]
-x.plot[[10]]
-x.plot[[11]]
-x.plot[[12]]
-x.plot[[13]]
-x.plot[[14]]
-x.plot[[15]]
 ```
+  
+### PTT 166566  
+  
+  
+```{r, echo=F}   
+x.plot[[9]]
+```
+  
+### PTT 166568  
+  
+```{r, echo=F}
+x.plot[[10]]
+```
+  
+### PTT 166569  
+  
+```{r, echo=F}
+x.plot[[11]]
+```
+  
+### PTT 166570  
+  
+```{r, echo=F}
+x.plot[[12]]
+```
+  
+### PTT 166571  
+  
+```{r, echo=F}
+x.plot[[13]]
+```
+  
+### PTT 166572  
+  
+```{r, echo=F}
+x.plot[[14]]
+```
+  
+### PTT 166573  
+  
+```{r, echo=F}
+x.plot[[15]]
+    
+```
+  
+  
+## Déploiement 2018 
+  
+### PTT 162070  
+  
+```{r, echo = F}  
+x.plot[[1]]
+```
+  
+### PTT 162071  
+  
+```{r, echo=F}
+x.plot[[2]]
+```
+  
+### PTT 162072  
+  
+```{r, echo=F}
+x.plot[[3]]
+```
+  
+### PTT 162073  
+  
+```{r, echo=F}
+x.plot[[4]]
+```
+  
+### PTT 166561  
+  
+```{r, echo=F}
+x.plot[[5]]
+```
+  
+### PTT 166563  
+  
+```{r, echo=F}
+x.plot[[6]]
+```
+  
+### PTT 166564  
+  
+```{r, echo=F}
+x.plot[[7]]
+```
+  
+### PTT 166565  
+  
+```{r, echo=F}
+x.plot[[8]]
+```
+ 
+  
