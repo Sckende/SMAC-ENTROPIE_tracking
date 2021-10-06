@@ -238,13 +238,15 @@ mapview(list(cpUTM[cpUTM$id == '166572',], argos.sf[argos.sf$PTT == '166572',]),
 # ---------------------- #
 #### Home Range size ####
 # -------------------- #
+kud <- kernelUD(argos.sp.UTM[, 1],
+                h = 'href')
 
-# Need to convert the CRS : latlong to UTM to obtain a good estimation of area
+kud1 <- kernelUD(argos.sp.UTM[, 1],
+                h = 'LSCV')
 
-
-
-
-
+kud
+image(kud)
+image(kud1)
 
 
 
