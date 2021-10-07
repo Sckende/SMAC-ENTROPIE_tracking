@@ -184,6 +184,10 @@ argos.track <- do.call('rbind', argos) %>% group_by(Vessel) %>%  summarize(do_un
                                                                layer.name = 'Track'
                                                                )
   })
+  
+  x.del <- lapply(argos, function(x){
+    t <- table(round(x$delay)*-1)
+  })
 ```
   
 ### PTT 166566  
@@ -191,42 +195,113 @@ argos.track <- do.call('rbind', argos) %>% group_by(Vessel) %>%  summarize(do_un
   
 ```{r, echo=F}   
 x.plot[[9]]
+
+j <- barplot(x.del[[9]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[9],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[9]]),
+     tick = F,
+     cex.axis = 0.7)
 ```
   
 ### PTT 166568  
   
 ```{r, echo=F}
 x.plot[[10]]
+j <- barplot(x.del[[10]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[10],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[10]]),
+     tick = F,
+     cex.axis = 0.7)
 ```
   
 ### PTT 166569  
   
 ```{r, echo=F}
 x.plot[[11]]
+j <- barplot(x.del[[11]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[11],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[11]]),
+     tick = F,
+     cex.axis = 0.7)
 ```
   
 ### PTT 166570  
   
 ```{r, echo=F}
 x.plot[[12]]
+j <- barplot(x.del[[12]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[12],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[12]]),
+     tick = F,
+     cex.axis = 0.7)
 ```
   
 ### PTT 166571  
   
 ```{r, echo=F}
 x.plot[[13]]
+j <- barplot(x.del[[13]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[13],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[13]]),
+     tick = F,
+     cex.axis = 0.7)
 ```
   
 ### PTT 166572  
   
 ```{r, echo=F}
 x.plot[[14]]
+j <- barplot(x.del[[14]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[14],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[14]]),
+     tick = F,
+     cex.axis = 0.7)
 ```
   
 ### PTT 166573  
   
 ```{r, echo=F}
 x.plot[[15]]
+j <- barplot(x.del[[15]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[15],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[15]]),
+     tick = F,
+     cex.axis = 0.7)
     
 ```
   
@@ -237,48 +312,129 @@ x.plot[[15]]
   
 ```{r, echo = F}  
 x.plot[[1]]
+j <- barplot(x.del[[1]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[1],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[1]]),
+     tick = F,
+     cex.axis = 0.7)
 ```
   
 ### PTT 162071  
   
 ```{r, echo=F}
 x.plot[[2]]
+j <- barplot(x.del[[2]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[2],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[2]]),
+     tick = F,
+     cex.axis = 0.7)
 ```
   
 ### PTT 162072  
   
 ```{r, echo=F}
 x.plot[[3]]
+j <- barplot(x.del[[3]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[3],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[3]]),
+     tick = F,
+     cex.axis = 0.7)
 ```
   
 ### PTT 162073  
   
 ```{r, echo=F}
 x.plot[[4]]
+j <- barplot(x.del[[4]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[4],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[4]]),
+     tick = F,
+     cex.axis = 0.7)
 ```
   
 ### PTT 166561  
   
 ```{r, echo=F}
 x.plot[[5]]
+j <- barplot(x.del[[5]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[5],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[5]]),
+     tick = F,
+     cex.axis = 0.7)
 ```
   
 ### PTT 166563  
   
 ```{r, echo=F}
 x.plot[[6]]
+j <- barplot(x.del[[6]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[6],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[6]]),
+     tick = F,
+     cex.axis = 0.7)
 ```
   
 ### PTT 166564  
   
 ```{r, echo=F}
 x.plot[[7]]
+j <- barplot(x.del[[7]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[7],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[7]]),
+     tick = F,
+     cex.axis = 0.7)
 ```
   
 ### PTT 166565  
   
 ```{r, echo=F}
 x.plot[[8]]
+j <- barplot(x.del[[8]],
+        xlab = 'delay (h)',
+        ylab = 'Occurence',
+        main = names(x.del)[8],
+        xaxt = 'n')
+axis(1,
+     at = j,
+     labels = names(x.del[[8]]),
+     tick = F,
+     cex.axis = 0.65,
+     las = 2)
 ```
  
   
