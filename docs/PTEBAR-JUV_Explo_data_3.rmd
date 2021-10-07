@@ -11,7 +11,7 @@ output:
 <style>
 
 .main-container{
-min-width:900px;
+max-width:80vw !important;
 }
 </style>
 
