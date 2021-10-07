@@ -235,18 +235,133 @@ mapview(cpUTM[cpUTM$id == '166572',], legend = F) + mapview(argos.sf[argos.sf$PT
 mapview(list(cpUTM[cpUTM$id == '166572',], argos.sf[argos.sf$PTT == '166572',]), col.regions = viridis(length(PTT))[6],
         layer.name = c('Minimim Convex Polygon', 'Relocations'))
 
-# ---------------------- #
-#### Home Range size ####
-# -------------------- #
-kud <- kernelUD(argos.sp.UTM[, 1],
-                h = 'href')
+# ------------------------------------------ #
+#### Home Range size for all individuals ####
+# ---------------------------------------- #
+kud <- kernelUD(argos.sp.UTM,
+                h = 'href', 
+                # h = 0.1,
+                grid = 500)
+kud@h
+KUDvol <- getvolumeUD(kud)
+ver90 <- getverticeshr(KUDvol, 90)
+ver80 <- getverticeshr(KUDvol, 80)
+ver70 <- getverticeshr(KUDvol, 70)
+ver60 <- getverticeshr(KUDvol, 60)
+ver50 <- getverticeshr(KUDvol, 50)
 
-kud1 <- kernelUD(argos.sp.UTM[, 1],
-                h = 'LSCV')
+verHREF <- list()
+v <- c(90, 80, 70, 60, 50)
 
-kud
-image(kud)
-image(kud1)
+for(i in 1:length(v)){
+  verHREF[[i]] <- getverticeshr(KUDvol, v[i])
+}
+
+# saveRDS(verHREF,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_kernelHREF.rds")
+
+# ----- #
+kudLSCV <- kernelUD(argos.sp.UTM,
+                    h = 'LSCV',
+                    grid = 500)
+kudLSCV@h
+kudLSCVvol <- getvolumeUD(kudLSCV)
+ver90LSCV <- getverticeshr(kudLSCVvol, 90)
+ver80LSCV <- getverticeshr(kudLSCVvol, 80)
+ver70LSCV <- getverticeshr(kudLSCVvol, 70)
+
+verLSCV <- list()
+v <- c(90, 80, 70, 60, 50)
+
+for(i in 1:length(v)){
+  verLSCV[[i]] <- getverticeshr(kudLSCVvol, v[i])
+}
+
+# kud1 <- kernelUD(argos.sp.UTM,
+#                 h = 1,
+#                 grid = 500)
+# KUDvol1 <- getvolumeUD(kud1)
+# ver90.1 <- getverticeshr(KUDvol1, 90)
+# ver80.1 <- getverticeshr(KUDvol1, 80)
+# ver70.1 <- getverticeshr(KUDvol1, 70)
+# 
+# kud2 <- kernelUD(argos.sp.UTM,
+#                 h = 2,
+#                 grid = 500)
+# KUDvol2 <- getvolumeUD(kud2)
+# ver90.2 <- getverticeshr(KUDvol2, 90)
+# ver80.2 <- getverticeshr(KUDvol2, 80)
+# ver70.2 <- getverticeshr(KUDvol2, 70)
+
+
+mapview(list(ver90, ver80, ver70, ver60, ver50),
+        col.regions = viridis(n = 5, alpha = 0.5)) +
+  mapview(argos.sp,
+          cex = 1,
+          col.regions = 'black')
+
+
+mapview(list(ver90LSCV, ver80LSCV, ver70LSCV),
+        col.regions = c('red', 'orange', 'green'))
+
+
+# ------------------------------------- #
+#### Home Range size per individual ####
+# ----------------------------------- #
+unique(argos.sp.UTM$PTT)
+
+shortPTT <- c(162070,162072,162073,166561,166563,166564,166565,166568,166569,166572) # deletion of PTTs 162071, 166570, 166571, 166573, 166566
+
+THElist <- list()
+
+for(i in 1:length(shortPTT)){
+  x <- argos.sp.UTM[argos.sp.UTM$PTT == shortPTT[i],]
+  kud <- kernelUD(x,
+                  h = 'href',
+                  grid = 500)
+  
+  THElist[[i]] <- list()
+  names(THElist)[i] <- shortPTT[i]
+  v <- c(90, 80, 70, 60, 50)
+  
+  for(j in 1:length(v)){
+    THElist[[i]][[j]] <- getverticeshr(kud, v[j])
+  }
+}
+
+# saveRDS(THElist,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_LIST_ind_kernelHREF.rds")
+
+
+
+mapview(THElist[[1]],
+        col.regions = viridis(n = length(THElist[[1]]), alpha = 0.5)) +
+  mapview(argos.sp[argos.sp$PTT == names(THElist)[1],],
+          cex = 1,
+          col.regions = 'black')
+
+
+mapview(THElist[[2]],
+        col.regions = viridis(n = length(THElist[[2]]), alpha = 0.5)) +
+  mapview(argos.sp[argos.sp$PTT == names(THElist)[2],],
+          cex = 1,
+          col.regions = 'black')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
