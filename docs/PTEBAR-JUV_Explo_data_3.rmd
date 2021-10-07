@@ -1,0 +1,225 @@
+---
+title: "PTEBAR-JUV - Second analysis"
+author: "CCJ"
+date: "07/10/2021"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+---
+<style>
+
+.main-container{
+min-width:900px;
+}
+</style>
+
+```{r, include = F}
+
+# Output figure in HTML5
+if (knitr::is_html_output()) knitr::knit_hooks$set(
+  plot = function(x, options) {
+    cap  <- options$fig.cap  # figure caption
+    tags <- htmltools::tags
+    as.character(tags$figure(
+      tags$img(src = x, alt = cap),
+      tags$figcaption(cap)
+    ))
+  }
+)
+
+# packages
+require(knitr)
+require(mapview)
+require(leafpop)
+require(tidyverse)
+require(dplyr)
+require(sf)
+require(sp)
+require(viridis)
+require(lubridate)
+require(htmltools)
+library(adehabitatHR)
+```
+  
+# Représentation globale  
+  
+Smooth parameter estimation with the 'reference bandwith' method  
+  
+```{r, echo = F, warning=F}
+ker <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_kernelHREF.rds")
+
+argos.sp <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_points_ARGOS.rds')
+
+kernAD <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_AD_kernel90.rds')
+
+mapview(ker,
+        col.regions = viridis(n = length(ker)),
+        layer.name = c('HR90', 'HR80', 'HR70', 'HR60', 'HR50'),
+        legend = F) +
+  mapview(argos.sp,
+          cex = 1,
+          col.regions = 'black',
+          layer.name = 'Relocations',
+          legend = F) + 
+  mapview(kernAD,
+          col.regions = 'darkred',
+          layer.name = 'adulteAD90',
+          legend = F)
+```
+  
+# Représentation individuelle  
+  
+```{r, echo = F, warning = F}
+THElist <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_LIST_ind_kernelHREF.rds")
+```
+  
+## Déploiement en 2017  
+  
+### PTT 166568  
+  
+```{r, echo = F, warning = F}
+
+mapview(THElist[[8]],
+        col.regions = viridis(n = length(THElist[[8]]), alpha = 0.5),
+        layer.name = c('HR90', 'HR80', 'HR70', 'HR60', 'HR50'),
+        legend = F) +
+  mapview(argos.sp[argos.sp$PTT == names(THElist)[8],],
+          cex = 1,
+          col.regions = 'black',
+          layer.name = 'Relocations',
+          legend = F)
+```
+  
+### PTT 166569  
+  
+```{r, echo = F, warning = F}
+mapview(THElist[[9]],
+        col.regions = viridis(n = length(THElist[[9]]), alpha = 0.5),
+        layer.name = c('HR90', 'HR80', 'HR70', 'HR60', 'HR50'),
+        legend = F) +
+  mapview(argos.sp[argos.sp$PTT == names(THElist)[9],],
+          cex = 1,
+          col.regions = 'black',
+          layer.name = 'Relocations',
+          legend = F)
+```
+  
+### PTT 166572 
+  
+```{r, echo = F, warning = F}
+
+mapview(THElist[[10]],
+        col.regions = viridis(n = length(THElist[[10]]), alpha = 0.5),
+        layer.name = c('HR90', 'HR80', 'HR70', 'HR60', 'HR50'),
+        legend = F) +
+  mapview(argos.sp[argos.sp$PTT == names(THElist)[10],],
+          cex = 1,
+          col.regions = 'black',
+          layer.name = 'Relocations',
+          legend = F)
+```
+  
+## Déploiement en 2018  
+  
+### PTT 162070 
+    
+```{r, echo = F, warning = F}
+mapview(THElist[[1]],
+        col.regions = viridis(n = length(THElist[[1]]), alpha = 0.5),
+        layer.name = c('HR90', 'HR80', 'HR70', 'HR60', 'HR50'),
+        legend = F) +
+  mapview(argos.sp[argos.sp$PTT == names(THElist)[1],],
+          cex = 1,
+          col.regions = 'black',
+          layer.name = 'Relocations',
+          legend = F)
+```
+  
+### PTT 162072  
+  
+```{r, echo = F, warning = F}
+
+mapview(THElist[[2]],
+        col.regions = viridis(n = length(THElist[[2]]), alpha = 0.5),
+        layer.name = c('HR90', 'HR80', 'HR70', 'HR60', 'HR50'),
+        legend = F) +
+  mapview(argos.sp[argos.sp$PTT == names(THElist)[2],],
+          cex = 1,
+          col.regions = 'black',
+          layer.name = 'Relocations',
+          legend = F)
+```
+  
+### PTT 162073  
+  
+```{r, echo = F, warning = F}
+mapview(THElist[[3]],
+        col.regions = viridis(n = length(THElist[[3]]), alpha = 0.5),
+        layer.name = c('HR90', 'HR80', 'HR70', 'HR60', 'HR50'),
+        legend = F) +
+  mapview(argos.sp[argos.sp$PTT == names(THElist)[3],],
+          cex = 1,
+          col.regions = 'black',
+          layer.name = 'Relocations',
+          legend = F)
+```
+  
+### PTT 166561  
+  
+```{r, echo = F, warning = F}
+
+mapview(THElist[[4]],
+        col.regions = viridis(n = length(THElist[[4]]), alpha = 0.5),
+        layer.name = c('HR90', 'HR80', 'HR70', 'HR60', 'HR50'),
+        legend = F) +
+  mapview(argos.sp[argos.sp$PTT == names(THElist)[4],],
+          cex = 1,
+          col.regions = 'black',
+          layer.name = 'Relocations',
+          legend = F)
+```
+  
+### PTT 166563  
+  
+```{r, echo = F, warning = F}
+mapview(THElist[[5]],
+        col.regions = viridis(n = length(THElist[[5]]), alpha = 0.5),
+        layer.name = c('HR90', 'HR80', 'HR70', 'HR60', 'HR50'),
+        legend = F) +
+  mapview(argos.sp[argos.sp$PTT == names(THElist)[5],],
+          cex = 1,
+          col.regions = 'black',
+          layer.name = 'Relocations',
+          legend = F)
+```
+  
+### PTT 166564  
+  
+```{r, echo = F, warning = F}
+
+mapview(THElist[[6]],
+        col.regions = viridis(n = length(THElist[[6]]), alpha = 0.5),
+        layer.name = c('HR90', 'HR80', 'HR70', 'HR60', 'HR50'),
+        legend = F) +
+  mapview(argos.sp[argos.sp$PTT == names(THElist)[6],],
+          cex = 1,
+          col.regions = 'black',
+          layer.name = 'Relocations',
+          legend = F)
+```
+  
+### PTT 166565  
+  
+```{r, echo = F, warning = F}
+mapview(THElist[[7]],
+        col.regions = viridis(n = length(THElist[[7]]), alpha = 0.5),
+        layer.name = c('HR90', 'HR80', 'HR70', 'HR60', 'HR50'),
+        legend = F) +
+  mapview(argos.sp[argos.sp$PTT == names(THElist)[7],],
+          cex = 1,
+          col.regions = 'black',
+          layer.name = 'Relocations',
+          legend = F)
+```
