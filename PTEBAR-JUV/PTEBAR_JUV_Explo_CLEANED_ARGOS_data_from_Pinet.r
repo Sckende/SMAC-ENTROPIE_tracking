@@ -43,7 +43,6 @@ argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_
                     h = T,
                     sep = '\t',
                     dec = '.')
-
 head(argos)
 names(argos)[1] <- 'PTT'
 # ---- Date class
@@ -277,21 +276,29 @@ for(i in 1:length(v)){
   verLSCV[[i]] <- getverticeshr(kudLSCVvol, v[i])
 }
 
-# kud1 <- kernelUD(argos.sp.UTM,
-#                 h = 1,
-#                 grid = 500)
-# KUDvol1 <- getvolumeUD(kud1)
-# ver90.1 <- getverticeshr(KUDvol1, 90)
-# ver80.1 <- getverticeshr(KUDvol1, 80)
-# ver70.1 <- getverticeshr(KUDvol1, 70)
-# 
-# kud2 <- kernelUD(argos.sp.UTM,
-#                 h = 2,
-#                 grid = 500)
-# KUDvol2 <- getvolumeUD(kud2)
-# ver90.2 <- getverticeshr(KUDvol2, 90)
-# ver80.2 <- getverticeshr(KUDvol2, 80)
-# ver70.2 <- getverticeshr(KUDvol2, 70)
+kud1 <- kernelUD(argos.sp,
+                h = 1, # ici 1 degré (relié au type de projection, si lat/lon (non projeté) = degré, si UTM (projeté) = m) en rapport à la précision des GLS env. 180km (1deg = 111m) - pour ARGOS précision environ 1km, donc 1/100 degré
+                grid = 500) # ici correspond 500x500 degrés (1deg = 111 km à l'équateur)
+KUDvol1 <- getvolumeUD(kud1)
+ver90.1 <- getverticeshr(KUDvol1, 90)
+ver80.1 <- getverticeshr(KUDvol1, 80)
+ver70.1 <- getverticeshr(KUDvol1, 70)
+
+mapview(list(ver90.1, ver80.1, ver70.1),
+        col.regions = viridis(n = 3, alpha = 0.5),
+        layer.name = c('kern90', 'kern80', 'kern70'))
+
+kud2 <- kernelUD(argos.sp,
+                h = 2,
+                grid = 500)
+KUDvol2 <- getvolumeUD(kud2)
+ver90.2 <- getverticeshr(KUDvol2, 90)
+ver80.2 <- getverticeshr(KUDvol2, 80)
+ver70.2 <- getverticeshr(KUDvol2, 70)
+
+mapview(list(ver90.2, ver80.2, ver70.2),
+        col.regions = viridis(n = 3, alpha = 0.5),
+        layer.name = c('kern90', 'kern80', 'kern70'))
 
 
 mapview(list(ver90, ver80, ver70, ver60, ver50),
