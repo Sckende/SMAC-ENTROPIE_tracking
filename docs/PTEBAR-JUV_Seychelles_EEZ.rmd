@@ -98,7 +98,7 @@ sum_juv_Seych_df <- as.data.frame(do.call('rbind', sum_juv_Seych))
 sum_juv_Seych_df$input <- date(sum_juv_Seych_df$input)
 sum_juv_Seych_df$output <- date(sum_juv_Seych_df$output)
 ```
-# Summary of presence in the zone  
+# Summary of presences in the EEZ  
   
 ```{r, echo = F}
 kable(sum_juv_Seych_df,
@@ -113,16 +113,18 @@ kable(sum_juv_Seych_df,
 **input**: date of the first presence in the zone  
 **output**: date of the last presence in the zone  
   
-# Map illustrating the species distribution  
+# Map illustrating the juvenile distribution  
+  
+*Please, try to click on points or on the 'multi-layer' icon*  
   
 ```{r, echo = F}
-mapview(birds_Seych[, c(41, 40, 2, 6, 42)],
+mapview(birds_Seych[, c(41, 40, 2, 6)],
         zcol = 'PTT_fact',
-        popup = popupTable(birds_Seych[, c(41, 40, 2, 6, 42)],
-                           zcol = 'popup_info',
-                           feature.id = FALSE,
-                           row.numbers = FALSE,
-                           className = 'mapview-popup'),
+        # popup = popupTable(birds_Seych[, c(41, 40, 2, 6, 42)],
+        #                    zcol = 'popup_info',
+        #                    feature.id = FALSE,
+        #                    row.numbers = FALSE,
+        #                    className = 'mapview-popup'),
         # popup = birds_Seych$popup_info,
         # popup = popupTable(birds_Seych,
         #                    zcol = 'popup_info'),
@@ -132,3 +134,7 @@ mapview(birds_Seych[, c(41, 40, 2, 6, 42)],
                              popup = F,
                              layer.name = 'Seychelles_EEZ')
 ```
+  
+**PTT_fact**: unique ID of individual  
+**Date**: date of the relocation  
+**deploy**: date of the device deployment
