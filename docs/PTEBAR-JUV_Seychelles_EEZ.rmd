@@ -98,7 +98,29 @@ sum_juv_Seych_df <- as.data.frame(do.call('rbind', sum_juv_Seych))
 sum_juv_Seych_df$input <- date(sum_juv_Seych_df$input)
 sum_juv_Seych_df$output <- date(sum_juv_Seych_df$output)
 ```
-# Summary of presences in the EEZ  
+# Overview  
+  
+Juvenile PTEBAR get through:  
+* Amsterdam and Saint Paul Islands  
+* Australia  
+* Chagos Archipelago  
+* Christmas Island  
+* Cocos Islands  
+* Comores  
+* Glorioso Islands  
+* Ile Tromelin  
+* India  
+* Indonesia  
+* Madagascar  
+* Maldives  
+* Mayotte  
+* Republic of Mauritius  
+* Réunion  
+* Seychelles  
+* Sri Lanka  
+* Tanzania  
+  
+# Summary of presences in the EEZ of Seychelles 
   
 ```{r, echo = F}
 kable(sum_juv_Seych_df,
