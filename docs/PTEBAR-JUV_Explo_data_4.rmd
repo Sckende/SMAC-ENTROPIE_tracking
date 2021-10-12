@@ -117,6 +117,8 @@ mapview(argos3.sf,
   
 # Aperçu individuel  
   
+Les cartes suivantes illustrent le trajets des individus de l'envol jusqu'au 6 mai 2018.  
+  
 ```{r, echo = F}
 # Visualization of tracks before, during and after the cyclone period (until 2018-05-06)
 bird.Fak <- argos.sf[argos.sf$PTT %in% unique(argos3$PTT) & argos.sf$Date < '2018-05-06',]
@@ -126,10 +128,16 @@ bird.Fak.Tracks <- bird.Fak %>%
   group_by(PTT) %>% 
   summarize(do_union = FALSE) %>%
   st_cast("LINESTRING")
+
 # category depending on the intensity of cyclone
 
-for(i in 1:length(bird.Fak$PTT)){
-  if(bird.Fak$Date[i] <= '2018-04-22 00:00' | bird.Fak$Date[i] > '2018-04-24 18:00'){
+for(i in 1:length(bird.Fak$PTT)){  
+  if(bird.Fak$Date[i] <= '2018-04-20 12:00'){
+  
+  bird.Fak$Cycl_cat[i] <- 0
+} else
+  
+  if(bird.Fak$Date[i] > '2018-04-20 12:00' & bird.Fak$Date[i] <= '2018-04-22 00:00'){
     
     bird.Fak$Cycl_cat[i] <- 1
   } else
@@ -152,7 +160,13 @@ for(i in 1:length(bird.Fak$PTT)){
         if(bird.Fak$Date[i] > '2018-04-24 12:00' & bird.Fak$Date[i] <= '2018-04-24 18:00'){
           
           bird.Fak$Cycl_cat[i] <- 3
-        }  
+        }  else
+          if(bird.Fak$Date[i] > '2018-04-24 18:00' & bird.Fak$Date[i] <= '2018-04-26 18:00'){
+          bird.Fak$Cycl_cat[i] <- 1  
+          }  else
+            if(bird.Fak$Date[i] > '2018-04-26 18:00'){
+              bird.Fak$Cycl_cat[i] <- 0  
+            }
 }
 
 bird.Fak$Cycl_cat <- as.factor(bird.Fak$Cycl_cat)
@@ -163,7 +177,7 @@ bird.Fak$Cycl_cat <- as.factor(bird.Fak$Cycl_cat)
 ```{r, echo = F}
 mapview(bird.Fak[bird.Fak$PTT == '162070',],
         zcol = 'Cycl_cat',
-        col.regions = c('green', 'yellow', 'orange', 'red'),
+        col.regions = c('darkgrey', 'green', 'yellow', 'orange', 'red'),
         layer.name = 'Relocations',
         legend = F) + 
   mapview(bird.Fak.Tracks[bird.Fak.Tracks$PTT == '162070',],
@@ -182,7 +196,7 @@ mapview(bird.Fak[bird.Fak$PTT == '162070',],
 ```{r, echo = F}
 mapview(bird.Fak[bird.Fak$PTT == '162072',],
         zcol = 'Cycl_cat',
-        col.regions = c('green', 'yellow', 'orange', 'red'),
+        col.regions = c('darkgrey', 'green', 'yellow', 'orange', 'red'),
         layer.name = 'Relocations',
         legend = F) + 
   mapview(bird.Fak.Tracks[bird.Fak.Tracks$PTT == '162072',],
@@ -201,7 +215,7 @@ mapview(bird.Fak[bird.Fak$PTT == '162072',],
 ```{r, echo = F}
 mapview(bird.Fak[bird.Fak$PTT == '162073',],
         zcol = 'Cycl_cat',
-        col.regions = c('green', 'yellow', 'orange', 'red'),
+        col.regions = c('darkgrey', 'green', 'yellow', 'orange', 'red'),
         layer.name = 'Relocations',
         legend = F) + 
   mapview(bird.Fak.Tracks[bird.Fak.Tracks$PTT == '162073',],
@@ -220,7 +234,7 @@ mapview(bird.Fak[bird.Fak$PTT == '162073',],
 ```{r, echo = F}
 mapview(bird.Fak[bird.Fak$PTT == '166561',],
         zcol = 'Cycl_cat',
-        col.regions = c('green', 'yellow', 'orange', 'red'),
+        col.regions = c('darkgrey', 'green', 'yellow', 'orange', 'red'),
         layer.name = 'Relocations',
         legend = F) + 
   mapview(bird.Fak.Tracks[bird.Fak.Tracks$PTT == '166561',],
@@ -239,7 +253,7 @@ mapview(bird.Fak[bird.Fak$PTT == '166561',],
 ```{r, echo = F}
 mapview(bird.Fak[bird.Fak$PTT == '166563',],
         zcol = 'Cycl_cat',
-        col.regions = c('green', 'yellow', 'orange', 'red'),
+        col.regions = c('darkgrey', 'green', 'yellow', 'orange', 'red'),
         layer.name = 'Relocations',
         legend = F) + 
   mapview(bird.Fak.Tracks[bird.Fak.Tracks$PTT == '166563',],
@@ -258,7 +272,7 @@ mapview(bird.Fak[bird.Fak$PTT == '166563',],
 ```{r, echo = F}
 mapview(bird.Fak[bird.Fak$PTT == '166564',],
         zcol = 'Cycl_cat',
-        col.regions = c('green', 'yellow', 'orange', 'red'),
+        col.regions = c('darkgrey', 'green', 'yellow', 'orange', 'red'),
         layer.name = 'Relocations',
         legend = F) + 
   mapview(bird.Fak.Tracks[bird.Fak.Tracks$PTT == '166564',],
@@ -277,7 +291,7 @@ mapview(bird.Fak[bird.Fak$PTT == '166564',],
 ```{r, echo = F}
 mapview(bird.Fak[bird.Fak$PTT == '166565',],
         zcol = 'Cycl_cat',
-        col.regions = c('green', 'yellow', 'orange', 'red'),
+        col.regions = c('darkgrey', 'green', 'yellow', 'orange', 'red'),
         layer.name = 'Relocations',
         legend = F) + 
   mapview(bird.Fak.Tracks[bird.Fak.Tracks$PTT == '166565',],

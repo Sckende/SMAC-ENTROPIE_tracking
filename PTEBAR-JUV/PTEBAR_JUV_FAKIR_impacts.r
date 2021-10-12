@@ -127,8 +127,13 @@ mapview(bird.Fak,
 
 # category depending on the intensity of cyclone
 
-for(i in 1:length(bird.Fak$PTT)){
-  if(bird.Fak$Date[i] <= '2018-04-22 00:00' | bird.Fak$Date[i] > '2018-04-24 18:00'){
+for(i in 1:length(bird.Fak$PTT)){  
+  if(bird.Fak$Date[i] <= '2018-04-20 12:00'){
+  
+  bird.Fak$Cycl_cat[i] <- 0
+} else
+  
+  if(bird.Fak$Date[i] > '2018-04-20 12:00' & bird.Fak$Date[i] <= '2018-04-22 00:00'){
     
     bird.Fak$Cycl_cat[i] <- 1
   } else
@@ -151,14 +156,21 @@ for(i in 1:length(bird.Fak$PTT)){
         if(bird.Fak$Date[i] > '2018-04-24 12:00' & bird.Fak$Date[i] <= '2018-04-24 18:00'){
           
           bird.Fak$Cycl_cat[i] <- 3
-        }  
+        }  else
+          if(bird.Fak$Date[i] > '2018-04-24 18:00' & bird.Fak$Date[i] <= '2018-04-26 18:00'){
+          bird.Fak$Cycl_cat[i] <- 1  
+          }  else
+            if(bird.Fak$Date[i] > '2018-04-26 18:00'){
+              bird.Fak$Cycl_cat[i] <- 0  
+            }
 }
 
 bird.Fak$Cycl_cat <- as.factor(bird.Fak$Cycl_cat)
+table(bird.Fak$Cycl_cat, useNA = 'always')
 
 mapview(bird.Fak[bird.Fak$PTT == '162070',],
         zcol = 'Cycl_cat',
-        col.regions = c('green', 'yellow', 'orange', 'red')
+        col.regions = c('darkgrey', 'green', 'yellow', 'orange', 'red')
         ) + mapview(bird.Fak.Tracks[bird.Fak.Tracks$PTT == '162070',],
                     burst = T) + mapview(st_buffer(fakir.sf.UTM, dist = 150000, joinStyle = 'ROUND'),
                                          zcol = 'CI',
