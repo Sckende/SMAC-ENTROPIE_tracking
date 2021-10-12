@@ -4,6 +4,7 @@ library(mapview)
 library(lubridate)
 library(leafpop)
 library(leaflet)
+library(dplyr)
 
 # ------------------------------------------------------------------ #
 #### Loading and treatment of ARGOS data  - RAW cleaned localisations ####
@@ -47,8 +48,9 @@ fakir <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_
                     sep = '\t',
                     dec = '.')
 # ---- Date class
-fakir$date <- as.POSIXct(fakir$date,
-                         format = "%Y-%m-%d") # Date format
+fakir$date2 <- paste(fakir$date, fakir$hour, sep = ' ')
+fakir$date2 <- as.POSIXct(fakir$date2,
+                         format = "%Y-%m-%d %H:%M") # Date format
 fakir$start.date <- as.POSIXct(fakir$start.date,
                            format = "%Y-%m-%d") # Date format
 fakir$end.date <- as.POSIXct(fakir$end.date,
@@ -59,17 +61,106 @@ summary(fakir)
 fakir.sf <- st_as_sf(fakir,
                      coords = c('lon', 'lat'),
                      crs = projLatLon)
+# Projected Spatial object
+# Projected spatial object
+fakir.sf.UTM <- st_transform(fakir.sf,
+                             crs = 32740)
+
+fakir.sf$CI <- as.factor(fakir.sf$CI)
+fakir.sf.UTM$CI <- as.factor(fakir.sf.UTM$CI)
+mapview(fakir.sf.UTM,
+        zcol = 'CI',
+        col.regions = c('green', 'green', 'green', 'yellow', 'yellow', 'orange', 'orange', 'red', 'red'))
+
+mapview(st_buffer(fakir.sf.UTM, dist = 150000, joinStyle = 'ROUND'),
+        zcol = 'CI',
+        col.regions = c('green', 'green', 'green', 'yellow', 'yellow', 'orange', 'orange', 'red', 'red'))
 
 # ------------- #
 
-# REPRENDRE ICI #
-# ------------ #
-birds_vs_fakir <- argos.sf[argos.sf$Date >= unique(fakir$start.date) & argos$Date >= unique(fakir$end.date),]
+start <- min(fakir$date2)
+end <- max(fakir$date2)
 
-birds_vs_fakir <- birds_vs_fakir[year(birds_vs_fakir$deploy) == 2018,]
+argos2 <- argos[year(argos$deploy) == 2018,]
+argos3 <- argos2[argos2$Date >= start & argos2$Date <= end,]
 
-birds_vs_fakir$PTT <- as.factor(birds_vs_fakir$PTT)
+# Non projected spatial object
+argos3.sf <- st_as_sf(argos3,
+                     coords = c('Longitude', 'Latitude'),
+                     crs = projLatLon)
 
-mapview(birds_vs_fakir,
+argos3.sf$PTT <- as.factor(argos3.sf$PTT)
+mapview(argos3.sf,
         zcol = 'PTT',
-        burst = T)
+        burst = T) + mapview(st_buffer(fakir.sf.UTM, dist = 150000, joinStyle = 'ROUND'),
+                             zcol = 'CI',
+                             col.regions = c('green', 'green', 'green', 'yellow', 'yellow', 'orange', 'orange', 'red', 'red'), 
+                             layer.name = 'Cyclone intensity')
+# date max
+for(i in unique(argos3$PTT)){
+  print(max(argos3$Date[argos3$PTT == i]))
+}
+
+# ----- #
+
+bird.Fak <- argos.sf[argos.sf$PTT %in% unique(argos3$PTT) & argos.sf$Date < '2018-05-06',]
+bird.Fak$PTT <- as.factor(bird.Fak$PTT)
+
+bird.Fak.Tracks <- bird.Fak %>%
+  group_by(PTT) %>% 
+  summarize(do_union = FALSE) %>%
+  st_cast("LINESTRING")
+
+
+mapview(bird.Fak,
+        burst = T,
+        zcol = 'PTT',
+        # col.regions = 'black',
+        cex = 3,
+        legend = F) + mapview(bird.Fak.Tracks,
+                              burst = T) + mapview(st_buffer(fakir.sf.UTM, dist = 150000, joinStyle = 'ROUND'),
+                                                         zcol = 'CI',
+                                                         col.regions = c('green', 'green', 'green', 'yellow', 'yellow', 'orange', 'orange', 'red', 'red'),
+                                                         layer.name = 'Cyclone intensity')
+
+# ----- #
+
+# category depending on the intensity of cyclone
+
+for(i in 1:length(bird.Fak$PTT)){
+  if(bird.Fak$Date[i] <= '2018-04-22 00:00' | bird.Fak$Date[i] > '2018-04-24 18:00'){
+    
+    bird.Fak$Cycl_cat[i] <- 1
+  } else
+  
+  if(bird.Fak$Date[i] > '2018-04-22 00:00' & bird.Fak$Date[i] <= '2018-04-23 00:00'){
+    
+    bird.Fak$Cycl_cat[i] <- 2
+  } else
+    
+    if(bird.Fak$Date[i] > '2018-04-23 00:00' & bird.Fak$Date[i] <= '2018-04-23 12:00'){
+      
+      bird.Fak$Cycl_cat[i] <- 3
+    } else
+      
+      if(bird.Fak$Date[i] > '2018-04-23 12:00' & bird.Fak$Date[i] <= '2018-04-24 12:00'){
+        
+        bird.Fak$Cycl_cat[i] <- 4
+      } else
+        
+        if(bird.Fak$Date[i] > '2018-04-24 12:00' & bird.Fak$Date[i] <= '2018-04-24 18:00'){
+          
+          bird.Fak$Cycl_cat[i] <- 3
+        }  
+}
+
+bird.Fak$Cycl_cat <- as.factor(bird.Fak$Cycl_cat)
+
+mapview(bird.Fak[bird.Fak$PTT == '162070',],
+        zcol = 'Cycl_cat',
+        col.regions = c('green', 'yellow', 'orange', 'red')
+        ) + mapview(bird.Fak.Tracks[bird.Fak.Tracks$PTT == '162070',],
+                    burst = T) + mapview(st_buffer(fakir.sf.UTM, dist = 150000, joinStyle = 'ROUND'),
+                                         zcol = 'CI',
+                                         col.regions = c('green', 'green', 'green', 'yellow', 'yellow', 'orange', 'orange', 'red', 'red'),
+                                         layer.name = 'Cyclone intensity')
