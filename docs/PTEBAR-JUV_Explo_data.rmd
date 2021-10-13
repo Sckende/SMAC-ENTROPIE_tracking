@@ -30,6 +30,7 @@ require(dplyr)
 require(sf)
 require(lubridate)
 require(htmltools)
+library(gridExtra)
 ```
 
 ```{css, echo = F}
@@ -438,3 +439,161 @@ axis(1,
 ```
  
   
+# Classes de localisation & trajet par individu  
+  
+Pour information, les différentes classes de localisations sont les suivantes (de la moins précise à la plus précise):  
+  
+**B** < **A** < **0** < **1** < **2** < **3**  
+  
+Avec une estimation de l'erreur correspondant à:  
+  
+* **B** & **A** - Estimation de précision non bornée fournie  
+* **0** - Erreur supérieure à 1 500 m  
+* **1** - Erreur comprise entre 500 m et 1 500 m  
+* **2** - Erreur comprise entre 250 m et 500 m  
+* **3** - Erreur inférieure à 100 m  
+  
+    
+      
+```{r,echo=FALSE}
+arg <- do.call('rbind', argos) 
+arg$Class <- as.factor(arg$Class)
+arg$Class <- ordered(arg$Class, levels = c('B', 'A', '0', '1', '2', '3'))
+t <- table(arg$Class[year(arg$deploy) == 2017])
+t1 <- table(arg$Class[year(arg$deploy) == 2018])
+
+# b1 <- 
+  barplot(t,
+        xlab = 'Classes de localisation',
+        ylab = 'Nombre de localisations',
+        main = 'Déploiement 2017')
+  
+```
+  
+     
+       
+       
+```{r, echo = F}
+# b2 <- 
+  barplot(t1,
+        xlab = 'Classes de localisation',
+        ylab = 'Nombre de localisations',
+        main = 'Déploiement 2018')
+
+# grid.arrange(b1, b2, ncol=2)
+```
+  
+## Déploiement 2017  
+  
+```{r, echo=F}
+x.plot2 <- lapply(argos, function(x){
+    
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('B', 'A', '0', '1', '2', '3'))
+
+    mapview(x,
+        zcol = 'Class',
+        burst = T,
+        legend = F,
+        layer.name = unique(as.character(x$Vessel))) + mapview(argos.track[argos.track$Vessel == unique(as.character(x$Vessel)),],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track'
+                                                               )
+  })
+
+```
+  
+### PTT 166566  
+  
+  
+```{r, echo=F}   
+x.plot2[[9]]
+```
+  
+### PTT 166568  
+  
+```{r, echo=F}
+x.plot2[[10]]
+```
+  
+### PTT 166569  
+  
+```{r, echo=F}
+x.plot2[[11]]
+```
+  
+### PTT 166570  
+  
+```{r, echo=F}
+x.plot2[[12]]
+```
+  
+### PTT 166571  
+  
+```{r, echo=F}
+x.plot2[[13]]
+```
+  
+### PTT 166572  
+  
+```{r, echo=F}
+x.plot2[[14]]
+```
+  
+### PTT 166573  
+  
+```{r, echo=F}
+x.plot2[[15]]
+```
+  
+  
+## Déploiement 2018 
+
+  
+### PTT 162070  
+  
+```{r, echo = F}  
+x.plot2[[1]]
+```
+  
+### PTT 162071  
+  
+```{r, echo=F}
+x.plot2[[2]]
+```
+  
+### PTT 162072  
+  
+```{r, echo=F}
+x.plot2[[3]]
+```
+  
+### PTT 162073  
+  
+```{r, echo=F}
+x.plot2[[4]]
+```
+  
+### PTT 166561  
+  
+```{r, echo=F}
+x.plot2[[5]]
+```
+  
+### PTT 166563  
+  
+```{r, echo=F}
+x.plot2[[6]]
+```
+  
+### PTT 166564  
+  
+```{r, echo=F}
+x.plot2[[7]]
+```
+  
+### PTT 166565  
+  
+```{r, echo=F}
+x.plot2[[8]]
+```

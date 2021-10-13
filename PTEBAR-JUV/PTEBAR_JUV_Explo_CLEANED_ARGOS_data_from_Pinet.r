@@ -13,6 +13,7 @@ library('lubridate')
 library('dplyr')
 library('adehabitatHR')
 library('viridis')
+library('viridisLite')
 
 # ------------------------------------------------- #
 #### Loading and treatment of data 1 - METADATA #### 
@@ -169,7 +170,7 @@ argos.sf.track$PTT <- as.factor(argos.sf.track$PTT)
 mapview(argos.sf.track,
         zcol = 'PTT',
         burst = T,
-        legend = F)
+        legend = T)
 
 # ---------------- #
 #### RMD files ####
@@ -180,6 +181,20 @@ mapview(argos.sf.track,
 
 # saveRDS(argos.sf.track,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_tracks_ARGOS.rds")
+
+# ---------------------------------------- #
+#### Visualisation of relocation class ####
+# -------------------------------------- #
+
+table(argos.sf$Class, useNA = 'always')
+argos.sf$Class <- as.factor(argos.sf$Class)
+argos.sf$Class <- ordered(argos.sf$Class, levels = c('B', 'A', '0', '1', '2', '3'))
+
+mapview(argos.sf,
+        zcol = 'Class',
+        # col.regions = c('darkred', 'red', 'orange', 'yellow', 'green', 'darkgreen'),
+        col.regions = viridis,
+        burst = T)
 
 # ----------------------------- #
 #### Minimum Convex Polygon ####
