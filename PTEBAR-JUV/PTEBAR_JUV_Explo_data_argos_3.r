@@ -3,7 +3,7 @@
 # source --> Patrick Pinet/Life +
 # ---------------------------------------------------------- #
 
-# ---- Clean ---- 
+# ---- Cleaning ---- 
 rm(list = ls())
 
 # ---- Packages -----
@@ -18,15 +18,84 @@ library('dplyr')
 argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_argos_data.txt",
                     sep = '\t',
                     h = T)
+
+infos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_infos_deploiement.txt",
+                    sep = '\t',
+                    h = T)
 head(argos)
 dim(argos)
 
 table(argos$Vessel)
 table(argos$Class)
 
+# Conversion of Class variable in numeric one
+
+argos$Class.num <- argos$Class
+argos$Class.num[argos$Class.num == 'B'] <- -2
+argos$Class.num[argos$Class.num == 'A'] <- -1
+
+table(argos$Class.num)
+table(argos$Class)
+
+# EXPLORATION of first points before deployment ####
+# Necessary to keep at least one point one the breeding colony
+
+# Date format
 argos$Date <- as.POSIXct(argos$Date,
                          format = '%d/%m/%Y %H:%M')
 argos <- argos[order(argos$Vessel, argos$Date),]
+
+argos %>% group_by(Vessel) %>% summarize(min(Date))
+
+infos$deploy <- as.POSIXct(infos$deploy,
+                         format = '%d/%m/%Y %H:%M')
+
+# List creation for keeping saved relocations before deployment for each device 
+bef.deploy <- lapply(split(argos, argos$Vessel), function(x){
+  
+  y <- x[x$Date <= infos$deploy[infos$PTT == unique(x$Vessel)],]
+  
+  if(length(y$Vessel) >= 1){
+    y  
+  }
+})
+
+bef.deploy[5] <- NULL # deletion of devices with no date before the deployment date
+
+# First visual exploration of these relocations
+
+bef.sp <- lapply(bef.deploy, function(x){
+  
+  x <- sf::st_as_sf(x,
+                    coords = c('Longitude', 'Latitude'),
+                    crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+  x
+  })
+
+bef.sp <- do.call('rbind', bef.sp)
+bef.sp$Vessel <- as.factor(bef.sp$Vessel)
+mapview(bef.sp, zcol = 'Vessel', burst = T) # All device with at least one point one the colony
+
+# Keep the more accurate relocs before the deployment date per device
+pt.bef.deploy1 <- bef.deploy[1:9]
+pt.bef.deploy2 <- bef.deploy[8:16]
+
+pt.bef.deploy2 <- lapply(pt.bef.deploy2, function(x){
+
+    x$Class.num <- as.numeric(x$Class.num)
+    y <- x[which(x$Class.num == max(x$Class.num)),]
+    z <-y[which(y$Date == max(y$Date)),]
+    z
+ 
+})
+
+pt.bef.deploy <- rbind(do.call('rbind', pt.bef.deploy1),
+                       do.call('rbind', pt.bef.deploy2))
+
+pt.bef.deploy.sp <- sf::st_as_sf(pt.bef.deploy,
+                                 coords = c('Longitude', 'Latitude'),
+                                 crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+mapview(bef.sp, zcol = 'Vessel', burst = T) + mapview(pt.bef.deploy.sp, col.regions = 'black')
 
 #  ---- Deletion of location class in Z or U ----
 table(argos$Class, useNA = 'always') # **** here we lost the PTT 166562 (2 locs with U class) ****
@@ -41,15 +110,13 @@ argos2 %>% group_by(Vessel) %>% count() # 2 PTTs are concerned
 argos3 <- argos2[!(argos2$Vessel %in% c('162074', '166567')), ]
 
 # ---- Check for the first date of location for each devices ---- 
-infos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_infos_deploiement.txt",
-                    sep = '\t',
-                    h = T)
 
-setdiff(unique(argos3$Vessel), infos$device)
+
+setdiff(unique(argos3$Vessel), infos$PTT)
 
 argos4 <- left_join(argos3,
-                     infos[, c('device', 'deploy')],
-                     by = c('Vessel' = 'device'))
+                     infos[, c('PTT', 'deploy')],
+                     by = c('Vessel' = 'PTT'))
 
 argos4$deploy <- as.POSIXct(argos4$deploy,
                              format = '%d/%m/%Y %H:%M')
@@ -60,7 +127,7 @@ min.date <- argos4 %>%
   group_by(Vessel) %>% 
   summarise(min.date = min(Date)) # minimal date for each device
 
-min.date.infos <- left_join(infos, min.date, by = c('device' = 'Vessel'))
+min.date.infos <- left_join(infos, min.date, by = c('PTT' = 'Vessel'))
 min.date.infos$deploy <= min.date.infos$min.date
 
 # ---- Quick visualization of data ----
@@ -74,6 +141,28 @@ mapview(argos.sp,
         zcol = 'Vessel',
         burst = T) + mapview(argos.track,
                              zcol = 'Vessel')
+# ---- Retrieve the first point on breeding colony if it's necessary
+# 162070, 162071, 162072, 162073, 166561, 166563, 166564, 166565
+rec <- pt.bef.deploy[pt.bef.deploy$Vessel %in% c(162070, 162071, 162072, 162073, 166561, 166563, 166564, 166565),]
+rec <- left_join(rec,
+                 infos[,c(1, 3)],
+                 by = c('Vessel' = 'PTT'))
+argos5 <- rbind(argos4,
+                rec)
+argos5.sp <- sf::st_as_sf(argos5,
+                         coords = c('Longitude', 'Latitude'),
+                         crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+mapview(argos5.sp, zcol = 'Vessel', burst = T)
+#### REPENDRE ICI !!!!!!! ####
+
+
+
+
+
+
+
+
+
 
 # ---- Delay btw records & visualization of loc groups ----
 
