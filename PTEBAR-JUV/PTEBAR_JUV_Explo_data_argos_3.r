@@ -97,19 +97,19 @@ pt.bef.deploy.sp <- sf::st_as_sf(pt.bef.deploy,
                                  crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
 mapview(bef.sp, zcol = 'Vessel', burst = T) + mapview(pt.bef.deploy.sp, col.regions = 'black')
 
-#  ---- Deletion of location class in Z or U ----
+#  ---- DELETION of location class in Z or U ----
 table(argos$Class, useNA = 'always') # **** here we lost the PTT 166562 (2 locs with U class) ****
 
 argos2 <- argos[!(argos$Class %in% c('U', 'Z')),]
 
-# ---- Deletion of PTTs with almost no data ---- 
+# ---- DELETION of PTTs with almost no data ---- 
 argos2 %>% group_by(Vessel) %>% count() # 2 PTTs are concerned 
 # 162074 (2 locs)
 # 166567 (5 locs)
 
 argos3 <- argos2[!(argos2$Vessel %in% c('162074', '166567')), ]
 
-# ---- Check for the first date of location for each devices ---- 
+# ---- CHECK for the first date of location for each devices ---- 
 
 
 setdiff(unique(argos3$Vessel), infos$PTT)
@@ -122,7 +122,7 @@ argos4$deploy <- as.POSIXct(argos4$deploy,
                              format = '%d/%m/%Y %H:%M')
 summary(argos4$deploy)
 
-# ----
+# ---- #
 min.date <- argos4 %>%
   group_by(Vessel) %>% 
   summarise(min.date = min(Date)) # minimal date for each device
@@ -130,7 +130,7 @@ min.date <- argos4 %>%
 min.date.infos <- left_join(infos, min.date, by = c('PTT' = 'Vessel'))
 min.date.infos$deploy <= min.date.infos$min.date
 
-# ---- Quick visualization of data ----
+# ---- QUICK visualization of data ----
 argos.sp <- sf::st_as_sf(argos4,
                          coords = c('Longitude', 'Latitude'),
                          crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
@@ -141,7 +141,7 @@ mapview(argos.sp,
         zcol = 'Vessel',
         burst = T) + mapview(argos.track,
                              zcol = 'Vessel')
-# ---- Retrieve the first point on breeding colony if it's necessary
+# ---- RETRIEVE the first point on breeding colony if it's necessary ####
 # 162070, 162071, 162072, 162073, 166561, 166563, 166564, 166565
 rec <- pt.bef.deploy[pt.bef.deploy$Vessel %in% c(162070, 162071, 162072, 162073, 166561, 166563, 166564, 166565),]
 rec <- left_join(rec,
@@ -156,7 +156,11 @@ argos5.sp <- sf::st_as_sf(argos5,
 
 mapview(argos5.sp, zcol = 'Vessel', burst = T)
 
-# ---- Delay btw records & visualization of loc groups ----
+# RE-ORDER device per date #### 
+argos5 <- argos5[order(argos5$Vessel, argos5$Date),]
+
+
+# ---- DELAY btw records & visualization of loc groups ----
 
 a.list <- split(argos5, argos5$Vessel)
 
@@ -213,10 +217,43 @@ mapview(a.list2.sp,
             color = 'darkgrey',
             legend = F)
 
+# DEAL with the duplicated data ####
+# Order data based on date, then descending Class.num for keeping the best data quality when date is duplicated
+
+dup2 <- lapply(a.list2, function(x){
+  x$Class.num[x$Class.num == 'U'] <- NA
+  x$Class.num <- as.numeric(x$Class.num)
+  x <- x[with(x, order(x$Date, -x$Class.num)),]
+  x <- x[duplicated(x$Date),]
+  x
+}) # Which rows are duplicated
+
+dim(do.call('rbind', dup2))
+
+# Deletion of the duplicated rows
+
+argos6.ls <- lapply(a.list2, function(x){
+  x$Class.num[x$Class.num == 'U'] <- NA
+  x$Class.num <- as.numeric(x$Class.num)
+  x <- x[with(x, order(x$Date, -x$Class.num)),]
+  x <- x[!duplicated(x$Date),]
+  x
+})
+
+# Spatial object
+
+argos6.ls.sp <- lapply(argos6.ls, function(x){
+  x <- sf::st_as_sf(x,
+                    coords = c('Longitude', 'Latitude'),
+                    crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+  x$Vessel <- as.factor(x$Vessel)
+  x
+})
+
 # ---- Save the cleaned data ---- #
-# saveRDS(a.list2.sp,
+# saveRDS(argos6.ls.sp,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.rds")
 
-# write.table(do.call('rbind', a.list2),
+# write.table(do.call('rbind', argos6.ls.sp),
 #             "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.txt",
 #             sep = '\t')
