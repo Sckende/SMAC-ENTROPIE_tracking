@@ -149,24 +149,16 @@ rec <- left_join(rec,
                  by = c('Vessel' = 'PTT'))
 argos5 <- rbind(argos4,
                 rec)
+argos5$Vessel <- as.factor(argos5$Vessel)
 argos5.sp <- sf::st_as_sf(argos5,
                          coords = c('Longitude', 'Latitude'),
                          crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+
 mapview(argos5.sp, zcol = 'Vessel', burst = T)
-#### REPENDRE ICI !!!!!!! ####
-
-
-
-
-
-
-
-
-
 
 # ---- Delay btw records & visualization of loc groups ----
 
-a.list <- split(argos4, argos4$Vessel)
+a.list <- split(argos5, argos5$Vessel)
 
 a.list2 <- lapply(a.list, function(x){
   
