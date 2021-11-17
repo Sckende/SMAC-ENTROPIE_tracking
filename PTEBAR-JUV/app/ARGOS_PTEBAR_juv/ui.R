@@ -9,6 +9,8 @@
 
 library(shiny)
 library(shinydashboard)
+library(plotly)
+library(leaflet)
 
 ui <- dashboardPage(
     dashboardHeader(disable = TRUE),
@@ -29,9 +31,10 @@ ui <- dashboardPage(
             div(style = "font-size:25px; text-align:center",
                 "Graphiques vitesse"),
             
-            plotlyOutput("hist_speed"),
-            
-            plotlyOutput("barplot_speed"))
+            # plotlyOutput("hist_speed"),
+            # 
+            # plotlyOutput("barplot_speed")
+            )
         ),
         
         column(width = 9,
