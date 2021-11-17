@@ -1,5 +1,5 @@
 #### adehabitatLT vignettes ####
-# see 'Analysis if animal movement in R: the adehabitatLT package' - Calenge 2015
+# see 'Analysis of animal movement in R: the adehabitatLT package' - Calenge 2015
 require(adehabitatLT)
 
 data("puechabonsp") # trajectories of 4 boars
@@ -107,7 +107,7 @@ plotltr(ib3, 'dt/3600') # regular trajectories !
 # To check if an object is like that
 
 is.sd(ib3) # sd for 'same distance' - This object is not of the type sd (same duration). However, theoretically, all the trajectories should have been sampled at the same time points. It is regular, but there are mismatches between the time of the relocations. Because there are missing values at the beginning/end of the monitoring
-#We can use the function set.limits to dene the time of beginning and ending of the trajectories. This function adds NAs to the beginning and ending of the monitoring when required.
+#We can use the function set.limits to define the time of beginning and ending of the trajectories. This function adds NAs to the beginning and ending of the monitoring when required.
 
 ib4 <- set.limits(ib3,
                   begin = '2003-06-01 00:00',

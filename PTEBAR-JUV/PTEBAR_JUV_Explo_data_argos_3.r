@@ -257,3 +257,7 @@ argos6.ls.sp <- lapply(argos6.ls, function(x){
 # write.table(do.call('rbind', argos6.ls.sp),
 #             "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.txt",
 #             sep = '\t')
+
+# write.table(do.call('rbind', argos6.ls),
+#             "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED_noSPATIAL.txt",
+#             sep = '\t')
