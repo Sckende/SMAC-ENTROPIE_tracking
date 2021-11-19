@@ -40,10 +40,7 @@ infos_argos2 <- infos_argos2[, c(2, 1, 3:8)]
 # ------------------------------------------------------------------ #
 #### Loading and treatment of data 2 - RAW cleaned localisations ####
 # ---------------------------------------------------------------- #
-argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.txt",
-                    h = T,
-                    sep = '\t',
-                    dec = '.')
+argos <- do.call('rbind', readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.rds'))
 head(argos)
 names(argos)[1] <- 'PTT'
 # ---- Date class
@@ -57,6 +54,13 @@ summary(argos$Date)
 barplot(table(argos$Date))
 year(head(argos$Date))
 table(year(argos$Date))
+
+# ---- Retrieve the coords from sf object
+
+coords1 <- st_coordinates(argos)
+coords2 <- as.data.frame(coords1)
+names(coords2) <- c('Longitude', 'Latitude')
+argos <- cbind(argos, coords2)
 
 # ---- Summary of device recordings
 
@@ -72,6 +76,8 @@ arg_bil <- argos %>% group_by(PTT) %>%
 # ---------------------------------------------- #
 #### Extra information for each trajectories ####
 # -------------------------------------------- #
+
+infos_argos2$PTT <- as.factor(infos_argos2$PTT)
 arg_bil2 <- left_join(arg_bil,
                       infos_argos2[, c(2, 3)],
                       by = 'PTT')
@@ -88,26 +94,26 @@ projLatLon <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 # UTM 43 => 32743 
 projUTM <- '+init=epsg:32743'
 
-# Non projected spatial object
-argos.sf <- st_as_sf(argos,
-                     coords = c('Longitude', 'Latitude'),
-                     crs = projLatLon)
-class(argos.sf)
+# Projected spatial object for computing distance matrice in meter
+argos <- st_transform(argos,
+                      crs = 32743)
 
-# Projected spatial object
-argos.sf.UTM <- st_transform(argos.sf,
-                             crs = 32743)
+coords3 <- as.data.frame(st_coordinates(argos))
+names(coords3) <- c('X', 'Y')
 
+argos <- cbind(argos, coords3)
 
-argos_sf_list <- split(argos.sf, argos.sf$PTT)
+# Distance matrice computation
+argos_sf_list <- split(argos, argos$PTT)
 
-# argos_dist_mat <- lapply(argos_sf_list, st_distance) # Matrix distance for each device - *** WARNING *** Long process
+argos_dist_mat <- lapply(argos_sf_list, st_distance) # Matrix distance for each device - *** WARNING *** Long process
 # st_distance() computes the distance between each points based on the great circle distances method (take the curvature of the earth into account)
 
 # saveRDS(argos_dist_mat, "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Distance_matrices.rds")
 
 
-argos_dist_mat <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Distance_matrices.rds") # import distance matrices for juvenile petrels
+# argos_dist_mat <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Distance_matrices.rds") # import distance matrices for juvenile petrels
+
 matrix_data <- data.frame()
 
 for(i in 1:length(argos_dist_mat)){
@@ -115,10 +121,11 @@ for(i in 1:length(argos_dist_mat)){
   matr <- argos_dist_mat[[i]] # distance matrix for the device
   
   max_dist <- max(matr[1,]) # max of the first row of the matrix, i.e. distance between the first point (breeding colony at Reunion Island) and each following points
-  loc_max_dist <- which(matr[1,] == max_dist) # Location or point number where the maximal distance from the Reunion Island is obtained
+  loc_max_dist <- min(which(matr[1,] == max_dist)) # Location or point number where the maximal distance from the Reunion Island is obtained
   
   matr_diag_sec <- diag(matr[, -1]) # secondary diagonal of the matrix containing the distance between each consecutive points
-  dist_travel <- max(cumsum(matr_diag_sec)) # max of the cumulative sum for obtaining the total traveled distance
+  # dist_travel <- max(cumsum(matr_diag_sec))
+  dist_travel <- sum(matr_diag_sec) # max of the cumulative sum for obtaining the total traveled distance
   
   matrix_data <- rbind(matrix_data, c(id, max_dist, loc_max_dist, dist_travel))
 }
@@ -133,7 +140,7 @@ for (i in 1:nrow(matrix_data)){
   id <- matrix_data$PTT[i]
   loc <- as.numeric(matrix_data$loc_max_dist[i])
   
-  matrix_data$date_loc[i] <- as.character(argos.sf$Date[argos.sf$PTT == id][loc]) # date corresponding to the nth loc where the maximal distance is reached
+  matrix_data$date_loc[i] <- as.character(argos$Date[argos$PTT == id][loc]) # date corresponding to the nth loc where the maximal distance is reached
   matrix_data$date_deploy[i] <- unique(as.character(infos_argos2$deploy[infos_argos2$PTT == id])) # deployment date of the argos device
 }
 
@@ -146,7 +153,7 @@ matrix_data$date_deploy <- as.POSIXct(matrix_data$date_deploy,
 matrix_data$timing_for_max <- date(matrix_data$date_loc) - date(matrix_data$date_deploy)
 
 # ---- Combine the both summary df 
-matrix_data$PTT <- as.integer(matrix_data$PTT)
+matrix_data$PTT <- as.factor(matrix_data$PTT)
 arg_bil3 <- left_join(arg_bil2,
                       matrix_data[, c(1, 5, 6, 9)],
                       by = 'PTT')
@@ -161,12 +168,11 @@ arg_bil3 <- arg_bil3[order(arg_bil3$deploy),]
 # ------------------------------------------------------ #
 #### Production of Spatial Trackline object for maps ####
 # ---------------------------------------------------- #
-argos.sf.track <- argos.sf %>%
+argos.sf.track <- argos %>%
   group_by(PTT) %>% 
   summarize(do_union = FALSE) %>%
   st_cast("LINESTRING") # Creation of SF LINESTRINGS
 
-argos.sf.track$PTT <- as.factor(argos.sf.track$PTT)
 mapview(argos.sf.track,
         zcol = 'PTT',
         burst = T,
@@ -176,7 +182,7 @@ mapview(argos.sf.track,
 #### RMD files ####
 # -------------- #
 
-# saveRDS(argos.sf,
+# saveRDS(argos,
 # "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_points_ARGOS.rds")
 
 # saveRDS(argos.sf.track,
@@ -186,16 +192,16 @@ mapview(argos.sf.track,
 #### Visualisation of relocation class ####
 # -------------------------------------- #
 
-table(argos.sf$Class, useNA = 'always')
-argos.sf$Class <- as.factor(argos.sf$Class)
-argos.sf$Class <- ordered(argos.sf$Class, levels = c('B', 'A', '0', '1', '2', '3'))
+table(argos$Class, useNA = 'always')
+argos$Class <- as.factor(argos$Class)
+argos$Class <- ordered(argos$Class, levels = c('B', 'A', '0', '1', '2', '3'))
 
-mapview(argos.sf,
+mapview(argos,
         zcol = 'Class',
         # col.regions = c('darkred', 'red', 'orange', 'yellow', 'green', 'darkgreen'),
-        col.regions = viridis,
+        # col.regions = viridis,
         burst = T)
-
+#### A REPRENDRE ICI AVEC LES DONNEES COMPLETES ####
 # ----------------------------- #
 #### Minimum Convex Polygon ####
 # --------------------------- #
