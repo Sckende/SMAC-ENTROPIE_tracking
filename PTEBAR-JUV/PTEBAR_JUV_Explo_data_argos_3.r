@@ -240,24 +240,25 @@ argos6.ls <- lapply(a.list2, function(x){
   x
 })
 
-# Spatial object
+# SPATIAL object & extraction of projected and non projected coords ####
+argos7 <- do.call('rbind', argos6.ls)
 
-argos6.ls.sp <- lapply(argos6.ls, function(x){
-  x <- sf::st_as_sf(x,
+argos7.sp <- sf::st_as_sf(argos7,
                     coords = c('Longitude', 'Latitude'),
                     crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
-  x$Vessel <- as.factor(x$Vessel)
-  x
-})
 
+coordLatLon <- st_coordinates(argos7.sp)
+coordUTM <- st_coordinates(st_transform(argos7.sp,
+                                        crs = 32743))
+
+UTMDF <- as.data.frame(coordUTM)
+
+argos8 <- cbind(as.data.frame(argos7), coordUTM)
+head(argos8)
 # ---- Save the cleaned data ---- #
-# saveRDS(argos6.ls.sp,
+# saveRDS(argos8,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.rds")
 
-# write.table(do.call('rbind', argos6.ls.sp),
+# write.table(argos8,
 #             "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.txt",
-#             sep = '\t')
-
-# write.table(do.call('rbind', argos6.ls),
-#             "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED_noSPATIAL.txt",
 #             sep = '\t')
