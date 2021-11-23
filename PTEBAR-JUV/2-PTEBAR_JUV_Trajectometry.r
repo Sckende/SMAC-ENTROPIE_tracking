@@ -12,18 +12,11 @@
 rm(list = ls())
 
 # ---- PACKAGES ----
-
-library(mapview)
-library(dplyr)
-library(sf)
-library(lubridate)
-library(adehabitatHR)
-library(adehabitatLT)
-library(rgdal)
-library(sp)
+source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
 
 # ---- DATA ----
 argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED_speed.rds")
+
 str(argos)
 
 # ---- WORKING on two devices ----
@@ -31,23 +24,13 @@ str(argos)
 ar <- argos[[1]]
 # hist(table(ar$point.group))
 
-#### Retrieve the lat/long coordinates from sf object
+#### Retrieve the UTM coordinates from sf object
 coords <- st_coordinates(ar)
 coords.DF <- as.data.frame(coords)
-names(coords.DF) <- c('lon', 'lat')
-
-#### Convert lat/long coordinates to UTM
-coords <- SpatialPoints(coords,
-                        proj4string = CRS('+proj=longlat')) # conversion in sp object
-coord.UTM <- spTransform(coords,
-                         CRS('+init=epsg:32742')) # Transforming coordinate to UTM using EPSG=32742 for WGS=84, UTM Zone=42S
-coord.UTM.DF <- as.data.frame(coord.UTM)
+names(coords.DF) <- c('X', 'Y')
 
 #### Complete coordinates in dataframe
-ar <- cbind(ar, coords.DF, coord.UTM.DF)
-
-#### Deletion of the sf geometry column
-ar <- as.data.frame(ar)[, - length(names(ar))]
+ar <- cbind(as.data.frame(ar)[, - length(names(ar))], coords.DF)
 
 #### Specific to the work on a single device ####
 # Deletion of unused factor level
@@ -84,7 +67,7 @@ head(t)
 #### Speed conversion ####
 t$speed <- t$dist / t$dt # Speed in m/s
 t$speed.km.h <- t$speed * 0.001 / (1/3600)
-par(mfrow = c(1, 2)); barplot(t$speed); barplot(speed2)
+par(mfrow = c(1, 2)); barplot(t$speed); barplot(ar$speed.m.sec)
 summary(t$speed); summary(t$speed.km.h)
 
 #### Check for speed outliers ####
@@ -119,8 +102,8 @@ bursts <- lapply(bursts, function(x){
 })
 
 bursts.out <- do.call('rbind', bursts)
-bursts.out <- bursts.out[bursts.out$speed.km.h > 100,]
 bursts.out <- bursts.out[!is.na(bursts.out$speed.km.h),]
+barplot(bursts.out$speed.km.h)
 
 # ---- WORKING on all devices ----
 #### Creation of ltraj object ####
@@ -129,21 +112,11 @@ argos.ltraj <- lapply(argos, function(x){ # List of list object - First level = 
   
   coords <- st_coordinates(x)
   coords.DF <- as.data.frame(coords)
-  names(coords.DF) <- c('lon', 'lat')
-  
-  # Convert lat/long coordinates to UTM
-  coords <- SpatialPoints(coords,
-                          proj4string = CRS('+proj=longlat')) # conversion in sp object
-  coord.UTM <- spTransform(coords,
-                           CRS('+init=epsg:32742')) # Transforming coordinate to UTM using EPSG=32742 for WGS=84, UTM Zone=42S
-  coord.UTM.DF <- as.data.frame(coord.UTM)
+  names(coords.DF) <- c('X', 'Y')
   
   # Complete coordinates in dataframe
-  x <- cbind(x, coords.DF, coord.UTM.DF)
-  
-  # Deletion of the sf geometry column
-  x <- as.data.frame(x)[, - length(names(x))]
-  
+  x <- cbind(as.data.frame(x)[, - length(names(x))], coords.DF)
+
   # Specific to the work on a single device 
   # Deletion of unused factor level
   x <- droplevels(x)
@@ -177,13 +150,23 @@ argos.ltraj.speed <- lapply(argos.ltraj, function(x){
     }
     
   })
+  
+  x <- do.call('rbind', x)
+  x
+  
 })
+par(mfrow = c(1, 2))
+for(i in 1:length(argos)){
+  barplot(argos.ltraj.speed[[i]]$speed.m.s)
+  barplot(argos[[i]]$speed.m.sec)
+  
+}
 
 # Creation of list with speed outliers for each device
 argos.speed.out2 <- lapply(argos.ltraj.speed, function(x){
   
   x <- do.call('rbind', x)
-  x <- x[x$speed.km.h > 100,]
+  x <- x[x$speed.km.h > 100,] # Revoir la valeur seuil
   x <- x[!is.na(x$speed.km.h),]
   x
   
