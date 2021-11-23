@@ -1,19 +1,10 @@
 # Exploration des données Argos déployées sur des juvéniles pétrel de Barau en avril 2017 et 2018
 # Data à l'origine du papier de Weimerskirch et al 2016 - Wettability of juvenile plumage as a major cause of mortality threatens endangered Barau’s petrel
-# Utilisation des données récupérées auprès de P. Pinet
+# Utilisation des données récupérées auprès de P. Pinet et CLEAN
 
 rm(list = ls())
+source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
 
-library('mapview')
-library('leaflet')
-library('leafpop')
-library('sf')
-library('sp')
-library('lubridate')
-library('dplyr')
-library('adehabitatHR')
-library('viridis')
-library('viridisLite')
 
 # ------------------------------------------------- #
 #### Loading and treatment of data 1 - METADATA #### 
@@ -40,27 +31,18 @@ infos_argos2 <- infos_argos2[, c(2, 1, 3:8)]
 # ------------------------------------------------------------------ #
 #### Loading and treatment of data 2 - RAW cleaned localisations ####
 # ---------------------------------------------------------------- #
-argos <- do.call('rbind', readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.rds'))
-head(argos)
-names(argos)[1] <- 'PTT'
-# ---- Date class
-argos$Date <- as.POSIXct(argos$Date,
-                         format = "%Y-%m-%d %H:%M") # Date format
-argos$deploy <- as.POSIXct(argos$deploy,
-                           format = "%Y-%m-%d %H:%M") # Date format
+argos <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.rds')
 
+head(argos)
+names(argos)
+names(argos)[1] <- 'PTT'
+
+# ---- Date class
 class(argos$Date)
 summary(argos$Date)
 barplot(table(argos$Date))
 year(head(argos$Date))
 table(year(argos$Date))
-
-# ---- Retrieve the coords from sf object
-
-coords1 <- st_coordinates(argos)
-coords2 <- as.data.frame(coords1)
-names(coords2) <- c('Longitude', 'Latitude')
-argos <- cbind(argos, coords2)
 
 # ---- Summary of device recordings
 
@@ -88,31 +70,24 @@ arg_bil2 <- left_join(arg_bil,
 arg_bil2$duration_trip_day <- arg_bil2$max_date - date(arg_bil2$deploy)  
 
 # ---- Max distance from Reunion island and total distance traveled 
-# Conversion in sf Spatial Object
+# Conversion in non projected sf Spatial Object to obtain meter unit
+
 projLatLon <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 # UTM 43S corresponding to the center of the Indian ocean
 # UTM 43 => 32743 
-projUTM <- '+init=epsg:32743'
+# projUTM <- '+init=epsg:32743'
 
-# Projected spatial object for computing distance matrice in meter
-argos <- st_transform(argos,
-                      crs = 32743)
-
-coords3 <- as.data.frame(st_coordinates(argos))
-names(coords3) <- c('X', 'Y')
-
-argos <- cbind(argos, coords3)
+argos_sf_UTM <- st_as_sf(argos,
+                         coords = c('X', 'Y'),
+                         crs = 32743)
 
 # Distance matrice computation
-argos_sf_list <- split(argos, argos$PTT)
+argos_UTM_list <- split(argos_sf_UTM, argos$PTT)
 
-argos_dist_mat <- lapply(argos_sf_list, st_distance) # Matrix distance for each device - *** WARNING *** Long process
+argos_dist_mat <- lapply(argos_UTM_list, st_distance) # Matrix distance for each device - *** WARNING *** Long process
 # st_distance() computes the distance between each points based on the great circle distances method (take the curvature of the earth into account)
 
 # saveRDS(argos_dist_mat, "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Distance_matrices.rds")
-
-
-# argos_dist_mat <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Distance_matrices.rds") # import distance matrices for juvenile petrels
 
 matrix_data <- data.frame()
 
@@ -168,7 +143,7 @@ arg_bil3 <- arg_bil3[order(arg_bil3$deploy),]
 # ------------------------------------------------------ #
 #### Production of Spatial Trackline object for maps ####
 # ---------------------------------------------------- #
-argos.sf.track <- argos %>%
+argos.sf.track <- argos_sf_UTM %>%
   group_by(PTT) %>% 
   summarize(do_union = FALSE) %>%
   st_cast("LINESTRING") # Creation of SF LINESTRINGS
@@ -182,25 +157,26 @@ mapview(argos.sf.track,
 #### RMD files ####
 # -------------- #
 
-# saveRDS(argos,
-# "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_points_ARGOS.rds")
+# saveRDS(argos_sf_UTM,
+# "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_points_UTM_ARGOS.rds")
 
 # saveRDS(argos.sf.track,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_tracks_ARGOS.rds")
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_tracks_UTM_ARGOS.rds")
 
 # ---------------------------------------- #
 #### Visualisation of relocation class ####
 # -------------------------------------- #
 
-table(argos$Class, useNA = 'always')
-argos$Class <- as.factor(argos$Class)
-argos$Class <- ordered(argos$Class, levels = c('B', 'A', '0', '1', '2', '3'))
+table(argos_sf_UTM$Class, useNA = 'always')
+argos_sf_UTM$Class <- as.factor(argos_sf_UTM$Class)
+argos_sf_UTM$Class <- ordered(argos_sf_UTM$Class, levels = c('B', 'A', '0', '1', '2', '3'))
 
-mapview(argos,
+mapview(argos_sf_UTM,
         zcol = 'Class',
         # col.regions = c('darkred', 'red', 'orange', 'yellow', 'green', 'darkgreen'),
         # col.regions = viridis,
         burst = T)
+
 #### A REPRENDRE ICI AVEC LES DONNEES COMPLETES ####
 # ----------------------------- #
 #### Minimum Convex Polygon ####
@@ -376,140 +352,23 @@ mapview(THElist[[2]],
           col.regions = 'black')
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ------------------------------------------------------------ #
-#### Rapid visual exploration of extrapolated trajectories ####
-# ---------------------------------------------------------- #
-argos.raw.list <- lapply(arg.list, function(x){
-  x <- x[!duplicated(x$Date),]
-})
-
-argos.raw <- do.call('rbind', argos.raw.list)
-
-projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
-argos.raw.sp <- sf::st_as_sf(argos.raw,
-                             coords = c('Longitude', 'Latitude'),
-                             crs = projcrs)
-argos.raw.sp$Vessel <- as.factor(argos.raw.sp$Vessel)
-
-mapview(argos.raw.sp,
-        zcol = 'Vessel',
-        burst = T,
-        legend = F)
-
-argos.raw.track <- argos.raw.sp %>%
-  group_by(Vessel) %>% 
-  summarize(do_union = FALSE) %>%
-  st_cast("LINESTRING") # Creation of SF LINESTRINGS
-
-mapview(argos.raw.track,
-        zcol = 'Vessel',
-        burst = T,
-        legend = F)
-# ------------------------------------------------------------ #
-#### Rapid visual exploration of extrapolated trajectories ####
-# ---------------------------------------------------------- #
-
-projcrs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
-argos_sp <- sf::st_as_sf(argos2.qual,
-                         coords = c('Longitude', 'Latitude'),
-                         crs = projcrs)
-
-# argos_sp$Vessel <- as.factor(argos_sp$Vessel)
-
-track_lines <- argos_sp %>%
-  group_by(Vessel) %>% 
-  summarize(do_union = FALSE) %>%
-  st_cast("LINESTRING") # Creation of SF LINESTRINGS
-
-track_lines <- left_join(track_lines, arg_bil2, by = 'Vessel')
-
-track_lines$popup_info <- paste0("<b>PTT</b> ",
-                                 track_lines$Vessel,
-                                 "<br/>",
-                                 "<b>Durée de l'enregistrement </b>",
-                                 track_lines$max_date - track_lines$deploy)
-# saveRDS(track_lines,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_track_lines_data.rds")
-
-argos_sp$Vessel <- as.factor(argos_sp$Vessel)
-track_lines$Vessel <- as.factor(track_lines$Vessel)
-
-mapview(argos_sp,
-        zcol = 'Vessel',
-        burst = T,
-        homebutton = F) 
-# saveRDS(map_points,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_raw_map_points.rds")
-# + 
-
-mapview(track_lines,
-        zcol = 'Vessel',
-        # homebutton = F,
-        popup = popupTable(track_lines,
-                           zcol = 'popup_info',
-                           feature.id = FALSE,
-                           row.numbers = FALSE,
-                           className = 'mapview-popup'),
-        burst = TRUE
-)
-# saveRDS(map_lines,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_raw_map_lines.rds")
-
 # ------------------------------------------------------- #
 #### Rapid visual exploration of trajectories on land ####
 # ----------------------------------------------------- #
 run <- st_read("C:/Users/ccjuhasz/Desktop/SMAC/SPATIAL_data_RUN/Admin/REU_adm0.shp")
+argos_sf_LL <- st_as_sf(argos,
+                        coords = c('Longitude', 'Latitude'),
+                        crs = st_crs(run))
 
-in_run <- st_intersection(argos_sp, run)
+st_crs(run)
+st_crs(argos_sf_LL)
+in_run <- st_intersection(argos_sf_LL, run)
 
 # saveRDS(in_run,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_in_Run_points_data.rds")
 
 mapview(in_run,
-        zcol = 'Vessel',
+        zcol = 'PTT',
         burst = T,
         homebutton = F)
 # mapview(track_lines[track_lines$Vessel == '166568',]) # Back and forth from Reunion Island before to go toward Tanzania

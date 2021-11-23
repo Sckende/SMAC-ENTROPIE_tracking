@@ -7,12 +7,7 @@
 rm(list = ls())
 
 # ---- Packages -----
-library('mapview')
-library('leaflet')
-library('leafpop')
-library('sf')
-library('lubridate')
-library('dplyr')
+source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
 
 # ---- Data ----
 argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_argos_data.txt",
