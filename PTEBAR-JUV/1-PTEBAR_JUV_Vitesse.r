@@ -3,11 +3,12 @@
 # script where computation of point.group is done --> PTEBAR_JUV_Explo_data_argos_3.r
 # --------------------------------------------------------------- #
 rm(list = ls())
-require(mapview)
-require(lubridate)
-require(sf)
+source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
 
 argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.rds")
+names(argos)
+summary(argos)
+
 
 # summary(argos[['166566']])
 
@@ -81,12 +82,19 @@ argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV
 # barplot(dev$speed.m.sec)
 
 # APPLICATION on the complete data ####
+argos.UTM <- st_as_sf(argos,
+                      coords = c('X', 'Y'),
+                      crs = 32743)
 
-argos2 <- lapply(argos, function(y){
+
+argos.ls <- split(argos.UTM, argos$Vessel)
+
+argos.ls2 <- lapply(argos.ls, function(y){
   
   y.list <- split(y, y$point.group)
   
   y.list <- lapply(y.list, function(x){
+    
     # Distance matrice
     matr <- st_distance(x)
     time <- difftime(c(x$Date[-1], NA),
@@ -119,14 +127,16 @@ y
   
 })
 
-lapply(argos2,
+lapply(argos.ls2,
        function(x){
          summary(x$speed.m.s)
        })
 
 par(mfrow = c(1, 2))
-lapply(argos2,
+lapply(argos.ls2,
        function(x){
+         
+         x$speed.m.s[x$speed.m.s > 40] <- NA # Outlier speed filter
          hist(x$speed.m.s,
               main = unique(x$Vessel),
               xlab = 'Speed (m/s)',
@@ -136,5 +146,7 @@ lapply(argos2,
                  ylab = 'Speed (m/s)')
        })
 
-# saveRDS(argos2,
+
+
+# saveRDS(argos.ls2,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED_speed.rds")
