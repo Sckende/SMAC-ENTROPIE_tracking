@@ -33,3 +33,12 @@ argos.list2 <- lapply(argos.list, function(x){
 
 tt <- do.call('rbind', argos.list2)
 table(tt$buffer, tt$Class, useNA = 'always')
+
+tt <- tt %>% arrange(Vessel, Date) 
+
+tt.list <- split(tt, tt$Vessel)
+
+test <- tt.list[[1]]
+class(test)
+test$buffer[is.na(test$buffer)] <- 0
+mapview(test) + mapview(st_buffer(test, dist = test$buffer))
