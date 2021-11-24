@@ -250,8 +250,13 @@ UTMDF <- as.data.frame(coordUTM)
 
 argos8 <- cbind(as.data.frame(argos7), coordUTM)
 head(argos8)
+
+argos9 <- st_as_sf(argos8,
+                   coords = c('X', 'Y'),
+                   crs = 32743)
+argos9 <- cbind(argos9, coordUTM)
 # ---- Save the cleaned data ---- #
-# saveRDS(argos8,
+# saveRDS(argos9,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.rds")
 
 # write.table(argos8,
