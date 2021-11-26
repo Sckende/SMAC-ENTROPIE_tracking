@@ -128,7 +128,8 @@ argos.ltraj <- lapply(argos, function(x){ # List of list object - First level = 
   # Conversion to ltraj object
   ar.traj <- as.ltraj(xy = x[, c('X', 'Y')], # UTM coordinates for meter unitin distance computation
                       date = x$Date,
-                      id = x$burst) # Trajectory split based on the burst of points
+                      id = x$burst,
+                      infolocs = x[, c('Vessel', 'Class')]) # Trajectory split based on the burst of points
   
   ar.traj
   
@@ -137,7 +138,16 @@ argos.ltraj <- lapply(argos, function(x){ # List of list object - First level = 
 #### Creation & exploration of speed variable ####
 
 # Speed computation for each burst for each device
+
+# 1 - Save the infoLoc part of the ltraj object
+infosLocs <- lapply(argos.ltraj, function(x){
+  x <- infolocs(x)
+  x <- do.call('rbind', x)
+})
+
+# 2 - speed computation
 argos.ltraj.speed <- lapply(argos.ltraj, function(x){
+  
   x <- lapply(x, function(y){
     
     if(length(y) == 1){
@@ -155,6 +165,8 @@ argos.ltraj.speed <- lapply(argos.ltraj, function(x){
   x
   
 })
+
+
 par(mfrow = c(1, 2))
 for(i in 1:length(argos)){
   barplot(argos.ltraj.speed[[i]]$speed.m.s)
@@ -162,12 +174,68 @@ for(i in 1:length(argos)){
   
 }
 
+
+
 # Creation of list with speed outliers for each device
 argos.speed.out2 <- lapply(argos.ltraj.speed, function(x){
   
-  x <- do.call('rbind', x)
-  x <- x[x$speed.km.h > 100,] # Revoir la valeur seuil
-  x <- x[!is.na(x$speed.km.h),]
+  # x <- do.call('rbind', x)
+  x <- x[x$speed.m.s > 20,] # Revoir la valeur seuil
+  x <- x[!is.na(x$speed.m.s),]
   x
   
+})
+
+speed.outl <- do.call('rbind', argos.speed.out2)
+speed.outl$PTT <- stringr::str_sub(row.names(speed.outl), 1,6)
+ 
+speed.outl %>%
+  group_by(PTT) %>% 
+  summarise(min(speed.m.s), max(speed.m.s))
+
+# Fusion of speed DF and infosLocs
+transi <- cbind(do.call('rbind', argos.ltraj.speed), do.call('rbind', infosLocs))
+
+argos.ltraj.speed2 <- split(transi, transi$Vessel)
+
+# Visualization of bird speed 
+argos.ltraj.speed2
+
+lapply(argos.ltraj.speed2, function(x){
+  
+  speed1 <- x
+#   argos1 <- argos[[unique(x$Vessel)]]
+# })
+# 
+# 
+# 
+# argos11 <- left_join(argos1, speed1[, -c(1, 2)], by = c('Date' = 'date'))
+
+speed1$col_class[speed1$Class %in% c('A', 'B')] <- 'darkred'
+speed1$col_class[speed1$Class %in% c('3', '2')] <- 'darkgreen'
+speed1$col_class[speed1$Class %in% c('0', '1')] <- 'darkorange'
+speed1$col_class[speed1$Class == 'U'] <- 'darkgrey'
+
+# hist(speed1$speed.m.s, breaks = dim(speed1)[1])
+# barplot(speed1$speed.m.s, col = speed1$col_class) 
+
+library(plotly)
+fig <- plot_ly(
+  
+  x = as.character(speed1$date),
+  
+  y = speed1$speed.m.s,
+  
+  name = unique(speed1$Vessel),
+  
+  type = "bar",
+  marker = list(color = speed1$col_class)
+  
+) %>%
+  layout(title = unique(speed1$Vessel),
+         xaxis = list(title = 'Records',
+                      showticklabels = FALSE))
+
+
+fig
 })

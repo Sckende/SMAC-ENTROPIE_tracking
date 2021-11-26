@@ -3,8 +3,10 @@
 # --------------------------------------------------------------------- #
 
 rm(list = ls())
-
+# -------------------- #
 # Packages loading ####
+# -------------------- #
+
 source('C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r')
 
 # Data loading ####
@@ -20,7 +22,12 @@ vec1 <- 180/pi * atan2(zon1, mer1) + 180
 hist(values(vec1))
 
 argos1 <- argos[year(argos$deploy) == 2017,]
+# Check if same number and names of layers
+all(names(zon1) == names(mer1))
+all(names(zon1) == names(vec1))
+all(names(zon1) == names(speed1))
 
+layers1 <- names(speed1)
 
 ## YEAR 2 - 2018 ####
 
@@ -34,7 +41,16 @@ hist(values(vec2))
 
 argos2 <- argos[year(argos$deploy) == 2018,]
 
+# Check if same number and names of layers
+all(names(zon2) == names(mer2))
+all(names(zon2) == names(vec2))
+all(names(zon2) == names(speed2))
+
+layers2 <- names(speed2)
+
+# --------------------- #
 # AVRIL 2017 & 2018 ####
+# -------------------- #
 
 ## Locations points ####
 argos.list <- split(argos, year(argos$deploy))
@@ -202,3 +218,141 @@ y2period4 +
 
 # y2period5 +
 #   layer(sp.points(as(st_transform(arg.env.period[[2]][[5]], 4326), 'Spatial')))
+
+# ------------------------ #
+# From APRIL to AUGUST ####
+# ---------------------- #
+
+# period 1 - 1-15 APRIL
+# period 2 - 16-30 APRIL
+# period 3 - 1-15 MAY
+# period 4 - 16-31 MAY
+# period 5 - 1-15 JUNE
+# period 6 - 16-30 JUNE
+# period 7 - 1-15 JULY
+# period 8 - 16-31 JULY
+# period 9 - 1-15 AUGUST
+# period 10 - 16-31 AUGUST
+
+## Locations points ####
+argos.list <- split(argos, year(argos$deploy))
+
+arg.envol <- lapply(argos.list, function(x){
+  
+  x <- x[month(x$Date) %in% 4:8,]
+})
+
+lapply(arg.envol, function(x){
+  table(month(x$Date))
+})
+
+arg.env.period <- lapply(arg.envol, function(y){
+  
+  y <- split(y, month(y$Date))
+  
+  y <- lapply(y, function(z){
+    
+    z$period[day(z$Date) %in% 1:15] <- 1
+    z$period[day(z$Date) %in% 16:31] <- 2
+    z
+    
+  })
+  y <- do.call('rbind', y)
+  y
+})
+
+
+lapply(arg.env.period, function(x){
+  table(x$period)
+  # sum(table(x$period))
+  
+})
+
+
+
+arg.env.period <- lapply(arg.env.period, function(x){
+  x <- split(x, list(x$period, month(x$Date)))
+  x
+})
+
+# First try on 2017 only
+# ---- test ---- #
+test2017 <- arg.env.period[[1]]
+
+init <- 1
+for(i in  1:length(test2017)){
+
+  test2017[[i]]$period <- init
+
+  init <- init + 1
+}
+
+tt2017 <- do.call('rbind', test2017)
+table(tt2017$period)
+
+# ---- #
+
+test2018 <- arg.env.period[[2]]
+
+init <- 1
+for(i in  1:length(test2018)){
+  
+  test2018[[i]]$period <- init
+  
+  init <- init + 1
+}
+
+tt2018 <- do.call('rbind', test2018)
+table(tt2018$period)
+
+# Layers manipulations
+stringr::str_which(layers2, '.04.30.') # give the indexes of strings that contain a pattern match
+
+cut.lay <- stringr::str_which(layers2, 'X2018.04.16.00.00.00|X2018.05.01.00.00.00|X2018.05.16.00.00.00|X2018.06.01.00.00.00|X2018.06.16.00.00.00|X2018.07.01.00.00.00|X2018.07.16.00.00.00|X2018.08.01.00.00.00|X2018.08.16.00.00.00|X2018.09.01.00.00.00')
+cut.lay <- c(1, cut.lay)
+
+# layers2[stringr::str_detect(layers2, 'X2018.04.16.|X2018.05.01.|X2018.05.16.|X2018.06.01.|X2018.06.16.|X2018.07.01.|X2018.07.16.|X2018.08.01.|X2018.08.16.|X2018.09.01.')]
+
+
+for(i in 1:(length(cut.lay)-1)){
+  
+
+  begin <- cut.lay[i]
+  end <- cut.lay[i + 1] - 1
+  
+  print(end - begin)
+  # ---- #
+  meanSpeed <- mean(speed1[[begin:end]])
+  meanVec <- mean(vec1[[begin:end]])
+
+  # ---- #
+  
+  png(paste("C:/Users/ccjuhasz/Desktop/test/2017/", i, ".png", sep = ''),
+    res=300,
+    width=30,
+    height=30,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+
+  print(vectorplot(meanVec, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = meanSpeed) +
+    layer(sp.points(as(st_transform(test2017[[i]], 4326), 'Spatial'), col = 'white')))
+
+
+  dev.off()
+  
+}
+
+meanVec <- mean(vec2[[1:604]])
+meanSpeed <- mean(speed2[[1:604]])      
+
+png(paste("C:/Users/ccjuhasz/Desktop/test/2018/", 'global', ".png", sep = ''),
+    res=300,
+    width=30,
+    height=30,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+print(vectorplot(meanVec, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = meanSpeed) +
+        layer(sp.points(as(st_transform(tt2018, 4326), 'Spatial'), col = 'white')))
+dev.off()

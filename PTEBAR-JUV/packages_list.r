@@ -7,6 +7,9 @@ library(adehabitatLT)
 library(rgdal)
 library(sp)
 
+library(latticeExtra)
+library(rasterVis)
+
 
 library(leaflet)
 library(leafpop)
