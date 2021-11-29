@@ -148,6 +148,10 @@ argos.sf.track <- argos_sf_UTM %>%
   summarize(do_union = FALSE) %>%
   st_cast("LINESTRING") # Creation of SF LINESTRINGS
 
+argos.sf.track <- left_join(argos.sf.track,
+                            infos_argos2[, c(1, 2)],
+                            by = 'PTT')
+
 mapview(argos.sf.track,
         zcol = 'PTT',
         burst = T,
@@ -274,7 +278,7 @@ for(i in 1:length(v)){
 }
 
 kud1 <- kernelUD(argos.sp,
-                h = 1, # ici 1 degré (relié au type de projection, si lat/lon (non projeté) = degré, si UTM (projeté) = m) en rapport à la précision des GLS env. 180km (1deg = 111m) - pour ARGOS précision environ 1km, donc 1/100 degré
+                h = 1, # ici 1 degré (relié au type de projection, si lat/lon (non projeté) = degré, si UTM (projeté) = m) en rapport à la précision des GLS env. 180km (1deg = 111km) - pour ARGOS précision environ 1km, donc 1/100 degré
                 grid = 500) # ici correspond 500x500 degrés (1deg = 111 km à l'équateur)
 KUDvol1 <- getvolumeUD(kud1)
 ver90.1 <- getverticeshr(KUDvol1, 90)

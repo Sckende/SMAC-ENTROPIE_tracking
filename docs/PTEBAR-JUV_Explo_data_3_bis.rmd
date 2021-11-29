@@ -1,0 +1,105 @@
+---
+title: "PTEBAR-JUV - Kernel adultes & localisations juvéniles"
+author: "CCJ"
+date: "07/10/2021"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+---
+<style>
+
+.main-container{
+max-width:80vw !important;
+}
+</style>
+
+```{r, include = F}
+
+# Output figure in HTML5
+if (knitr::is_html_output()) knitr::knit_hooks$set(
+  plot = function(x, options) {
+    cap  <- options$fig.cap  # figure caption
+    tags <- htmltools::tags
+    as.character(tags$figure(
+      tags$img(src = x, alt = cap),
+      tags$figcaption(cap)
+    ))
+  }
+)
+
+# packages
+require(knitr)
+require(mapview)
+require(leafpop)
+require(tidyverse)
+require(dplyr)
+require(sf)
+require(sp)
+require(viridis)
+require(lubridate)
+require(htmltools)
+library(adehabitatHR)
+```
+  
+# Représentation globale données GLS PTEBAR adultes  
+  
+ 
+  
+```{r, echo = F, warning=F}
+ker_a <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_AD_GLS_hivernage_KERNEL905025_Audrey.rds')
+
+ker_p <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_AD_GLS_hivernage_KERNEL905025_Patrick.rds')
+
+gls.hiv <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_AD_GLS_hivernage_points.rds')
+
+# --- #
+argos.sp <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED_speed.rds")
+argos.track <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_tracks_UTM_ARGOS.rds')
+
+
+mapview(gls.hiv[[2]],
+        cex = 2,
+        layer.name = 'GLS_2008-2009',
+        legend = F,
+        homebutton = F) +
+  mapview(gls.hiv[[1]],
+          cex = 2,
+          col.regions = 'darkorange',
+          layer.name = 'GLS_2008-2012',
+        legend = F,
+        homebutton = F) +
+mapview(ker_a,
+        col.regions = viridis(length(ker_a)),
+        layer.name = c('HR90_2008-2012', 'HR50_2008-2012', 'HR25_2008-2012'),
+        legend = F,
+        homebutton = F) +
+  mapview(ker_p,
+          col.regions = viridis(length(ker_p)),
+          layer.name = c('HR90_2008-2009', 'HR50_2008-2009', 'HR25_2008-2009'),
+        legend = F,
+        homebutton = F)
+```
+  
+# Représentation globale données GLS PTEBAR adultes  
+  
+```{r, echo = F, warning=F}
+mapview(argos.track[argos.track$year == 2017,],
+        zcol = 'PTT',
+        # burst = T,
+        layer.name = 'Déploiement_2017',
+        legend = F,
+        homebutton = F) +
+mapview(argos.track[argos.track$year == 2018,],
+        zcol = 'PTT',
+        # burst = T,
+        layer.name = 'Déploiement_2018',
+        legend = F,
+        homebutton = F) +
+mapview(ker_a,
+        col.regions = viridis(length(ker_a)),
+        layer.name = c('HR90_2008-2012', 'HR50_2008-2012', 'HR25_2008-2012'),
+        legend = F,
+        homebutton = F) 
+```    
