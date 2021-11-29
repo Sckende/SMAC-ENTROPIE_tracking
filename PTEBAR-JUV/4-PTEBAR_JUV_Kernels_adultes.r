@@ -140,9 +140,9 @@ mapview(ker_a,
 
 # saveRDS(ker_a,
 #         'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_AD_GLS_hivernage_KERNEL905025_Audrey.rds')
-
+# 
 # saveRDS(ker_p,
 #         'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_AD_GLS_hivernage_KERNEL905025_Patrick.rds')
-
+# 
 # saveRDS(list(hiv_a, hiv_p),
 #         'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_AD_GLS_hivernage_points.rds')
