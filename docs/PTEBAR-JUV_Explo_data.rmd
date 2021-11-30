@@ -31,6 +31,7 @@ require(sf)
 require(lubridate)
 require(htmltools)
 library(gridExtra)
+library(viridis)
 ```
 
 ```{css, echo = F}
@@ -68,19 +69,19 @@ kable(tabb, align = 'cccccccc')
 Les balises ont été programmées pour commencer à enregistrer les localisations AVANT leur déploiement. Il est donc nécessaire de retirer les localisations enregistrées avant la date de déploiement pour chaque balise.  
   
 ```{r, echo = F, class.source = 'test'}
-tabb2 <- as.data.frame(readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Bilan_ARGOS_data.rds"))[, c(1, 2, 4:8, 10:14, 15)]
+tabb2 <- as.data.frame(readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Bilan_ARGOS_data.rds"))[, c(14, 1, 2, 4:8, 12, 10, 11, 13)]
 
 
 
-r <- apply(tabb2[, c(4:7, 10:11)],
+r <- apply(tabb2[, c(5:9, 11)],
            2,
            round,
            digits = 2)
 
 
-tabb3 <- cbind(tabb2[, -c(4:7, 10:11)], r)
+tabb3 <- cbind(tabb2[, -c(5:9, 11)], r)
 
-tabb3 <- tabb3[, c(7, 1:3, 8:11, 13, 5, 12, 6)]
+tabb3 <- tabb3[, c(1:4, 7:11, 5, 12, 6)]
 
 
 
@@ -95,12 +96,12 @@ kable(tabb3
   
 * **depYear** - Année de déploiement de la balise  
 * **PTT** - Identifiant de la balise ARGOS  
-* **loc** - Nombre de localisations enregistrées (sans les localisations de classe U et Z)  
-* **dMax** - Dernière date où une localisation a été enregistrée  
+* **loc** - Nombre de localisations enregistrées (sans les localisations de classe Z)  
+* **dateMax** - Dernière date où une localisation a été enregistrée  
 * **max/minLat** - Latitude maximale et minimale  
 * **max/minLon** - Longitude maximale et minimale  
 * **distTrav** - Distance totale parcourue (km)  
-* **tripDay** - Nombre de jours pour parcourir la distance totale  
+* **distTravDay** - Nombre de jours pour parcourir la distance totale  
 * **maxDist** - Distance maximale atteinte par rapport à la colonie (km)  
 * **maxDistDay** - Nombre de jours pour atteindre le point le plus éloigné par rapport à la colonie  
   
@@ -169,6 +170,7 @@ Les successions de couleurs représentent un groupe de points enregistré avec u
 ```{r, echo=F}
 
 argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.rds")
+argos <- split(argos, argos$Vessel)
 
 
 argos.track <- do.call('rbind', argos) %>% group_by(Vessel) %>%  summarize(do_union = F) %>% st_cast('LINESTRING')
@@ -189,6 +191,8 @@ argos.track <- do.call('rbind', argos) %>% group_by(Vessel) %>%  summarize(do_un
   x.del <- lapply(argos, function(x){
     t <- table(round(x$delay)*-1)
   })
+  
+  viridisColor6 <- viridis(6)
 ```
   
 ### PTT 166566  
@@ -201,6 +205,7 @@ j <- barplot(x.del[[9]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[9],
+        col = ifelse(as.numeric(names(x.del[[9]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -208,6 +213,8 @@ axis(1,
      tick = F,
      cex.axis = 0.7)
 ```
+  
+**Figure 1.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
   
 ### PTT 166568  
   
@@ -217,6 +224,7 @@ j <- barplot(x.del[[10]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[10],
+        col = ifelse(as.numeric(names(x.del[[10]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -225,6 +233,8 @@ axis(1,
      cex.axis = 0.7)
 ```
   
+**Figure 2.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+    
 ### PTT 166569  
   
 ```{r, echo=F}
@@ -233,6 +243,7 @@ j <- barplot(x.del[[11]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[11],
+        col = ifelse(as.numeric(names(x.del[[11]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -241,6 +252,8 @@ axis(1,
      cex.axis = 0.7)
 ```
   
+**Figure 3.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+    
 ### PTT 166570  
   
 ```{r, echo=F}
@@ -249,6 +262,7 @@ j <- barplot(x.del[[12]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[12],
+        col = ifelse(as.numeric(names(x.del[[12]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -257,6 +271,8 @@ axis(1,
      cex.axis = 0.7)
 ```
   
+**Figure 4.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+    
 ### PTT 166571  
   
 ```{r, echo=F}
@@ -265,6 +281,7 @@ j <- barplot(x.del[[13]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[13],
+        col = ifelse(as.numeric(names(x.del[[13]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -273,6 +290,8 @@ axis(1,
      cex.axis = 0.7)
 ```
   
+**Figure 5.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+    
 ### PTT 166572  
   
 ```{r, echo=F}
@@ -281,6 +300,7 @@ j <- barplot(x.del[[14]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[14],
+        col = ifelse(as.numeric(names(x.del[[14]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -289,6 +309,8 @@ axis(1,
      cex.axis = 0.7)
 ```
   
+**Figure 6.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+    
 ### PTT 166573  
   
 ```{r, echo=F}
@@ -297,6 +319,7 @@ j <- barplot(x.del[[15]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[15],
+        col = ifelse(as.numeric(names(x.del[[15]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -305,6 +328,9 @@ axis(1,
      cex.axis = 0.7)
     
 ```
+  
+**Figure 7.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+  
   
   
 ## Déploiement 2018 
@@ -317,6 +343,7 @@ j <- barplot(x.del[[1]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[1],
+        col = ifelse(as.numeric(names(x.del[[1]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -325,6 +352,8 @@ axis(1,
      cex.axis = 0.7)
 ```
   
+**Figure 8.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+    
 ### PTT 162071  
   
 ```{r, echo=F}
@@ -333,6 +362,7 @@ j <- barplot(x.del[[2]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[2],
+        col = ifelse(as.numeric(names(x.del[[2]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -341,6 +371,8 @@ axis(1,
      cex.axis = 0.7)
 ```
   
+**Figure 9.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+    
 ### PTT 162072  
   
 ```{r, echo=F}
@@ -349,6 +381,7 @@ j <- barplot(x.del[[3]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[3],
+        col = ifelse(as.numeric(names(x.del[[3]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -357,6 +390,8 @@ axis(1,
      cex.axis = 0.7)
 ```
   
+**Figure 10.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+    
 ### PTT 162073  
   
 ```{r, echo=F}
@@ -365,6 +400,7 @@ j <- barplot(x.del[[4]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[4],
+        col = ifelse(as.numeric(names(x.del[[4]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -373,6 +409,8 @@ axis(1,
      cex.axis = 0.7)
 ```
   
+**Figure 11.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+    
 ### PTT 166561  
   
 ```{r, echo=F}
@@ -381,6 +419,7 @@ j <- barplot(x.del[[5]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[5],
+        col = ifelse(as.numeric(names(x.del[[5]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -389,6 +428,8 @@ axis(1,
      cex.axis = 0.7)
 ```
   
+**Figure 12.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+    
 ### PTT 166563  
   
 ```{r, echo=F}
@@ -397,6 +438,7 @@ j <- barplot(x.del[[6]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[6],
+        col = ifelse(as.numeric(names(x.del[[6]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -405,6 +447,8 @@ axis(1,
      cex.axis = 0.7)
 ```
   
+**Figure 13.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+    
 ### PTT 166564  
   
 ```{r, echo=F}
@@ -413,6 +457,7 @@ j <- barplot(x.del[[7]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[7],
+        col = ifelse(as.numeric(names(x.del[[7]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -421,6 +466,8 @@ axis(1,
      cex.axis = 0.7)
 ```
   
+**Figure 14.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+    
 ### PTT 166565  
   
 ```{r, echo=F}
@@ -429,6 +476,7 @@ j <- barplot(x.del[[8]],
         xlab = 'delay (h)',
         ylab = 'Occurence',
         main = names(x.del)[8],
+        col = ifelse(as.numeric(names(x.del[[8]])) >= 10, viridisColor6[3], viridisColor6[5]),
         xaxt = 'n')
 axis(1,
      at = j,
@@ -437,7 +485,9 @@ axis(1,
      cex.axis = 0.65,
      las = 2)
 ```
- 
+  
+**Figure 15.** Répartition des délais entre chaque point enregistrées. Les barres vertes correspondent aux délais entre les points de façon individuelle (delai de 0 à 10h). Les barres bleues correspondent aux délais entre les groupes de points (délai supérieur à 10h).  
+   
   
 # Classes de localisation & trajet par individu  
   
@@ -462,11 +512,15 @@ arg$Class <- ordered(arg$Class, levels = c('B', 'A', '0', '1', '2', '3'))
 t <- table(arg$Class[year(arg$deploy) == 2017])
 t1 <- table(arg$Class[year(arg$deploy) == 2018])
 
+col1 <- c('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF')
+col2 <- c('#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF','#FDE725FF', '#FDE725FF')
+
 # b1 <- 
   barplot(t,
         xlab = 'Classes de localisation',
         ylab = 'Nombre de localisations',
-        main = 'Déploiement 2017')
+        main = 'Déploiement 2017',
+        col = col1)
   
 ```
   
@@ -478,72 +532,190 @@ t1 <- table(arg$Class[year(arg$deploy) == 2018])
   barplot(t1,
         xlab = 'Classes de localisation',
         ylab = 'Nombre de localisations',
-        main = 'Déploiement 2018')
+        main = 'Déploiement 2018',
+        col = col1)
 
 # grid.arrange(b1, b2, ncol=2)
 ```
   
 ## Déploiement 2017  
   
-```{r, echo=F}
-x.plot2 <- lapply(argos, function(x){
-    
-    x$Class <- as.factor(x$Class)
-    x$Class <- ordered(x$Class, levels = c('B', 'A', '0', '1', '2', '3'))
 
-    mapview(x,
-        zcol = 'Class',
-        burst = T,
-        legend = F,
-        layer.name = unique(as.character(x$Vessel))) + mapview(argos.track[argos.track$Vessel == unique(as.character(x$Vessel)),],
-                                                               color = 'darkgrey',
-                                                               layer.name = 'Track'
-                                                               )
-  })
-
-```
   
 ### PTT 166566  
   
   
-```{r, echo=F}   
-x.plot2[[9]]
+```{r, echo=F}
+PTT <- '166566'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
 ### PTT 166568  
   
 ```{r, echo=F}
-x.plot2[[10]]
+PTT <- '166568'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
 ### PTT 166569  
   
 ```{r, echo=F}
-x.plot2[[11]]
+PTT <- '166569'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
 ### PTT 166570  
   
 ```{r, echo=F}
-x.plot2[[12]]
+PTT <- '166570'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('B', 'A', '0', '1', '2'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
 ### PTT 166571  
   
 ```{r, echo=F}
-x.plot2[[13]]
+PTT <- '166571'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
 ### PTT 166572  
   
 ```{r, echo=F}
-x.plot2[[14]]
+PTT <- '166572'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
 ### PTT 166573  
   
 ```{r, echo=F}
-x.plot2[[15]]
+PTT <- '166573'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
   
@@ -553,47 +725,200 @@ x.plot2[[15]]
 ### PTT 162070  
   
 ```{r, echo = F}  
-x.plot2[[1]]
+PTT <- '162070'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('U', 'B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('grey', '#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
 ### PTT 162071  
   
 ```{r, echo=F}
-x.plot2[[2]]
+PTT <- '162071'
+x <- argos[[PTT]]
+# unique(x$Class)
+
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('U', 'B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('grey', '#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
 ### PTT 162072  
   
 ```{r, echo=F}
-x.plot2[[3]]
+PTT <- '162072'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('U', 'B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('grey', '#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
 ### PTT 162073  
   
 ```{r, echo=F}
-x.plot2[[4]]
+PTT <- '162073'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('U', 'B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('grey', '#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
 ### PTT 166561  
   
 ```{r, echo=F}
-x.plot2[[5]]
+PTT <- '166561'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('U', 'B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('grey', '#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
 ### PTT 166563  
   
 ```{r, echo=F}
-x.plot2[[6]]
+PTT <- '166563'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('U', 'B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('grey', '#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
 ### PTT 166564  
   
 ```{r, echo=F}
-x.plot2[[7]]
+PTT <- '166564'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('U', 'B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('grey', '#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```
   
 ### PTT 166565  
   
 ```{r, echo=F}
-x.plot2[[8]]
+PTT <- '166565'
+x <- argos[[PTT]]
+# unique(x$Class)
+    x$Class <- as.factor(x$Class)
+    x$Class <- ordered(x$Class, levels = c('U', 'B', 'A', '0', '1', '2', '3'))
+    x.list <- split(x, x$Class)
+    
+        mapview(x.list,
+        # zcol = 'Class.num',
+        col.regions = list('grey', '#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        # col = list('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF'),
+        burst = T,
+        legend = T,
+        layer.name = PTT, map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap"),
+        homebutton = FALSE) +         
+          mapview(argos.track[argos.track$Vessel == PTT,],
+                                                               color = 'darkgrey',
+                                                               layer.name = 'Track',
+        homebutton = FALSE
+                                                               )
 ```

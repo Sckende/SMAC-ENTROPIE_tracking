@@ -82,6 +82,11 @@ mapview(ker_a,
         homebutton = F)
 ```
   
+Cette carte illustre les données issues des balises GLS déployées sur des adultes Pétrel de Barau, entre 2008 et 2012. La carte résume les éléments suivants :  
+    * **Points oranges** - Localisation des individus au cours de leur hivernage en 2008-2009. Le traitement des données brutes ont été réalisées avec le package **tripEstimation** dans le logiciel R, par Patrick Pinet.  
+    * **Points bleus** - Localisations des individus au cours des hivernages entre 2008 & 2012 (aucune données pour 2010 & 2011). Le traitement des données brutes ont été réalisées avec lepackage **GeoLight** par Audrey Jaeger.  
+    * **Polygones à 3 niveaux** - Kernels 90 (violet), 50 (turquoise) & 25 (jaune) pour chacun des deux groupes de points détaillées précédemment.  
+  
 # Représentation globale données GLS PTEBAR adultes  
   
 ```{r, echo = F, warning=F}
@@ -102,4 +107,7 @@ mapview(ker_a,
         layer.name = c('HR90_2008-2012', 'HR50_2008-2012', 'HR25_2008-2012'),
         legend = F,
         homebutton = F) 
-```    
+``` 
+  
+    
+Cette carte illustre les kernels 90 (violet), 50 (turquoise) & 25 (jaune) des adultes Pétrel de Barau pendant l'hivernage en 2008, 2009 & 2012 et les trajets des juvéniles en 2017 & 2018. Les kernels sont basées sur les localisations des adultes estimées avec le package **GeoLight** par Audrey Jaeger. Les données de juvéniles correspondent aux déploiements de balises GPS en avril 2017 (n = 7) et avril 2018 (n = 8).  
