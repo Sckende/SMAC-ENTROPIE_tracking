@@ -511,7 +511,7 @@ arg$Class <- as.factor(arg$Class)
 arg$Class <- ordered(arg$Class, levels = c('B', 'A', '0', '1', '2', '3'))
 t <- table(arg$Class[year(arg$deploy) == 2017])
 t1 <- table(arg$Class[year(arg$deploy) == 2018])
-
+# viridis colors
 col1 <- c('#FDE725FF', '#FDE725FF', '#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF')
 col2 <- c('#7AD151FF', '#22A884FF', '#2A788EFF', '#414487FF','#FDE725FF', '#FDE725FF')
 
