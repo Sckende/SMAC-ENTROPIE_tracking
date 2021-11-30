@@ -72,7 +72,7 @@ summary(t$speed); summary(t$speed.km.h)
 
 #### Check for speed outliers ####
 
-out <- t[t$speed.km.h > 100,]
+out <- t[t$speed.km.h > 20,]
 out <- out[!is.na(out$speed.km.h),]
 
 # ---- TEST with cutltraj function ----
@@ -104,6 +104,9 @@ bursts <- lapply(bursts, function(x){
 bursts.out <- do.call('rbind', bursts)
 bursts.out <- bursts.out[!is.na(bursts.out$speed.km.h),]
 barplot(bursts.out$speed.km.h)
+
+out2 <- bursts.out[bursts.out$speed.km.h > 20,]
+barplot(bursts.out$speed.km.h[bursts.out$speed.km.h <= 20])
 
 # ---- WORKING on all devices ----
 #### Creation of ltraj object ####
@@ -153,9 +156,9 @@ argos.ltraj.speed <- lapply(argos.ltraj, function(x){
     if(length(y) == 1){
       y$speed <- NA
     } else {
-      y$speed.m.s <- y$dist / y$dt
+      y$speed.m.s <- round(y$dist / y$dt)
       y$speed.m.s[1] <- NA
-      y$speed.km.h <- y$speed.m.s * 0.001 / (1/3600)
+      y$speed.km.h <- round(y$speed.m.s * 0.001 / (1/3600))
       y
     }
     
@@ -173,7 +176,6 @@ for(i in 1:length(argos)){
   barplot(argos[[i]]$speed.m.sec)
   
 }
-
 
 
 # Creation of list with speed outliers for each device
@@ -198,10 +200,10 @@ transi <- cbind(do.call('rbind', argos.ltraj.speed), do.call('rbind', infosLocs)
 
 argos.ltraj.speed2 <- split(transi, transi$Vessel)
 
-# Visualization of bird speed 
+# Visualization of bird speed - barplot & histogram
 argos.ltraj.speed2
 
-lapply(argos.ltraj.speed2, function(x){
+barplot.speed <- lapply(argos.ltraj.speed2, function(x){
   
   speed1 <- x
 #   argos1 <- argos[[unique(x$Vessel)]]
@@ -211,10 +213,12 @@ lapply(argos.ltraj.speed2, function(x){
 # 
 # argos11 <- left_join(argos1, speed1[, -c(1, 2)], by = c('Date' = 'date'))
 
-speed1$col_class[speed1$Class %in% c('A', 'B')] <- 'darkred'
-speed1$col_class[speed1$Class %in% c('3', '2')] <- 'darkgreen'
-speed1$col_class[speed1$Class %in% c('0', '1')] <- 'darkorange'
-speed1$col_class[speed1$Class == 'U'] <- 'darkgrey'
+speed1$col_class[speed1$Class %in% c('A', 'B')] <- '#FDE725FF'
+speed1$col_class[speed1$Class == '0'] <- '#7AD151FF'
+speed1$col_class[speed1$Class == '1'] <- '#22A884FF'
+speed1$col_class[speed1$Class == '2'] <- '#2A788EFF'
+speed1$col_class[speed1$Class == '3'] <- '#414487FF'
+speed1$col_class[speed1$Class == 'U'] <- 'grey'
 
 # hist(speed1$speed.m.s, breaks = dim(speed1)[1])
 # barplot(speed1$speed.m.s, col = speed1$col_class) 
@@ -224,7 +228,7 @@ fig <- plot_ly(
   
   x = as.character(speed1$date),
   
-  y = speed1$speed.m.s,
+  y = speed1$speed.km.h,
   
   name = unique(speed1$Vessel),
   
@@ -234,8 +238,54 @@ fig <- plot_ly(
 ) %>%
   layout(title = unique(speed1$Vessel),
          xaxis = list(title = 'Records',
-                      showticklabels = FALSE))
+                      showticklabels = FALSE),
+         yaxis = list(title = 'Speed (km/h)'))
 
 
 fig
 })
+
+histo.speed <- lapply(argos.ltraj.speed2, function(x){
+  
+  fig <- plot_ly(
+    
+    x = x$speed.km.h,
+    nbinsx = max(x$speed.km.h[!is.na(x$speed.km.h)]),
+    
+    name = unique(x$Vessel),
+    
+    type = "histogram"
+    
+  ) %>%
+    layout(title = unique(x$Vessel),
+           xaxis = list(title = 'Speed (km/h)'),
+           yaxis = list(title = 'Occurence'))
+  
+  
+  fig
+})
+# saveRDS(barplot.speed,
+#         'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_barplot_speed_list.rds')
+# saveRDS(histo.speed,
+#         'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_histo_speed_list.rds')
+# saveRDS(argos.ltraj.speed2,
+#         'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_argos_&_speed_ltraj.rds')
+
+
+# 3 - Mean speed per PTT
+ind.speed <- lapply(argos.ltraj.speed2, function(x){
+  
+  raw.mean <- mean(x$speed.km.h, na.rm = T)
+  raw.min <- min(x$speed.km.h, na.rm = T)
+  raw.max <- max(x$speed.km.h, na.rm = T)
+  mean.72max <- mean(x$speed.km.h[x$speed.km.h <= 72], na.rm = T)
+  
+  y <- c(as.character(unique(x$Vessel)), raw.mean, raw.min, raw.max, mean.20max)
+  y
+})
+
+ind.speed.range <- as.data.frame(do.call('rbind', ind.speed))
+names(ind.speed.range) <- c('PTT', 'rawMean', 'rawMin', 'rawMax', 'mean.72max')
+
+# saveRDS(ind.speed.range,
+#         'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_ind_speed_range.rds')
