@@ -1,0 +1,344 @@
+---
+title: "Speed data"
+author: "CCJ"
+date: "11/10/2021"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+---
+<style>
+
+.main-container{
+max-width:80vw !important;
+}
+</style>
+
+```{r setup, echo=FALSE, message=F, warning=F}
+source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
+
+bp <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_barplot_speed_list.rds')
+hist <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_histo_speed_list.rds')
+
+argos.speed.list <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_argos_&_speed_ltraj.rds')
+argos.track <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_tracks_UTM_ARGOS.rds')
+info.speed <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_ind_speed_range.rds')
+
+
+argos.speed <- do.call('rbind', argos.speed.list)
+argos.speed$speed.Class[is.na(argos.speed$speed.km.h)] <- 'NONE'     
+argos.speed$speed.Class[argos.speed$speed.km.h <= 72] <- 'ok' 
+argos.speed$speed.Class[argos.speed$speed.km.h > 72 & argos.speed$speed.km.h <= 150] <- 'rapide' 
+argos.speed$speed.Class[argos.speed$speed.km.h > 150] <- 'XtraRapide' 
+argos.speed.list <- split(argos.speed, argos.speed$Vessel)
+
+
+speed.class.list <- lapply(argos.speed.list, function(x){
+
+x.sf <- st_as_sf(x,
+                    coords = c('x', 'y'),
+                    crs = 32743)
+
+x.sf.list <- split(x.sf, x.sf$speed.Class)
+
+x.sf.list
+})
+```
+
+# Déploiement 2017  
+  
+
+  
+## PTT 166566  
+  
+  
+```{r, echo = FALSE, warning=F}
+PTT <- '166566'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF', '#22A884FF', '#FDE725FF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+```
+  
+## PTT 166568  
+  
+```{r, echo=F, warning=F}
+PTT <- '166568'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF', '#22A884FF', '#FDE725FF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+
+```
+  
+## PTT 166569  
+  
+```{r, echo=F, warning=F}
+PTT <- '166569'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF', '#22A884FF', '#FDE725FF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+```
+  
+## PTT 166570  
+  
+```{r, echo=F, warning=F}
+PTT <- '166570'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF', '#FDE725FF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+```
+  
+## PTT 166571  
+  
+```{r, echo=F, warning=F}
+PTT <- '166571'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF', '#FDE725FF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+```
+  
+## PTT 166572  
+  
+```{r, echo=F, warning=F}
+PTT <- '166572'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF', '#22A884FF', '#FDE725FF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+```
+  
+## PTT 166573  
+  
+```{r, echo=F, warning=F}
+PTT <- '166573'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+```
+  
+  
+# Déploiement 2018 
+
+  
+## PTT 162070  
+  
+```{r, echo=F, warning=F} 
+PTT <- '162070'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF', '#22A884FF', '#FDE725FF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+```
+  
+## PTT 162071  
+  
+```{r, echo=F, warning=F}
+PTT <- '162071'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+```
+  
+## PTT 162072  
+  
+```{r, echo=F, warning=F}
+PTT <- '162072'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF', '#22A884FF', '#FDE725FF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+```
+  
+## PTT 162073  
+  
+```{r, echo=F, warning=F}
+PTT <- '162073'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF', '#22A884FF', '#FDE725FF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+
+```
+  
+## PTT 166561  
+  
+```{r, echo=F, warning=F}
+PTT <- '166561'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF', '#22A884FF', '#FDE725FF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+```
+  
+## PTT 166563  
+  
+```{r, echo=F, warning=F}
+PTT <- '166563'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF', '#22A884FF', '#FDE725FF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+
+```
+  
+## PTT 166564  
+  
+```{r, echo=F, warning=F}
+PTT <- '166564'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF', '#22A884FF', '#FDE725FF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+```
+  
+## PTT 166565  
+  
+```{r, echo=F, warning=F}
+PTT <- '166565'
+
+mapview(speed.class.list[[PTT]],
+        col.regions = list('grey', '#2A788EFF', '#22A884FF', '#FDE725FF'),
+        homebutton = F,
+        map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
+  
+  mapview(argos.track[argos.track$PTT == PTT,],
+          legend = T,
+          layer.name = PTT,
+          color = 'darkgrey',
+          homebutton = F)
+bp[[PTT]]
+hist[[PTT]]
+```
