@@ -1,5 +1,5 @@
 ---
-title: "Speed data"
+title: "Vitesse de déplacement"
 author: "CCJ"
 date: "11/10/2021"
 output:
@@ -45,7 +45,8 @@ x.sf.list <- split(x.sf, x.sf$speed.Class)
 x.sf.list
 })
 ```
-
+Cette page à pour objectif de détailler et explorer la vitesse observée pour chaque individu. Chaque trajet a été divisé en groupe de points (*burst*) avec un délai minimum de 10h entre eux. Pour chaque burst, la vitesse entre chaque localisation a été calculée en divisant la distance par le temps écoulé entre le point **P** et le point **P-1**.  
+  
 # Déploiement 2017  
   
 
@@ -58,6 +59,7 @@ PTT <- '166566'
 
 mapview(speed.class.list[[PTT]],
         col.regions = list('grey', '#2A788EFF', '#22A884FF', '#FDE725FF'),
+        layer.name = list('not_estimated', 'speed <= 72 km/h', '72 km/h < speed <= 150 km/h', 'speed > 150 km/h'),
         homebutton = F,
         map.types = c("CartoDB.Positron", "OpenStreetMap", "OpenTopoMap")) + 
   
@@ -66,10 +68,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
+```
+  
+**Carte 1.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
 bp[[PTT]]
+```
+  
+**Figure 1.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
 hist[[PTT]]
 ```
   
+**Figure 2.** Histogramme des vitesses estimées de l'individu.   
+    
 ## PTT 166568  
   
 ```{r, echo=F, warning=F}
@@ -85,11 +99,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
-bp[[PTT]]
-hist[[PTT]]
-
 ```
   
+**Carte 2.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
+bp[[PTT]]
+```
+  
+**Figure 3.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
+hist[[PTT]]
+```
+  
+**Figure 4.** Histogramme des vitesses estimées de l'individu.   
+    
 ## PTT 166569  
   
 ```{r, echo=F, warning=F}
@@ -105,10 +130,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
+```
+  
+**Carte 3.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
 bp[[PTT]]
+```
+  
+**Figure 5.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
 hist[[PTT]]
 ```
   
+**Figure 6.** Histogramme des vitesses estimées de l'individu.   
+    
 ## PTT 166570  
   
 ```{r, echo=F, warning=F}
@@ -124,10 +161,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
+```
+  
+**Carte 4.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
 bp[[PTT]]
+```
+  
+**Figure 7.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
 hist[[PTT]]
 ```
   
+**Figure 8.** Histogramme des vitesses estimées de l'individu.   
+    
 ## PTT 166571  
   
 ```{r, echo=F, warning=F}
@@ -143,10 +192,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
+```
+  
+**Carte 5.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
 bp[[PTT]]
+```
+  
+**Figure 9.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
 hist[[PTT]]
 ```
   
+**Figure 10.** Histogramme des vitesses estimées de l'individu.   
+    
 ## PTT 166572  
   
 ```{r, echo=F, warning=F}
@@ -162,10 +223,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
+```
+  
+**Carte 6.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
 bp[[PTT]]
+```
+  
+**Figure 11.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
 hist[[PTT]]
 ```
   
+**Figure 12.** Histogramme des vitesses estimées de l'individu.   
+    
 ## PTT 166573  
   
 ```{r, echo=F, warning=F}
@@ -181,10 +254,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
+```
+  
+**Carte 7.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
 bp[[PTT]]
+```
+  
+**Figure 13.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
 hist[[PTT]]
 ```
   
+**Figure 14.** Histogramme des vitesses estimées de l'individu.   
+    
   
 # Déploiement 2018 
 
@@ -204,10 +289,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
+```
+  
+**Carte 8.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
 bp[[PTT]]
+```
+  
+**Figure 15.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
 hist[[PTT]]
 ```
   
+**Figure 16.** Histogramme des vitesses estimées de l'individu.   
+    
 ## PTT 162071  
   
 ```{r, echo=F, warning=F}
@@ -223,10 +320,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
+```
+  
+**Carte 9.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
 bp[[PTT]]
+```
+  
+**Figure 17.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
 hist[[PTT]]
 ```
   
+**Figure 18.** Histogramme des vitesses estimées de l'individu.   
+    
 ## PTT 162072  
   
 ```{r, echo=F, warning=F}
@@ -242,10 +351,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
+```
+  
+**Carte 10.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
 bp[[PTT]]
+```
+  
+**Figure 19.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
 hist[[PTT]]
 ```
   
+**Figure 20.** Histogramme des vitesses estimées de l'individu.   
+    
 ## PTT 162073  
   
 ```{r, echo=F, warning=F}
@@ -261,11 +382,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
-bp[[PTT]]
-hist[[PTT]]
-
 ```
   
+**Carte 11.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
+bp[[PTT]]
+```
+  
+**Figure 21.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
+hist[[PTT]]
+```
+  
+**Figure 22.** Histogramme des vitesses estimées de l'individu.   
+    
 ## PTT 166561  
   
 ```{r, echo=F, warning=F}
@@ -281,10 +413,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
+```
+  
+**Carte 12.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
 bp[[PTT]]
+```
+  
+**Figure 23.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
 hist[[PTT]]
 ```
   
+**Figure 24.** Histogramme des vitesses estimées de l'individu.   
+    
 ## PTT 166563  
   
 ```{r, echo=F, warning=F}
@@ -300,11 +444,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
-bp[[PTT]]
-hist[[PTT]]
-
 ```
   
+**Carte 13.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
+bp[[PTT]]
+```
+  
+**Figure 25.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
+hist[[PTT]]
+```
+  
+**Figure 26.** Histogramme des vitesses estimées de l'individu.   
+    
 ## PTT 166564  
   
 ```{r, echo=F, warning=F}
@@ -320,10 +475,22 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
+```
+  
+**Carte 14.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
 bp[[PTT]]
+```
+  
+**Figure 27.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
 hist[[PTT]]
 ```
   
+**Figure 28.** Histogramme des vitesses estimées de l'individu.   
+    
 ## PTT 166565  
   
 ```{r, echo=F, warning=F}
@@ -339,6 +506,19 @@ mapview(speed.class.list[[PTT]],
           layer.name = PTT,
           color = 'darkgrey',
           homebutton = F)
+```
+  
+**Carte 15.** Localisation en fonction de la vitesse de l'individu. **Gris** : vitesse non estimée, **bleu** : vitesse <= 72 km/h (20 m/s), **vert** : 72 km/h < vitesse <= 150 km/h, **jaune** : vitesse > 150 km/h.  
+  
+```{r, echo = FALSE, warning=F}
 bp[[PTT]]
+```
+  
+**Figure 29.** Vitesse de l'individu au cours du temps en fonction de la classe de la localisation. **Jaune** : localisation de classe A ou B, **vert** : localisation de classe 0, **turquoise** : localisation de classe 1, **bleu** : localisation de classe 2, **violet** : localisation de classe 3.   
+  
+```{r, echo = FALSE, warning=F}
 hist[[PTT]]
 ```
+  
+**Figure 30.** Histogramme des vitesses estimées de l'individu.   
+    
