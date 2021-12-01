@@ -205,38 +205,27 @@ argos.ltraj.speed2
 
 barplot.speed <- lapply(argos.ltraj.speed2, function(x){
   
-  speed1 <- x
-#   argos1 <- argos[[unique(x$Vessel)]]
-# })
-# 
-# 
-# 
-# argos11 <- left_join(argos1, speed1[, -c(1, 2)], by = c('Date' = 'date'))
+x$col_class[x$Class %in% c('A', 'B')] <- '#FDE725FF' # yellow
+x$col_class[x$Class == '0'] <- '#7AD151FF'# green
+x$col_class[x$Class == '1'] <- '#22A884FF'# turquoise
+x$col_class[x$Class == '2'] <- '#2A788EFF' # bue
+x$col_class[x$Class == '3'] <- '#414487FF' # purple
+x$col_class[x$Class == 'U'] <- 'grey'
 
-speed1$col_class[speed1$Class %in% c('A', 'B')] <- '#FDE725FF'
-speed1$col_class[speed1$Class == '0'] <- '#7AD151FF'
-speed1$col_class[speed1$Class == '1'] <- '#22A884FF'
-speed1$col_class[speed1$Class == '2'] <- '#2A788EFF'
-speed1$col_class[speed1$Class == '3'] <- '#414487FF'
-speed1$col_class[speed1$Class == 'U'] <- 'grey'
-
-# hist(speed1$speed.m.s, breaks = dim(speed1)[1])
-# barplot(speed1$speed.m.s, col = speed1$col_class) 
-
+# hist(x$speed.m.s, breaks = dim(x)[1])
+# barplot(x$speed.m.s, col = x$col_class) 
+x <- x[!is.na(x$speed.km.h),]
 library(plotly)
-fig <- plot_ly(
+fig <- plot_ly() %>% 
   
-  x = as.character(speed1$date),
-  
-  y = speed1$speed.km.h,
-  
-  name = unique(speed1$Vessel),
-  
-  type = "bar",
-  marker = list(color = speed1$col_class)
+  add_trace(
+    x = as.character(x$date),
+    y = x$speed.km.h,
+    type = "bar",
+    marker = list(color = x$col_class)
   
 ) %>%
-  layout(title = unique(speed1$Vessel),
+  layout(title = unique(x$Vessel),
          xaxis = list(title = 'Records',
                       showticklabels = FALSE),
          yaxis = list(title = 'Speed (km/h)'))
