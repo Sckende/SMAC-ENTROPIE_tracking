@@ -19,7 +19,35 @@ zon1 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DA
 mer1 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637651880863_YEAR1_MERIDIONAL.nc')
 
 vec1 <- 180/pi * atan2(zon1, mer1) + 180
-hist(values(vec1))
+hist(values(vec1[[1]]))
+vectorplot(mean(vec1[[1:10]]))
+vec1.4 <- atan2(zon1, mer1) + 180
+hist(values(vec1.4[[1]]))
+
+vectorplot(mean(vec1.4[[1:10]]), scaleSlope=T)
+
+mean.mer1 <- mean(mer1)
+mean.zon1 <- mean(zon1)
+mean.speed1 <- mean(speed1)
+x11();vectorplot(stack(mean.zon1, mean.mer1),
+                 isField = 'dXY',
+                 region = mean.speed1,
+                 # narrows = 100,
+                 lwd.arrows = 1)
+
+vec1.2 <- 180/pi * atan2(zon1, mer1)
+vec1.3 <- atan2(zon1, mer1)
+
+
+par(mfrow = c(2, 2))
+hist(values(vec1[[1]]))
+hist(values(vec1.2[[1]]))
+hist(values(vec1.3[[1]]))
+hist(values(vec1.4[[1]]))
+
+par(mfrow = c(1, 2))
+vectorplot(vec1)
+vectorplot(vec1.4)
 
 argos1 <- argos[year(argos$deploy) == 2017,]
 # Check if same number and names of layers
@@ -35,6 +63,14 @@ speed2 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/
 
 zon2 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637652399617_YEAR2_ZONAL.nc')
 mer2 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637652499961_YEAR2_MERIDIONAL.nc')
+mean.mer2 <- mean(mer2)
+mean.zon2 <- mean(zon2)
+mean.speed2 <- mean(speed2)
+x11();vectorplot(stack(mean.zon2, mean.mer2),
+           isField = 'dXY',
+           region = mean.speed2,
+           # narrows = 100,
+           lwd.arrows = 1)
 
 vec2 <- 180/pi * atan2(zon2, mer2) + 180
 hist(values(vec2))

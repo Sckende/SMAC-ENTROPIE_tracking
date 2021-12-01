@@ -7,6 +7,7 @@ library(adehabitatLT)
 library(rgdal)
 library(sp)
 library(stringr)
+library(raster)
 
 library(latticeExtra)
 library(rasterVis)
