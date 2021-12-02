@@ -17,6 +17,7 @@ max-width:80vw !important;
 
 ```{r setup, echo=FALSE, message=F, warning=F}
 source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
+library(knitr)
 
 bp <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_barplot_speed_list.rds')
 bp20ms <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_barplot_speed_20ms_list.rds')
@@ -48,6 +49,26 @@ x.sf.list
 ```
 Cette page à pour objectif de détailler et explorer la vitesse observée pour chaque individu. Chaque trajet a été divisé en groupe de points (*burst*) avec un délai minimum de 10h entre eux. Pour chaque burst, la vitesse entre chaque localisation a été calculée en divisant la distance par le temps écoulé entre le point **P** et le point **P-1**.  
   
+# Résumé des données de vitesse par balise Argos
+  
+```{r, echo = F, class.source = 'test'}
+speed <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_ind_speed_range.rds')
+
+
+kable(speed
+
+      , align = 'ccccc'
+#       # , table.attr = 'class=\"striped\"'
+#       # , format = 'html'
+      )
+``` 
+  
+* **PTT** - Identifiant de la balise ARGOS  
+* **rawMean** - Vitesse moyenne (km/h) 
+* **rawMin** - Vitesse minimale estimée (km/h)  
+* **rawMax** - Vitesse maximale estimée (km/h)  
+* **mean72max** - Vitesse moyenne (km/h) basée sur les données filtrées à 72 km/h (20 m/s) maximum  
+
 # Déploiement 2017  
   
 

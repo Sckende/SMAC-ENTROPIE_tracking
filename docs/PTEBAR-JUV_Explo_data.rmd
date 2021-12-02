@@ -84,7 +84,6 @@ tabb3 <- cbind(tabb2[, -c(5:9, 11)], r)
 tabb3 <- tabb3[, c(1:4, 7:11, 5, 12, 6)]
 
 
-
 kable(tabb3
 #       , digits = 2
       , col.names = c('depYear','PTT', 'loc', 'dMax', 'maxLat', 'minLat', 'maxLon', 'minLon', 'distTrav', 'tripDay', 'maxDist', 'maxDistDay')
@@ -104,7 +103,6 @@ kable(tabb3
 * **distTravDay** - Nombre de jours pour parcourir la distance totale  
 * **maxDist** - Distance maximale atteinte par rapport à la colonie (km)  
 * **maxDistDay** - Nombre de jours pour atteindre le point le plus éloigné par rapport à la colonie  
-  
   
 # Visualisation des trajets  
   

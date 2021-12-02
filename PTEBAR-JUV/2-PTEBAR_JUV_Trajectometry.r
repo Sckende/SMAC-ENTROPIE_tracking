@@ -310,14 +310,21 @@ ind.speed <- lapply(argos.ltraj.speed2, function(x){
   raw.mean <- mean(x$speed.km.h, na.rm = T)
   raw.min <- min(x$speed.km.h, na.rm = T)
   raw.max <- max(x$speed.km.h, na.rm = T)
-  mean.72max <- mean(x$speed.km.h[x$speed.km.h <= 72], na.rm = T)
+  mean72max <- mean(x$speed.km.h[x$speed.km.h <= 72], na.rm = T)
   
-  y <- c(as.character(unique(x$Vessel)), raw.mean, raw.min, raw.max, mean.20max)
+  y <- c(as.character(unique(x$Vessel)), round(raw.mean), raw.min, raw.max, round(mean72max))
   y
 })
 
 ind.speed.range <- as.data.frame(do.call('rbind', ind.speed))
-names(ind.speed.range) <- c('PTT', 'rawMean', 'rawMin', 'rawMax', 'mean.72max')
+names(ind.speed.range) <- c('PTT', 'rawMean', 'rawMin', 'rawMax', 'mean72max')
 
-# saveRDS(ind.speed.range,
+summary(ind.speed.range)
+sp <- apply(ind.speed.range[, 2:5],
+            2,
+            as.numeric)
+
+ind.speed.range2 <- data.frame(PTT = as.factor(ind.speed.range[, 1]), sp)
+summary(ind.speed.range2)
+# saveRDS(ind.speed.range2,
 #         'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_ind_speed_range.rds')
