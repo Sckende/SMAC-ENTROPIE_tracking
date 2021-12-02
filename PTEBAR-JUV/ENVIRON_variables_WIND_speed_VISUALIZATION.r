@@ -18,13 +18,21 @@ speed1 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/
 zon1 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637651769964_YEAR1_ZONAL.nc')
 mer1 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637651880863_YEAR1_MERIDIONAL.nc')
 
-vec1 <- 180/pi * atan2(zon1, mer1) + 180
-hist(values(vec1[[1]]))
-vectorplot(mean(vec1[[1:10]]))
-vec1.4 <- atan2(zon1, mer1) + 180
-hist(values(vec1.4[[1]]))
+# Check if same number and names of layers
+all(names(zon1) == names(mer1))
+all(names(zon1) == names(speed1))
 
-vectorplot(mean(vec1.4[[1:10]]), scaleSlope=T)
+layers1 <- names(speed1)
+
+# vec1 <- 180/pi * atan2(zon1, mer1) + 180
+# hist(values(vec1[[1]]))
+# vectorplot(mean(vec1[[1:10]]))
+# vec1.4 <- atan2(zon1, mer1) + 180
+# hist(values(vec1.4[[1]]))
+# vec1.2 <- 180/pi * atan2(zon1, mer1)
+# vec1.3 <- atan2(zon1, mer1)
+# 
+# vectorplot(mean(vec1.4[[1:10]]), scaleSlope=T)
 
 mean.mer1 <- mean(mer1)
 mean.zon1 <- mean(zon1)
@@ -35,27 +43,20 @@ x11();vectorplot(stack(mean.zon1, mean.mer1),
                  # narrows = 100,
                  lwd.arrows = 1)
 
-vec1.2 <- 180/pi * atan2(zon1, mer1)
-vec1.3 <- atan2(zon1, mer1)
+x11();levelplot(mean.speed1)
 
-
-par(mfrow = c(2, 2))
-hist(values(vec1[[1]]))
-hist(values(vec1.2[[1]]))
-hist(values(vec1.3[[1]]))
-hist(values(vec1.4[[1]]))
-
-par(mfrow = c(1, 2))
-vectorplot(vec1)
-vectorplot(vec1.4)
+# par(mfrow = c(2, 2))
+# hist(values(vec1[[1]]))
+# hist(values(vec1.2[[1]]))
+# hist(values(vec1.3[[1]]))
+# hist(values(vec1.4[[1]]))
+# 
+# par(mfrow = c(1, 2))
+# vectorplot(vec1)
+# vectorplot(vec1.4)
 
 argos1 <- argos[year(argos$deploy) == 2017,]
-# Check if same number and names of layers
-all(names(zon1) == names(mer1))
-all(names(zon1) == names(vec1))
-all(names(zon1) == names(speed1))
 
-layers1 <- names(speed1)
 
 ## YEAR 2 - 2018 ####
 
@@ -63,6 +64,14 @@ speed2 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/
 
 zon2 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637652399617_YEAR2_ZONAL.nc')
 mer2 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637652499961_YEAR2_MERIDIONAL.nc')
+
+# Check if same number and names of layers
+all(names(zon2) == names(mer2))
+all(names(zon2) == names(speed2))
+
+layers2 <- names(speed2)
+
+
 mean.mer2 <- mean(mer2)
 mean.zon2 <- mean(zon2)
 mean.speed2 <- mean(speed2)
@@ -72,18 +81,49 @@ x11();vectorplot(stack(mean.zon2, mean.mer2),
            # narrows = 100,
            lwd.arrows = 1)
 
-vec2 <- 180/pi * atan2(zon2, mer2) + 180
-hist(values(vec2))
+# vec2 <- 180/pi * atan2(zon2, mer2) + 180
+# hist(values(vec2))
 
 argos2 <- argos[year(argos$deploy) == 2018,]
 
-# Check if same number and names of layers
-all(names(zon2) == names(mer2))
-all(names(zon2) == names(vec2))
-all(names(zon2) == names(speed2))
 
-layers2 <- names(speed2)
+levelplot(mean.speed2,
+          at = my.at,
+          col.regions = my.cols) 
 
+# --- Global levelplot --- #
+nlev <- 100
+my.at <- seq(from = 0,
+             to = 20,
+             length.out = nlev+1)
+my.cols <- viridis_pal(option = "B")(nlev)
+levelplot(mean.speed1,
+          at = my.at,
+          col.regions = my.cols) 
+
+x11(); levelplot(mean.speed1,
+                 at = my.at,
+                 col.regions = my.cols,
+                 main = 'Wind 2017')
+x11(); levelplot(mean.speed2,
+                 at = my.at,
+                 col.regions = my.cols,
+                 main = 'Wind 2018')
+
+# --- Global vectorplot --- #
+
+x11(); vectorplot(stack(mean.zon1, mean.mer1),
+                  isField = 'dXY',
+                  region =  mean.speed1,
+                  at = my.at,
+                  col.regions = my.cols,
+                  main = 'Wind 2017')
+x11(); vectorplot(stack(mean.zon2, mean.mer2),
+                 isField = 'dXY',
+                 region = mean.speed2,
+                 at = my.at,
+                 col.regions = my.cols,
+                 main = 'Wind 2018')
 # --------------------- #
 # AVRIL 2017 & 2018 ####
 # -------------------- #
@@ -115,104 +155,191 @@ arg.env.period <- lapply(arg.env.period, function(x){
   x <- split(x, x$period)
   x
 })
-## WIND speed & trajectory per period ####
-layersSpeed1 <- names(speed1) 
-layersVec1 <- names(vec1)
 
-layersSpeed2 <- names(speed2)
-layersVec2 <- names(vec2)
+## WIND speed & trajectory per period ####
+max(values(speed1), na.rm = T)
 
 # period 1 - from 1 to 7 APRIL
-all(layersSpeed1 == layersVec1)
-which(layersSpeed1 == 'X2017.04.07.00.00.00')#5
+which(layers1 == 'X2017.04.07.18.00.00')#8
 
-sp1Per1 <- mean(speed1[[1:5]])
-vec1Per1 <- mean(vec1[[1:5]])
+sp1Per1 <- mean(speed1[[1:8]])
+zon1Per1 <- mean(zon1[[1:8]])
+mer1Per1 <- mean(mer1[[1:8]])
 
-y1period1 <- vectorplot(vec1Per1, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = sp1Per1)
+nlev <- 100
+my.at <- seq(from = 0,
+             to = 20,
+             length.out = nlev+1)
+my.cols <- viridis_pal(begin = 1,
+                       end = 0,
+                       option = "A")(nlev)
+
+y1period1 <- vectorplot(stack(zon1Per1, mer1Per1),
+                        isField = 'dXY',
+                        narrows = 200,
+                        region =  sp1Per1,
+                        at = my.at,
+                        col.regions = my.cols,
+                        main = 'Wind 6 - 7 April 2017') 
+
+y1period1
 
 # ---- #
 
-all(layersSpeed2 == layersVec2)
-which(layersSpeed2 == 'X2018.04.07.00.00.00')#17
+which(layers2 == 'X2018.04.07.18.00.00')#20
 
-sp2Per1 <- mean(speed2[[1:17]])
-vec2Per1 <- mean(vec2[[1:17]])
+sp2Per1 <- mean(speed2[[1:20]])
+zon2Per1 <- mean(zon2[[1:20]])
+mer2Per1 <- mean(mer2[[1:20]])
 
-y2period1 <- vectorplot(vec2Per1, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = sp2Per1)
+y2period1 <- vectorplot(stack(zon2Per1, mer2Per1),
+                        isField = 'dXY',
+                        narrows = 200,
+                        region =  sp2Per1,
+                        at = my.at,
+                        col.regions = my.cols,
+                        main = 'Wind 3 - 7 April 2018')
+y2period1
 
 # period 2 - from 8 to 14 APRIL
 
-which(layersSpeed1 == 'X2017.04.14.00.00.00')#33
+which(layers1 == 'X2017.04.14.18.00.00')#36
 
-sp1Per2 <- mean(speed1[[18:33]])
-vec1Per2 <- mean(vec1[[18:33]])
+sp1Per2 <- mean(speed1[[9:36]])
+zon1Per2 <- mean(zon1[[9:36]])
+mer1Per2 <- mean(mer1[[9:36]])
 
-y1period2 <- vectorplot(vec1Per2, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = sp1Per2)
-
+y1period2 <- vectorplot(stack(zon1Per2, mer1Per2),
+                        isField = 'dXY',
+                        narrows = 200,
+                        region =  sp1Per2,
+                        at = my.at,
+                        col.regions = my.cols,
+                        main = 'Wind 8 - 14 April 2017') 
+y1period2
 # ---- #
 
-which(layersSpeed2 == 'X2018.04.14.00.00.00')#45
+which(layers2 == 'X2018.04.14.18.00.00')#48
 
-sp2Per2 <- mean(speed2[[18:45]])
-vec2Per2 <- mean(vec2[[18:45]])
+sp2Per2 <- mean(speed2[[21:48]])
+zon2Per2 <- mean(zon2[[21:48]])
+mer2Per2 <- mean(mer2[[21:48]])
 
-y2period2 <- vectorplot(vec2Per2, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = sp2Per2)
+y2period2 <- vectorplot(stack(zon2Per2, mer2Per2),
+                        isField = 'dXY',
+                        narrows = 200,
+                        region =  sp2Per2,
+                        at = my.at,
+                        col.regions = my.cols,
+                        main = 'Wind 8 - 14 April 2018')
+y2period2
 
 # period 3 - from 15 to 21 APRIL
 
-which(layersSpeed1 == 'X2017.04.21.00.00.00')#61
+which(layers1 == 'X2017.04.21.18.00.00')#64
 
-sp1Per3 <- mean(speed1[[34:61]])
-vec1Per3 <- mean(vec1[[34:61]])
+sp1Per3 <- mean(speed1[[37:64]])
+zon1Per3 <- mean(zon1[[37:64]])
+mer1Per3 <- mean(mer1[[37:64]])
 
-y1period3 <- vectorplot(vec1Per3, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = sp1Per3)
+y1period3 <- vectorplot(stack(zon1Per3, mer1Per3),
+                        isField = 'dXY',
+                        narrows = 200,
+                        region =  sp1Per3,
+                        at = my.at,
+                        col.regions = my.cols,
+                        main = 'Wind 9 - 21 April 2017')
+y1period3
 
 # ---- #
 
-which(layersSpeed2 == 'X2018.04.21.00.00.00')#73
+which(layers2 == 'X2018.04.21.18.00.00')#76
 
-sp2Per3 <- mean(speed2[[46:73]])
-vec2Per3 <- mean(vec2[[46:73]])
+sp2Per3 <- mean(speed2[[49:76]])
+zon2Per3 <- mean(zon2[[49:76]])
+mer2Per3 <- mean(mer2[[49:76]])
 
-y2period3 <- vectorplot(vec2Per3, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = sp2Per3)
+y2period3 <- vectorplot(stack(zon2Per3, mer2Per3),
+                        isField = 'dXY',
+                        narrows = 200,
+                        region =  sp2Per3,
+                        at = my.at,
+                        col.regions = my.cols,
+                        main = 'Wind 9 - 21 April 2018')
+y2period3
 
 # period 4 - from 22 to 28 APRIL
 
-which(layersSpeed1 == 'X2017.04.28.00.00.00')#89
+which(layers1 == 'X2017.04.28.18.00.00')#92
 
-sp1Per4 <- mean(speed1[[62:89]])
-vec1Per4 <- mean(vec1[[62:89]])
+sp1Per4 <- mean(speed1[[65:92]])
+zon1Per4 <- mean(zon1[[65:92]])
+mer1Per4 <- mean(mer1[[65:92]])
 
-y1period4 <- vectorplot(vec1Per4, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = sp1Per4)
+y1period4 <- vectorplot(stack(zon1Per4, mer1Per4),
+                        isField = 'dXY',
+                        narrows = 200,
+                        region =  sp1Per4,
+                        at = my.at,
+                        col.regions = my.cols,
+                        main = 'Wind 22 - 28 April 2017')
+
+y1period4
 
 # ---- #
 
-which(layersSpeed2 == 'X2018.04.28.00.00.00')#101
+which(layers2 == 'X2018.04.28.18.00.00')#104
 
-sp2Per4 <- mean(speed2[[74:101]])
-vec2Per4 <- mean(vec2[[74:101]])
+sp2Per4 <- mean(speed2[[77:104]])
+zon2Per4 <- mean(zon2[[77:104]])
+mer2Per4 <- mean(mer2[[77:104]])
 
-y2period4 <- vectorplot(vec2Per4, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = sp2Per4)
+y2period4 <- vectorplot(stack(zon2Per4, mer2Per4),
+                        isField = 'dXY',
+                        narrows = 200,
+                        region =  sp2Per4,
+                        at = my.at,
+                        col.regions = my.cols,
+                        main = 'Wind 22 - 28 April 2018')
+
+y2period4
 
 # period 5 - from 29 to 30 APRIL
 
-which(layersSpeed1 == 'X2017.04.30.00.00.00')#97
+which(layers1 == 'X2017.04.30.18.00.00')#100
 
-sp1Per5 <- mean(speed1[[90:97]])
-vec1Per5 <- mean(vec1[[90:97]])
+sp1Per5 <- mean(speed1[[93:100]])
+zon1Per5 <- mean(zon1[[93:100]])
+mer1Per5 <- mean(mer1[[93:100]])
 
-y1period5 <- vectorplot(vec1Per5, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = sp1Per5)
+y1period5 <- vectorplot(stack(zon1Per5, mer1Per5),
+                        isField = 'dXY',
+                        narrows = 200,
+                        region =  sp1Per5,
+                        at = my.at,
+                        col.regions = my.cols,
+                        main = 'Wind 29 - 30 April 2017')
 
+y1period5
 # ---- #
 
-which(layersSpeed2 == 'X2018.04.30.00.00.00')#109
+which(layers2 == 'X2018.04.30.18.00.00')#112
 
-sp2Per5 <- mean(speed2[[102:109]])
-vec2Per5 <- mean(vec2[[102:109]])
+sp2Per5 <- mean(speed2[[105:112]])
+zon2Per5 <- mean(zon2[[105:112]])
+mer2Per5 <- mean(mer2[[105:112]])
 
-y2period5 <- vectorplot(vec2Per5, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = sp2Per5)
+y2period5 <- vectorplot(stack(zon2Per5, mer2Per5),
+                        isField = 'dXY',
+                        narrows = 200,
+                        region =  sp2Per5,
+                        at = my.at,
+                        col.regions = my.cols,
+                        main = 'Wind 29 - 30 April 2018')
 
+y2period5
+
+# ---- #
 par(mfrow = c(1,2
               ))
 y1period1; y1period2
@@ -343,27 +470,34 @@ table(tt2018$period)
 
 # Layers manipulations
 stringr::str_which(layers2, '.04.30.') # give the indexes of strings that contain a pattern match
+cut.lay1 <- stringr::str_which(layers1, 'X2017.04.16.00.00.00|X2017.05.01.00.00.00|X2017.05.16.00.00.00|X2017.06.01.00.00.00|X2017.06.16.00.00.00|X2017.07.01.00.00.00|X2017.07.16.00.00.00|X2017.08.01.00.00.00|X2017.08.16.00.00.00|X2017.09.01.00.00.00')
+cut.lay1 <- c(1, cut.lay1)
 
-cut.lay <- stringr::str_which(layers2, 'X2018.04.16.00.00.00|X2018.05.01.00.00.00|X2018.05.16.00.00.00|X2018.06.01.00.00.00|X2018.06.16.00.00.00|X2018.07.01.00.00.00|X2018.07.16.00.00.00|X2018.08.01.00.00.00|X2018.08.16.00.00.00|X2018.09.01.00.00.00')
-cut.lay <- c(1, cut.lay)
+
+cut.lay2 <- stringr::str_which(layers2, 'X2018.04.16.00.00.00|X2018.05.01.00.00.00|X2018.05.16.00.00.00|X2018.06.01.00.00.00|X2018.06.16.00.00.00|X2018.07.01.00.00.00|X2018.07.16.00.00.00|X2018.08.01.00.00.00|X2018.08.16.00.00.00|X2018.09.01.00.00.00')
+cut.lay2 <- c(1, cut.lay2)
 
 # layers2[stringr::str_detect(layers2, 'X2018.04.16.|X2018.05.01.|X2018.05.16.|X2018.06.01.|X2018.06.16.|X2018.07.01.|X2018.07.16.|X2018.08.01.|X2018.08.16.|X2018.09.01.')]
 
-
-for(i in 1:(length(cut.lay)-1)){
+# ---- 2017 ---- #
+for(i in 1:(length(cut.lay1)-1)){
   
 
-  begin <- cut.lay[i]
-  end <- cut.lay[i + 1] - 1
+  
+  begin <- cut.lay1[i]
+  end <- cut.lay1[i + 1] - 1
+  layer.name1 <- str_sub(names(speed1[[begin]]), 2, 11)
+  layer.name2 <- str_sub(names(speed1[[end]]), 2, 11)
   
   print(end - begin)
   # ---- #
   meanSpeed <- mean(speed1[[begin:end]])
-  meanVec <- mean(vec1[[begin:end]])
+  meanZon <- mean(zon1[[begin:end]])
+  meanMer <- mean(mer1[[begin:end]])
 
   # ---- #
   
-  png(paste("C:/Users/ccjuhasz/Desktop/test/2017/", i, ".png", sep = ''),
+  png(paste("C:/Users/ccjuhasz/Desktop/test/2017/", layer.name2, ".png", sep = ''),
     res=300,
     width=30,
     height=30,
@@ -371,24 +505,81 @@ for(i in 1:(length(cut.lay)-1)){
     unit="cm",
     bg="transparent")
 
-  print(vectorplot(meanVec, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = meanSpeed) +
-    layer(sp.points(as(st_transform(test2017[[i]], 4326), 'Spatial'), col = 'white')))
+if(i == 1){
+  print(vectorplot(stack(meanZon, meanMer),
+                   isField = 'dXY',
+                   narrows = 200,
+                   region =  meanSpeed,
+                   at = my.at,
+                   col.regions = my.cols,
+                   main = paste('From ', layer.name1, ' to ', layer.name2, sep = '')) +
+          layer(sp.points(as(st_transform(test2017[[i]], 4326), 'Spatial'), col = 'white')))
+}else{
+  print(vectorplot(stack(meanZon, meanMer),
+                   isField = 'dXY',
+                   narrows = 200,
+                   region =  meanSpeed,
+                   at = my.at,
+                   col.regions = my.cols,
+                   main = paste('From ', layer.name1, ' to ', layer.name2, sep = '')) +
+          layer(c(sp.points(as(st_transform(test2017[[i]], 4326), 'Spatial'), col = 'white'), sp.points(as(st_transform(test2017[[i-1]], 4326), 'Spatial'), col = 'grey'))))
+}
+  
 
 
   dev.off()
   
 }
 
-meanVec <- mean(vec2[[1:604]])
-meanSpeed <- mean(speed2[[1:604]])      
+# ---- 2018 ---- #
 
-png(paste("C:/Users/ccjuhasz/Desktop/test/2018/", 'global', ".png", sep = ''),
-    res=300,
-    width=30,
-    height=30,
-    pointsize=12,
-    unit="cm",
-    bg="transparent")
-print(vectorplot(meanVec, unit = 'degrees', col.regions = viridis(150), cuts = 149, region = meanSpeed) +
-        layer(sp.points(as(st_transform(tt2018, 4326), 'Spatial'), col = 'white')))
-dev.off()
+for(i in 1:(length(cut.lay2)-1)){
+  
+  
+  
+  begin <- cut.lay2[i]
+  end <- cut.lay2[i + 1] - 1
+  layer.name1 <- str_sub(names(speed2[[begin]]), 2, 11)
+  layer.name2 <- str_sub(names(speed2[[end]]), 2, 11)
+  
+  print(end - begin)
+  # ---- #
+  meanSpeed <- mean(speed2[[begin:end]])
+  meanZon <- mean(zon2[[begin:end]])
+  meanMer <- mean(mer2[[begin:end]])
+  
+  # ---- #
+  
+  png(paste("C:/Users/ccjuhasz/Desktop/test/2018/", layer.name2, ".png", sep = ''),
+      res=300,
+      width=30,
+      height=30,
+      pointsize=12,
+      unit="cm",
+      bg="transparent")
+  
+  if(i == 1){
+    print(vectorplot(stack(meanZon, meanMer),
+                     isField = 'dXY',
+                     narrows = 200,
+                     region =  meanSpeed,
+                     at = my.at,
+                     col.regions = my.cols,
+                     main = paste('From ', layer.name1, ' to ', layer.name2, sep = '')) +
+            layer(sp.points(as(st_transform(test2018[[i]], 4326), 'Spatial'), col = 'white')))
+  }else{
+    print(vectorplot(stack(meanZon, meanMer),
+                     isField = 'dXY',
+                     narrows = 200,
+                     region =  meanSpeed,
+                     at = my.at,
+                     col.regions = my.cols,
+                     main = paste('From ', layer.name1, ' to ', layer.name2, sep = '')) +
+            layer(c(sp.points(as(st_transform(test2018[[i]], 4326), 'Spatial'), col = 'white'), sp.points(as(st_transform(test2018[[i-1]], 4326), 'Spatial'), col = 'grey'))))
+  }
+  
+  
+  
+  dev.off()
+  
+}
