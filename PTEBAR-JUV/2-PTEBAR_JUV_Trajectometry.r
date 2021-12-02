@@ -211,18 +211,19 @@ x$col_class[x$Class == '1'] <- '#22A884FF'# turquoise
 x$col_class[x$Class == '2'] <- '#2A788EFF' # bue
 x$col_class[x$Class == '3'] <- '#414487FF' # purple
 x$col_class[x$Class == 'U'] <- 'grey'
-
-# hist(x$speed.m.s, breaks = dim(x)[1])
-# barplot(x$speed.m.s, col = x$col_class) 
+ 
 x <- x[!is.na(x$speed.km.h),]
 library(plotly)
 fig <- plot_ly() %>% 
   
-  add_trace(
+  add_trace(data = x,
     x = as.character(x$date),
     y = x$speed.km.h,
     type = "bar",
-    marker = list(color = x$col_class)
+    marker = list(color = x$col_class),
+    hovertemplate  = ~paste('</br>Date: ', date,
+                            '</br>Vitesse: ', speed.m.s, ' m/s',
+                            '</br>Classe de localisation: ', Class)
   
 ) %>%
   layout(title = unique(x$Vessel),
@@ -233,6 +234,46 @@ fig <- plot_ly() %>%
 
 fig
 })
+
+# ----- #
+
+barplot.speed.20ms <- lapply(argos.ltraj.speed2, function(x){
+  
+  x$col_class[x$Class %in% c('A', 'B')] <- '#FDE725FF' # yellow
+  x$col_class[x$Class == '0'] <- '#7AD151FF'# green
+  x$col_class[x$Class == '1'] <- '#22A884FF'# turquoise
+  x$col_class[x$Class == '2'] <- '#2A788EFF' # bue
+  x$col_class[x$Class == '3'] <- '#414487FF' # purple
+  x$col_class[x$Class == 'U'] <- 'grey'
+  
+  # hist(x$speed.m.s, breaks = dim(x)[1])
+  # barplot(x$speed.m.s, col = x$col_class) 
+  x <- x[!is.na(x$speed.km.h),]
+  x <- x[x$speed.m.s <= 20,]
+  # library(plotly)
+  fig <- plot_ly() %>% 
+    
+    add_trace(data = x,
+      x = as.character(x$date),
+      y = x$speed.km.h,
+      type = "bar",
+      marker = list(color = x$col_class),
+      # hoverinfo = 'text',
+      hovertemplate  = ~paste('</br>Date: ', date,
+                    '</br>Vitesse: ', speed.m.s, ' m/s',
+                    '</br>Classe de localisation: ', Class)
+      
+    ) %>%
+    layout(title = unique(x$Vessel),
+           xaxis = list(title = 'Records',
+                        showticklabels = FALSE),
+           yaxis = list(title = 'Speed (km/h)'))
+  
+  
+  fig
+})
+
+# ----- #
 
 histo.speed <- lapply(argos.ltraj.speed2, function(x){
   
@@ -255,6 +296,8 @@ histo.speed <- lapply(argos.ltraj.speed2, function(x){
 })
 # saveRDS(barplot.speed,
 #         'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_barplot_speed_list.rds')
+# saveRDS(barplot.speed.20ms,
+#         'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_barplot_speed_20ms_list.rds')
 # saveRDS(histo.speed,
 #         'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_histo_speed_list.rds')
 # saveRDS(argos.ltraj.speed2,
