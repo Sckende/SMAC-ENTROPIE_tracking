@@ -12,6 +12,8 @@ source('C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/
 # Data loading ####
 argos <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.rds')
 
+argos.track <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_tracks_UTM_ARGOS.rds')
+
 ## YEAR 1 - 2017 ####
 speed1 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637652088629_YEAR1_SPEED.nc')
 
@@ -40,7 +42,7 @@ mean.speed1 <- mean(speed1)
 x11();vectorplot(stack(mean.zon1, mean.mer1),
                  isField = 'dXY',
                  region = mean.speed1,
-                 # narrows = 100,
+                 narrows = 300,
                  lwd.arrows = 1)
 
 x11();levelplot(mean.speed1)
@@ -96,14 +98,19 @@ nlev <- 100
 my.at <- seq(from = 0,
              to = 20,
              length.out = nlev+1)
-my.cols <- viridis_pal(option = "B")(nlev)
+my.cols <- viridis_pal(begin = 1,
+                       end = 0,
+                       alpha = 0.9,
+                       option = "A")(nlev)
+my.cols.grey <- rev(gray(seq(0.25, 1, length.out = nlev+1)))
 levelplot(mean.speed1,
           at = my.at,
           col.regions = my.cols) 
 
 x11(); levelplot(mean.speed1,
                  at = my.at,
-                 col.regions = my.cols,
+                 # col.regions = my.cols,
+                 col.regions = my.cols.grey,
                  main = 'Wind 2017')
 x11(); levelplot(mean.speed2,
                  at = my.at,
@@ -111,19 +118,52 @@ x11(); levelplot(mean.speed2,
                  main = 'Wind 2018')
 
 # --- Global vectorplot --- #
+argos.track.sp <- as(st_transform(argos.track, 4326), 'Spatial')
 
-x11(); vectorplot(stack(mean.zon1, mean.mer1),
+png("C:/Users/ccjuhasz/Desktop/test/2017_global_Tracks_&_Wind.png",
+    res=300,
+    width=50,
+    height=30,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+
+# x11()
+vectorplot(stack(mean.zon1, mean.mer1),
                   isField = 'dXY',
                   region =  mean.speed1,
                   at = my.at,
+                  lwd.arrows = 1,
+                  aspX = 0.4,
+                  narrows = 500,
                   col.regions = my.cols,
-                  main = 'Wind 2017')
-x11(); vectorplot(stack(mean.zon2, mean.mer2),
+                  # col.regions = my.cols.grey,
+                  main = 'Tracks & Wind 2017') +
+  layer(sp.lines(argos.track.sp[argos.track.sp$year == 2017,], col = viridis(7), lwd = 3))
+
+dev.off()
+
+png("C:/Users/ccjuhasz/Desktop/test/2018_global_Tracks_&_Wind.png",
+    res=300,
+    width=50,
+    height=30,
+    pointsize=12,
+    unit="cm",
+    bg="transparent")
+
+# x11()
+vectorplot(stack(mean.zon2, mean.mer2),
                  isField = 'dXY',
                  region = mean.speed2,
                  at = my.at,
+                 lwd.arrows = 1,
+                 aspX = 0.4,
+                 narrows = 500,
                  col.regions = my.cols,
-                 main = 'Wind 2018')
+                 main = 'Tracks & Wind 2018') +
+  layer(sp.lines(argos.track.sp[argos.track.sp$year == 2018,], col = viridis(8), lwd = 3))
+
+dev.off()
 # --------------------- #
 # AVRIL 2017 & 2018 ####
 # -------------------- #
@@ -499,7 +539,7 @@ for(i in 1:(length(cut.lay1)-1)){
   
   png(paste("C:/Users/ccjuhasz/Desktop/test/2017/", layer.name2, ".png", sep = ''),
     res=300,
-    width=30,
+    width=50,
     height=30,
     pointsize=12,
     unit="cm",
@@ -511,18 +551,22 @@ if(i == 1){
                    narrows = 200,
                    region =  meanSpeed,
                    at = my.at,
+                   lwd.arrows = 1,
+                   aspX = 0.4,
                    col.regions = my.cols,
                    main = paste('From ', layer.name1, ' to ', layer.name2, sep = '')) +
-          layer(sp.points(as(st_transform(test2017[[i]], 4326), 'Spatial'), col = 'white')))
+          layer(sp.points(as(st_transform(test2017[[i]], 4326), 'Spatial'), col = 'white', cex = 2)))
 }else{
   print(vectorplot(stack(meanZon, meanMer),
                    isField = 'dXY',
                    narrows = 200,
                    region =  meanSpeed,
                    at = my.at,
+                   lwd.arrows = 1,
+                   aspX = 0.4,
                    col.regions = my.cols,
                    main = paste('From ', layer.name1, ' to ', layer.name2, sep = '')) +
-          layer(c(sp.points(as(st_transform(test2017[[i]], 4326), 'Spatial'), col = 'white'), sp.points(as(st_transform(test2017[[i-1]], 4326), 'Spatial'), col = 'grey'))))
+          layer(c(sp.points(as(st_transform(test2017[[i]], 4326), 'Spatial'), col = 'white', cex = 2), sp.points(as(st_transform(test2017[[i-1]], 4326), 'Spatial'), col = 'grey', cex = 1))))
 }
   
 
@@ -552,7 +596,7 @@ for(i in 1:(length(cut.lay2)-1)){
   
   png(paste("C:/Users/ccjuhasz/Desktop/test/2018/", layer.name2, ".png", sep = ''),
       res=300,
-      width=30,
+      width=50,
       height=30,
       pointsize=12,
       unit="cm",
@@ -561,21 +605,25 @@ for(i in 1:(length(cut.lay2)-1)){
   if(i == 1){
     print(vectorplot(stack(meanZon, meanMer),
                      isField = 'dXY',
-                     narrows = 200,
+                     narrows = 300,
                      region =  meanSpeed,
                      at = my.at,
+                     lwd.arrows = 1,
+                     aspX = 0.4,
                      col.regions = my.cols,
                      main = paste('From ', layer.name1, ' to ', layer.name2, sep = '')) +
-            layer(sp.points(as(st_transform(test2018[[i]], 4326), 'Spatial'), col = 'white')))
+            layer(sp.points(as(st_transform(test2018[[i]], 4326), 'Spatial'), col = 'white', cex = 2)))
   }else{
     print(vectorplot(stack(meanZon, meanMer),
                      isField = 'dXY',
-                     narrows = 200,
+                     narrows = 300,
                      region =  meanSpeed,
                      at = my.at,
+                     lwd.arrows = 1,
+                     aspX = 0.4,
                      col.regions = my.cols,
                      main = paste('From ', layer.name1, ' to ', layer.name2, sep = '')) +
-            layer(c(sp.points(as(st_transform(test2018[[i]], 4326), 'Spatial'), col = 'white'), sp.points(as(st_transform(test2018[[i-1]], 4326), 'Spatial'), col = 'grey'))))
+            layer(c(sp.points(as(st_transform(test2018[[i]], 4326), 'Spatial'), col = 'white', cex = 2), sp.points(as(st_transform(test2018[[i-1]], 4326), 'Spatial'), col = 'grey', cex = 1))))
   }
   
   
@@ -587,14 +635,18 @@ for(i in 1:(length(cut.lay2)-1)){
 # ---------------------------------- #
 # From APRIL to AUGUST - monthly ####
 # -------------------------------- #
+argos.sp <- as(st_transform(argos, 4326), 'Spatial')
+proj4string(argos.sp)
 
 ## Locations points ####
-argos.list <- split(argos, year(argos$deploy))
+argos.list <- split(argos.sp, year(argos.sp$deploy))
 
-arg.month.list <- lapply(argos.list, function(x){
-  
-  x <- split(x, month(x$Date))
-})
+argos.sp.2017 <- argos.list[[1]]
+argos.sp.2018 <- argos.list[[2]]
+# arg.month.list <- lapply(argos.list, function(x){
+#   
+#   x <- split(x, month(x$Date))
+# })
 
 ## Layers manipulations ####
 # extraire les mois pour chaque année de suivi et moyenner les rasterstacks dont les noms fit avec le mois en question
@@ -604,24 +656,49 @@ cut.lay1 <- c(1, cut.lay1)
 
 ## 2017 ####
 
-for(i in 1:(length(cut.lay1)-1)){
+nlev <- 100
+my.at <- seq(from = 0,
+             to = 20,
+             length.out = nlev+1)
+my.cols <- viridis_pal(begin = 1,
+                       end = 0,
+                       option = "A")(nlev)
+
+for(i in 1:(length(cut.lay1))){
   
+  if(i == length(cut.lay1)){
+    begin <- cut.lay1[i]
+    end <- length(names(speed1))
+    layer.name1 <- str_sub(names(speed1[[begin]]), 2, 11)
+    layer.name2 <- str_sub(names(speed1[[end]]), 2, 11)
+    month <- as.numeric(str_sub(layer.name1, 6,7))
+    
+    print(paste('Layer number: ', end - begin))
+    print(paste('Month: ', month))
+    # ---- #
+    meanSpeed <- mean(speed1[[begin:end]])
+    meanZon <- mean(zon1[[begin:end]])
+    meanMer <- mean(mer1[[begin:end]])
+  }else{
+    begin <- cut.lay1[i]
+    end <- cut.lay1[i + 1] - 1
+    layer.name1 <- str_sub(names(speed1[[begin]]), 2, 11)
+    layer.name2 <- str_sub(names(speed1[[end]]), 2, 11)
+    month <- as.numeric(str_sub(layer.name1, 6,7))
+    
+    print(paste('Layer number: ', end - begin))
+    print(paste('Month: ', month))
+    # ---- #
+    meanSpeed <- mean(speed1[[begin:end]])
+    meanZon <- mean(zon1[[begin:end]])
+    meanMer <- mean(mer1[[begin:end]])
+  }
   
+
   
-  begin <- cut.lay1[i]
-  end <- cut.lay1[i + 1] - 1
-  layer.name1 <- str_sub(names(speed1[[begin]]), 2, 11)
-  layer.name2 <- str_sub(names(speed1[[end]]), 2, 11)
-  
-  print(end - begin)
   # ---- #
-  meanSpeed <- mean(speed1[[begin:end]])
-  meanZon <- mean(zon1[[begin:end]])
-  meanMer <- mean(mer1[[begin:end]])
   
-  # ---- #
-  
-  png(paste("C:/Users/ccjuhasz/Desktop/test/2017/", layer.name2, ".png", sep = ''),
+  png(paste("C:/Users/ccjuhasz/Desktop/test/2017/monthly/", layer.name2, ".png", sep = ''),
       res=300,
       width=30,
       height=30,
@@ -632,21 +709,117 @@ for(i in 1:(length(cut.lay1)-1)){
   if(i == 1){
     print(vectorplot(stack(meanZon, meanMer),
                      isField = 'dXY',
-                     narrows = 200,
+                     narrows = 300,
                      region =  meanSpeed,
                      at = my.at,
+                     lwd.arrows = 1,
+                     aspX = 0.4,
                      col.regions = my.cols,
                      main = paste('From ', layer.name1, ' to ', layer.name2, sep = '')) +
-            layer(sp.points(as(st_transform(test2017[[i]], 4326), 'Spatial'), col = 'white')))
+            layer(sp.points(argos.sp.2017[month(argos.sp.2017$Date) == month,], col = 'white', cex = 2))
+            # layer(sp.points(as(st_transform(arg.month.list[['2017']][[month]], 4326), 'Spatial'), col = 'white', cex = 2))
+    )
   }else{
     print(vectorplot(stack(meanZon, meanMer),
                      isField = 'dXY',
-                     narrows = 200,
+                     narrows = 300,
                      region =  meanSpeed,
                      at = my.at,
+                     lwd.arrows = 1,
+                     aspX = 0.4,
                      col.regions = my.cols,
                      main = paste('From ', layer.name1, ' to ', layer.name2, sep = '')) +
-            layer(c(sp.points(as(st_transform(test2017[[i]], 4326), 'Spatial'), col = 'white'), sp.points(as(st_transform(test2017[[i-1]], 4326), 'Spatial'), col = 'grey'))))
+            layer(c(sp.points(argos.sp.2017[month(argos.sp.2017$Date) == month,], col = 'white', cex = 2), sp.points(argos.sp.2017[month(argos.sp.2017$Date) == (month-1),], col = 'grey', cex = 1))))
+            # layer(c(sp.points(as(st_transform(arg.month.list[['2017']][[month]], 4326), 'Spatial'), col = 'white', cex = 2), sp.points(as(st_transform(arg.month.list[['2017']][[month-1]], 4326), 'Spatial'), col = 'grey', cex = 1))))
+  }
+  
+  
+  
+  dev.off()
+  
+}
+
+## 2018 ####
+cut.lay2 <- stringr::str_which(layers2, 'X2018.05.01.00.00.00|X2018.06.01.00.00.00|X2018.07.01.00.00.00|X2018.08.01.00.00.00|X2018.09.01.00.00.00|X2018.10.01.00.00.00|X2018.11.01.00.00.00|X2018.12.01.00.00.00')
+cut.lay2 <- c(1, cut.lay2)
+
+
+
+nlev <- 100
+my.at <- seq(from = 0,
+             to = 20,
+             length.out = nlev+1)
+my.cols <- viridis_pal(begin = 1,
+                       end = 0,
+                       option = "A")(nlev)
+
+for(i in 1:(length(cut.lay2))){
+  
+  if(i == length(cut.lay2)){
+    begin <- cut.lay2[i]
+    end <- length(names(speed2))
+    layer.name1 <- str_sub(names(speed2[[begin]]), 2, 11)
+    layer.name2 <- str_sub(names(speed2[[end]]), 2, 11)
+    month <- as.numeric(str_sub(layer.name1, 6,7))
+    
+    print(paste('Layer number: ', end - begin))
+    print(paste('Month: ', month))
+    # ---- #
+    meanSpeed <- mean(speed2[[begin:end]])
+    meanZon <- mean(zon2[[begin:end]])
+    meanMer <- mean(mer2[[begin:end]])
+  }else{
+    begin <- cut.lay2[i]
+    end <- cut.lay2[i + 1] - 1
+    layer.name1 <- str_sub(names(speed2[[begin]]), 2, 11)
+    layer.name2 <- str_sub(names(speed2[[end]]), 2, 11)
+    month <- as.numeric(str_sub(layer.name1, 6,7))
+    
+    print(paste('Layer number: ', end - begin))
+    print(paste('Month: ', month))
+    # ---- #
+    meanSpeed <- mean(speed2[[begin:end]])
+    meanZon <- mean(zon2[[begin:end]])
+    meanMer <- mean(mer2[[begin:end]])
+  }
+  
+  
+  
+  # ---- #
+  
+  png(paste("C:/Users/ccjuhasz/Desktop/test/2018/monthly/", layer.name2, ".png", sep = ''),
+      res=300,
+      width=30,
+      height=30,
+      pointsize=12,
+      unit="cm",
+      bg="transparent")
+  
+  if(i == 1){
+    print(vectorplot(stack(meanZon, meanMer),
+                     isField = 'dXY',
+                     narrows = 300,
+                     region =  meanSpeed,
+                     at = my.at,
+                     lwd.arrows = 1,
+                     aspX = 0.4,
+                     col.regions = my.cols,
+                     main = paste('From ', layer.name1, ' to ', layer.name2, sep = '')) +
+            layer(sp.points(argos.sp.2018[month(argos.sp.2018$Date) == month,], col = 'white', cex = 2))
+          # layer(sp.points(as(st_transform(arg.month.list[['2017']][[month]], 4326), 'Spatial'), col = 'white', cex = 2))
+    )
+  }else{
+    print(vectorplot(stack(meanZon, meanMer),
+                     isField = 'dXY',
+                     narrows = 300,
+                     region =  meanSpeed,
+                     at = my.at,
+                     lwd.arrows = 1,
+                     aspX = 0.4,
+                     col.regions = my.cols,
+                     main = paste('From ', layer.name1, ' to ', layer.name2, sep = '')) +
+            layer(c(sp.points(argos.sp.2018[month(argos.sp.2018$Date) == month,], col = 'white', cex = 2), sp.points(argos.sp.2018[month(argos.sp.2018$Date) == (month-1),], col = 'grey', cex = 1))))
+    # layer(c(sp.points(as(st_transform(arg.month.list[['2017']][[month]], 4326), 'Spatial'), col = 'white', cex = 2), sp.points(as(st_transform(arg.month.list[['2017']][[month-1]], 4326), 'Spatial'), col = 'grey', cex = 1))))
   }
   
   
