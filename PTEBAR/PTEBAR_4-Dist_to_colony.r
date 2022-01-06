@@ -1,5 +1,5 @@
 # ---------------------------------------------------- #
-####----- Distance to the coilony computation -----####
+####----- Distance to the colony computation -----####
 #### Track segmentation & back/forth qualification #### 
 # -------------------------------------------------- #
 
@@ -9,8 +9,7 @@ require(dplyr)
 require(lubridate)
 require(mapview)
 
-setwd("C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR")
-source('C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR/PTEBAR_0-Functions_for_scripts.R')
+source('C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR/PTEBAR_0-Functions_for_scripts.R')
 
 # Starting with no duplicated rows database
 gps <- read.table('C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/data/PTEBAR_GPS_DB_V2_noDUPL.txt', h = T, dec = '.', sep = '\t') # database with correct date but with NA and duplicated rows

@@ -1,7 +1,7 @@
 #### Error correction of initial database & addition of useful variables ####
 require(lubridate)
 
-gps <- read.csv2("C:/Users/Etudiant/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_all.csv", dec = ".")
+gps <- read.csv2("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_all.csv", dec = ".")
 
 #### Creation of 'time' variable ####
 gps$time <- paste(paste(gps$Year, gps$Month, gps$Day, sep = "-"), paste(gps$Hour, gps$Minute, gps$Second, sep = ":"), sep = " ")

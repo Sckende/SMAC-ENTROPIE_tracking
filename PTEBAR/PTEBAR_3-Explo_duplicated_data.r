@@ -6,11 +6,11 @@ rm(list = ls())
 require(sf)
 require(dplyr)
 
-setwd("C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR")
-source('C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR/PTEBAR_0-Functions_for_scripts.R')
+# setwd("C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR")
+source('C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR/PTEBAR_0-Functions_for_scripts.R')
 
 # Starting from the initial database
-source('C:/Users/Etudiant/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR/PTEBAR_00-Corrections_initial_database.R') # database with correct date but with NA and duplicated rows
+source('C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR/PTEBAR_00-Corrections_initial_database.r') # database with correct date but with NA and duplicated rows
 
 # Deletion of rows with NA in Longitude
 gps1_noNA <- gps1[!is.na(gps1$Longitude),]

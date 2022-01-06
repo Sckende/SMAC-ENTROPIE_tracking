@@ -181,6 +181,3 @@ table(df_ptest$colony[df_ptest$burst == 'PAC06.02'])
 df_ptest[df_ptest$colony == 'in',]
 
 
-
-blavla
-
