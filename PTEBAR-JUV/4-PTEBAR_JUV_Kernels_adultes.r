@@ -1,8 +1,12 @@
-# ------------------------------------------------------ #
+# ---------------------------------------------------------------- #
 #### OBJECTIFS - Calcul des kernels 50 pour les adultes PTEBAR ####
+
+# Calcul des kernels pour estimer la 'utilization distribution' basé sur les coordonnées non projetées en UTM
+# Estimation du 'Smoothing parameter' h avec la méthode 'href' (the bivariate normal kernel) - h controls the width of the kernel function
+# ---------------------------------------------------------------- #
 #### DATA - Données GLS extraites avec TripEstimation Patrick Pinet 2008-2009 
 #         - Données GLS extraites avec GeoLight Audrey Jager 2008-20xx
-# ------------------------------------------------------ #
+# -------------------------------------------------------------------------- #
 rm(list = ls())
 
 # Loading packages ####
@@ -190,7 +194,7 @@ mapview(gls_HIV,
 # Kernel 50 computation ####
 # ----------------------- #
 # ____ Patrick
-# GLOBAL - href
+# GLOBAL - href - h = 189001.1 m
 KUD_p_href <- kernelUD(gls_p_HIV,
                 h = 'href' # ici 1 degré (relié au type de projection, si lat/lon (non projeté) = degré, si UTM (projeté) = m) en rapport à la précision des GLS env. 180km (1deg = 111km) - pour ARGOS précision environ 1km, donc 1/100 degré
                 #grid = 500
@@ -207,22 +211,24 @@ ker_p_href <- list(ver90_p_href, ver50_p_href, ver25_p_href)
 mapview(ker_p_href) + mapview(gls_p_HIV)
 
 # GLOBAL - LSCV
-KUD_p_LSCV <- kernelUD(gls_p_HIV,
-                       h = 'LSCV')
-
-KUDvol_p_LSCV <- getvolumeUD(KUD_p_LSCV)
+# KUD_p_LSCV <- kernelUD(gls_p_HIV,
+#                        h = 'LSCV') # h = 37609.3 m
+# 
+# KUDvol_p_LSCV <- getvolumeUD(KUD_p_LSCV)
 # ver90_p_LSCV <- getverticeshr(KUDvol_p_LSCV, 90) # grid size problem
-ver50_p_LSCV <- getverticeshr(KUDvol_p_LSCV, 50)
-ver25_p_LSCV <- getverticeshr(KUDvol_p_LSCV, 25)
-
-ker_p_LSCV <- list(ver50_p_LSCV, ver25_p_LSCV)
-
-mapview(ker_p_LSCV) + mapview(gls_p_HIV)
+# ver50_p_LSCV <- getverticeshr(KUDvol_p_LSCV, 50)
+# ver25_p_LSCV <- getverticeshr(KUDvol_p_LSCV, 25)
+# 
+# ker_p_LSCV <- list(ver50_p_LSCV, ver25_p_LSCV)
+# 
+# mapview(ker_p_LSCV) + mapview(gls_p_HIV)
 
 
 # YEAR 1
 KUD_p_1 <- kernelUD(gls_HIV[['gls_p_1']],
                     h = 'href')
+KUD_p_1@h # 229082.7 m
+
 KUDvol_p_1 <- getvolumeUD(KUD_p_1)
 ver50_p_1 <- getverticeshr(KUDvol_p_1, 50)
 mapview(ver50_p_1) + mapview(gls_HIV[['gls_p_1']])
@@ -230,6 +236,8 @@ mapview(ver50_p_1) + mapview(gls_HIV[['gls_p_1']])
 # YEAR 2
 KUD_p_2 <- kernelUD(gls_HIV[['gls_p_2']],
                     h = 'href')
+KUD_p_2@h # 175475.3 m
+
 KUDvol_p_2 <- getvolumeUD(KUD_p_2)
 ver50_p_2 <- getverticeshr(KUDvol_p_2, 50)
 mapview(ver50_p_2) + mapview(gls_HIV[['gls_p_2']])
@@ -238,7 +246,9 @@ mapview(ver50_p_2) + mapview(gls_HIV[['gls_p_2']])
 # ____ Audrey
 # GLOBAL
 KUD_a <- kernelUD(gls_a_HIV,
-                h = 'href')# ici correspond 500x500 degrés (1deg = 111 km à l'équateur)
+                h = 'href')
+KUD_a@h # 201454.8 m
+
 KUDvol_a <- getvolumeUD(KUD_a)
 
 ver90_a <- getverticeshr(KUDvol_a, 90)
@@ -252,6 +262,8 @@ ker_a <- list(ver90_a, ver50_a, ver25_a)
 # YEAR 1
 KUD_a_1 <- kernelUD(gls_HIV[['gls_a_1']],
                     h = 'href')
+KUD_a_1@h # 233123.7 m
+
 KUDvol_a_1 <- getvolumeUD(KUD_a_1)
 ver50_a_1 <- getverticeshr(KUDvol_a_1, 50)
 mapview(ver50_a_1) + mapview(gls_HIV[['gls_a_1']])
@@ -259,6 +271,8 @@ mapview(ver50_a_1) + mapview(gls_HIV[['gls_a_1']])
 # YEAR 2
 KUD_a_2 <- kernelUD(gls_HIV[['gls_a_2']],
                     h = 'href')
+KUD_a_2@h # 170282.1 m
+
 KUDvol_a_2 <- getvolumeUD(KUD_a_2)
 ver50_a_2 <- getverticeshr(KUDvol_a_2, 50)
 mapview(ver50_a_2) + mapview(gls_HIV[['gls_a_2']])
@@ -266,10 +280,16 @@ mapview(ver50_a_2) + mapview(gls_HIV[['gls_a_2']])
 # YEAR 3
 KUD_a_3 <- kernelUD(gls_HIV[['gls_a_3']],
                     h = 'href')
+KUD_a_3@h # 187696.8 m
+
 KUDvol_a_3 <- getvolumeUD(KUD_a_3)
 ver50_a_3 <- getverticeshr(KUDvol_a_3, 50)
 mapview(gls_HIV[['gls_a_3']]) + mapview(ver50_a_3)
 
+
+# ------------------------------------ #
+# KERNELS COMPARISONS PP vs Audrey ####
+# ---------------------------------- #
 mapview(list(ver50_a_1, ver50_a_2, ver50_a_3, ver50_p_1, ver50_p_2),
         col.regions = viridis(5, alpha = 0.5))
 
