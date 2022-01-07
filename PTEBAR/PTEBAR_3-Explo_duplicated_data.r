@@ -63,6 +63,11 @@ info_dupl
 
 gps2 <- gps1_noNA[!duplicated(gps1_noNA$LoggerTime),]
 
-# write.table(gps2,
-            # 'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_DB_V2_noDUPL.txt')
+# Order data per group and date
+
+gps3 <- gps2[order(gps2$Logger_ID, gps2$time),]
+
+# write.table(gps3,
+#             'C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/4-PTEBAR_GPS/DATA/PTEBAR_GPS_DB_V2_noDUPL.txt',
+#             sep = '\t')
 
