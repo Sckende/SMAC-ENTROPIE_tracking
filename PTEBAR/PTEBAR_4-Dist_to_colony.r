@@ -159,6 +159,22 @@ for (i in 1:length(gps2.spat.list)){
 mapview(gps2.spat.list[[5]],
         zcol = 'behav')
 
+#### First jet pour NSD models ####
+
+gps2.spat.list <- lapply(gps2.spat.list, function(x){
+  x$NSD <- x$dist_colo^2
+  x
+})
+
+#### Visualisation des NSD - Nice ! ####
+plot(gps2.spat.list[["PAC03"]]$NSD, type = 'l')
+plot(gps2.spat.list[["PAC06"]]$NSD, type = 'l')
+plot(gps2.spat.list[["PAC10"]]$NSD, type = 'l')
+plot(gps2.spat.list[["PAC11"]]$NSD, type = 'l')
+plot(gps2.spat.list[["PAC10"]]$NSD, type = 'l')
+plot(gps2.spat.list[["PAC12"]]$NSD, type = 'l')
+plot(gps2.spat.list[["PAC15"]]$NSD, type = 'l')
+plot(gps2.spat.list[["PAC16"]]$NSD, type = 'l')
 
 # Write data for rmarkdown documents
 # ---------------------------------------- #
