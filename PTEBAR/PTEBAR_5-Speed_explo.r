@@ -102,6 +102,9 @@ speed.l <- lapply(gps2.sf.UTM.l, function(x){
 lapply(speed.l, function(x){
   summary(x$speed.km.h)})
 
+speed.df <- do.call('rbind', speed.l)
+tail(sort(speed.df$speed.km.h), 10)
+summary(speed.df$speed.km.h)
 ########## Merge speed infos with initial db & obtain more details for PAC06-3/PAC15-4 with max speed > 100 km/h & PAC11-1/PAC15-1/PAC16-1 with max speed < 1.5 km/h
 
 # PAC06-3
