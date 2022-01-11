@@ -165,7 +165,7 @@ wf_set_key(user = "72932", # UID sur profile Copernicus
   request <- c(
                # SSH, # doesn't work - internal error - retry after Python installation - OK
                # SST, # already done
-               # chloro_a, # doesn't work - internal error - retry after Python installation - "Error: Client has not agreed to the required terms and conditions" -
+               chloro_a#, # doesn't work - internal error - retry after Python installation - "Error: Client has not agreed to the required terms and conditions" -
                # bathymetry, # OK
                # east_wind#, # doesn't work - internal error - retry after Python installation - OK
                # north_wind, # OK
