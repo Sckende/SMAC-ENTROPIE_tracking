@@ -7,7 +7,7 @@
 
 
 ############################################################## DONNEES POUR LA PARTIE 1 DU SCRIPT ######################################################
-
+rm(list = ls())
 # Packages nécessaires
 # install.packages("ecmwfr") # Connexion à Copernicus et téléchargement des variables
 
@@ -163,11 +163,11 @@ wf_set_key(user = "72932", # UID sur profile Copernicus
   
 ######## Téléchargement des variables ####
   request <- c(
-               SSH, # doesn't work - internal error - retry after Python install
+               # SSH, # doesn't work - internal error - retry after Python installation - OK
                # SST, # already done
-               chloro_a, # doesn't work - internal error - retry after Python install
+               # chloro_a, # doesn't work - internal error - retry after Python installation - "Error: Client has not agreed to the required terms and conditions" -
                # bathymetry, # OK
-               east_wind, # doesn't work - internal error - retry after Python install
+               # east_wind#, # doesn't work - internal error - retry after Python installation - OK
                # north_wind, # OK
                # geostrophic_current # doesn't work - request not valid cause the version (vDT2021) was missing
                )
