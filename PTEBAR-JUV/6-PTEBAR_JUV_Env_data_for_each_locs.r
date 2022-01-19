@@ -1,20 +1,21 @@
 #####################################
 ##### Test for the TERRA PACKAGE ####
 #####################################
+rm(list = ls())
 # Exploration
 library(terra)
-help(rast)
+# help(rast)
 
-filename <- system.file("ex/logo.tif", package="terra")
-filename
+# filename <- system.file("ex/logo.tif", package="terra")
+# filename
 
-b <- rast(filename)
-b
-b[[1]]
-plot(b[[1]])
-plot(b[[2]])
-plot(b[[3]])
-plot(b)
+# b <- rast(filename)
+# b
+# b[[1]]
+# plot(b[[1]])
+# plot(b[[2]])
+# plot(b[[3]])
+# plot(b)
 
 raster.path <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R"
 names.raster <- "SST_GLO_SST_L4_REP_OBSERVATIONS_010_011-TDS__SST-2017-6.nc"
@@ -41,7 +42,7 @@ dim(argos)
 argos.s <- argos[sample(nrow(argos), 1000), ] # data subset
 argos.s
 
-help(extract)
+# help(extract)
 extract(r[[1]],
         argos.s[, c("Longitude", "Latitude")])
 
@@ -53,6 +54,7 @@ list.names <- list.files(env.folder)
 #####################################################
 library(stringr)
 library(lubridate)
+library(raster)
 
 # SST
 SST <- list.names[str_detect(list.names, 'SST')]
@@ -61,6 +63,8 @@ for(i in 1:length(SST)){
     r <- stack(paste(env.folder, SST[i], sep = '/'))
     SST.list <- c(SST.list, r)
 }
+
+plot(SST.list[[11]][[17:30]])
 SST.stack <- stack(SST.list)
 names(SST.stack)
 
@@ -78,8 +82,32 @@ for(j in 1:length(var)){
     }
 
 stack.var.list[j] <- stack(v.list)
-names(stack.var.list[j]) <- var[j]
+names(stack.var.list)[j] <- var[j]
 }
+
+warnings()
+
+stack.var.list
+names(stack.var.list)
+SST <- stack.var.list[[1]]
+chlo <- stack.var.list[[2]]
+wind.speed <- stack.var.list[[3]]
+wind.north <- stack.var.list[[4]]
+wind.east <- stack.var.list[[5]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Selection of the .nc file for each loc
@@ -121,14 +149,3 @@ for(i in 1:length(argos.s$Latitude)){
 
 }
 
-library(raster)
-rr <- stack(paste(env.folder, list.names[str_detect(list.names, 'SST-2018-5')], sep = '/'))
-rr
-rrr <- stack(paste(env.folder, list.names[str_detect(list.names, 'SST-2018-6')], sep = '/'))
-names(rr)
-names(rrr)
-
-j <- c(rr, rrr)
-t <- stack(rr, rrr)
-names(t)
-stack(j)
