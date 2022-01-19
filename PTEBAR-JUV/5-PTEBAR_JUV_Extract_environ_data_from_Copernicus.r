@@ -145,3 +145,46 @@ for (i in 1:length(vars)){
     print(paste("Variable traitées :", i, "sur", length(vars), seq = ""))
   }
 }
+
+##### Test for the TERRA PACKAGE ####
+# Exploration
+library(terra)
+help(rast)
+
+filename <- system.file("ex/logo.tif", package="terra")
+filename
+
+b <- rast(filename)
+b
+b[[1]]
+plot(b[[1]])
+plot(b[[2]])
+plot(b[[3]])
+plot(b)
+
+raster.path <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R"
+names.raster <- "SST_GLO_SST_L4_REP_OBSERVATIONS_010_011-TDS__SST-2017-6.nc"
+raster.path
+names.raster
+r <-rast(paste(raster.path, names.raster, sep = '/'))
+r
+crs(r)
+plot(r[[1]])
+plot(r[[2]])
+mean.r <- mean(r)
+plot(mean.r)
+
+# Data extraction under several locations
+argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.txt",
+                    sep = '\t',
+                    h = T)
+head(argos)
+summary(argos)
+dim(argos)
+
+argos.s <- argos[sample(nrow(argos), 1000), ]
+argos.s
+
+help(extract)
+extract(r[[1]],
+        argos.s[, c("Longitude", "Latitude")])
