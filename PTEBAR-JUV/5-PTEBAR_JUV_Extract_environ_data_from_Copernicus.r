@@ -13,7 +13,7 @@
 # install.packages("devtools") # Pour permettre l'installation du package RCMEMS via Github 
 # Devtools utilise Rtools qui doit être installé et ajouté aux path du système : https://cran.r-project.org/bin/windows/Rtools/. 
 # Attention aux compatibilités des versions Rtools et de R (Cf. lien ci-dessus)
-
+rm(list = ls())
 # library(devtools)
 
 # Installer le package développé sur Github, soumis sur CRAN en mars 2020 mais pas encore sortie
@@ -49,7 +49,7 @@ lat_max = "31"          # latitude maximale de la zone à télécharger
 # Informations variables
 # link_tab_parm <- "F:/PNB_ENTROPIE/Input_R"     # Chemin du tableau contenant les paramètres des variables
 link_tab_parm <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Input_R"
-nom_fichier_tab <- "Parametres_variables_suite8.csv"   # Nom du fichier contenant le tableau avec les paramètres des variables (.csv, séparateur point-virgule)
+nom_fichier_tab <- "Parametres_variables_suite9.csv"   # Nom du fichier contenant le tableau avec les paramètres des variables (.csv, séparateur point-virgule)
 
 
 ####################### DEBUT PARTIE 2 DU SCRIPT : Téléchargement variables sur Copernicus Marine Environment Monitoring Service #######################
