@@ -44,12 +44,11 @@ lat_max = "31"          # latitude maximale de la zone à télécharger
 ### "Service_id" : A récupérer sur Copernicus (code Python)
 ### "Date_min" : Format jour/mois/année (format Français)
 ### "Date_max" : Format jour/mois/année  (format Français)
-### "Depth_min" et "Depth_max": Intervalle de profondeur à télécharger (points et pas des virgules dans le fichier), laisser vide si pas de valeurs  
 
 # Informations variables
 # link_tab_parm <- "F:/PNB_ENTROPIE/Input_R"     # Chemin du tableau contenant les paramètres des variables
 link_tab_parm <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Input_R"
-nom_fichier_tab <- "Parametres_variables_suite9.csv"   # Nom du fichier contenant le tableau avec les paramètres des variables (.csv, séparateur point-virgule)
+nom_fichier_tab <- "Parametres_5_variables.csv"   # Nom du fichier contenant le tableau avec les paramètres des variables (.csv, séparateur point-virgule)
 
 
 ####################### DEBUT PARTIE 2 DU SCRIPT : Téléchargement variables sur Copernicus Marine Environment Monitoring Service #######################
@@ -80,16 +79,10 @@ vars <- c(tab_parm$Variable_code)
 tab_parm$Variable <- as.character(tab_parm$Variable)
 names_vars <- c(tab_parm$Variable)
 
-tab_parm$Depth_min <- as.character(tab_parm$Depth_min)
-depth_min <- c(tab_parm$Depth_min)
-
-tab_parm$Depth_max <- as.character(tab_parm$Depth_max)
-depth_max <- c(tab_parm$Depth_max)
 
 ########## Télécharger les variables
 for (i in 1:length(vars)){
   
-  if (is.na(depth_max[i]) == TRUE){
     parm_vars <- RCMEMS::CMEMS.config(
       motu = lien_motu[i],
       python = "C:/Users/ccjuhasz/AppData/Local/Programs/Python/Python310/python.exe",
@@ -114,34 +107,4 @@ for (i in 1:length(vars)){
     
     print(paste("Nom de la variable traitée : ", names_vars[i]))
     print(paste("Variable traitées :", i, "sur", length(vars), seq = ""))
-  }
-  
-  if (is.na(depth_max[i]) == FALSE){
-    parm_vars <- RCMEMS::CMEMS.config(
-      motu = lien_motu[i],
-      python = "C:/Users/ccjuhasz/AppData/Local/Programs/Python/Python310/python.exe",
-      script = "C:/Users/ccjuhasz/AppData/Local/Programs/Python/Python310/Scripts/motuclient-script.py",
-      user = user_name,
-      pwd = mdp,
-      auth.mode = "cas",
-      longitude.min = long_min,
-      longitude.max = long_max,
-      latitude.min = lat_min,
-      latitude.max = lat_max,
-      service.id = ID_service[i],
-      product.id = ID_produit[i],
-      date.min = date_min[i],
-      date.max = date_max[i],
-      variable = vars[i],
-      depth.min = depth_min[i],
-      depth.max = depth_max[i],
-      out.dir = dossier_vars,
-      out.name = paste(ID_service[i], "__", names_vars[i], ".nc", sep ="")
-    )
-    
-    RCMEMS::CMEMS.download(parm_vars)
-    
-    print(paste("Nom de la variable traitée : ", names_vars[i]))
-    print(paste("Variable traitées :", i, "sur", length(vars), seq = ""))
-  }
 }
