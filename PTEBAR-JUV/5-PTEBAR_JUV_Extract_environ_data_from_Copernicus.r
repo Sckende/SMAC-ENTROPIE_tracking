@@ -19,6 +19,7 @@ rm(list = ls())
 # Installer le package développé sur Github, soumis sur CRAN en mars 2020 mais pas encore sortie
 # devtools::install_github("markpayneatwork/RCMEMS", force = TRUE) 
 library(RCMEMS)
+library(lubridate)
 # Stocker le chemin de l'espace de travail
 # wd <- getwd()
 
@@ -108,3 +109,50 @@ for (i in 1:length(vars)){
     print(paste("Nom de la variable traitée : ", names_vars[i]))
     print(paste("Variable traitées :", i, "sur", length(vars), seq = ""))
 }
+
+
+######################## Prolongation du script pour télécharger les layers manquantes en fin de chaque mois pour les variables enregistrées au 6h #######################
+# WIND_SPEED, WIND_NORTH, WIND_EAST
+
+########## Créer les vecteurs issus des différentes colonnes du tableau de paramètrage des variables
+tab_parm <- read.csv(paste(link_tab_parm, nom_fichier_tab, sep = "/"), head = TRUE, na.strings = "" ,  sep = ";")
+
+# selection des variables d'intérêt
+tab_parm2 <- tab_parm[tab_parm$Variable_code %in% c("wind_speed", "northward_wind", "eastward_wind"),]
+
+# modification des noms de fichiers
+tab_parm2$Variable <- paste(tab_parm2$Variable, '-suite', sep = '')
+
+# Modification des dates
+tab_parm2$Date_min <- tab_parm2$Date_max
+tab_parm2$Date_min <- as.Date(tab_parm2$Date_min, format = "%d/%m/%Y")
+tab_parm2$Date_max <- date(tab_parm2$Date_min) + 1
+
+tab_parm2$Motu <- as.character(tab_parm2$Motu)
+lien_motu <- c(tab_parm2$Motu)
+
+tab_parm2$Service_id <- as.character(tab_parm2$Service_id)
+ID_service <- c(tab_parm2$Service_id)
+
+tab_parm2$Product_id <- as.character(tab_parm2$Product_id)
+ID_produit <- c(tab_parm2$Product_id)
+
+# tab_parm2$Date_min <- as.POSIXct(tab_parm2$Date_min, format = "%d/%m/%Y %H:%M:%S")
+# tab_parm2$Date_min <- as.Date(tab_parm2$Date_min, format = "%d/%m/%Y")
+date_min <- as.character(tab_parm2$Date_min)
+date_min <- c(date_min)
+
+# tab_parm2$Date_max <- as.POSIXct(tab_parm2$Date_max, format = "%d/%m/%Y %H:%M:%S")
+tab_parm2$Date_max <- as.Date(tab_parm2$Date_max, format = "%d/%m/%Y")
+date_max <- as.character(tab_parm2$Date_max)
+date_max <- c(date_max)
+
+tab_parm2$Variable_code <- as.character(tab_parm2$Variable_code)
+vars <- c(tab_parm2$Variable_code) 
+
+tab_parm2$Variable <- as.character(paste(tab_parm2$Variable, '_suite', sep = ''))
+names_vars <- c(tab_parm2$Variable)
+
+
+########## Télécharger les variables
+# --> cf première partie du script
