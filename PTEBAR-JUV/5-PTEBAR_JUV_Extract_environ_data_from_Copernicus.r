@@ -119,7 +119,7 @@ tab_parm <- read.csv(paste(link_tab_parm, nom_fichier_tab, sep = "/"), head = TR
 
 # selection des variables d'intérêt
 tab_parm2 <- tab_parm[tab_parm$Variable_code %in% c("wind_speed", "northward_wind", "eastward_wind"),]
-
+dim(tab_parm2)
 # modification des noms de fichiers
 tab_parm2$Variable <- paste(tab_parm2$Variable, '-suite', sep = '')
 
@@ -150,7 +150,7 @@ date_max <- c(date_max)
 tab_parm2$Variable_code <- as.character(tab_parm2$Variable_code)
 vars <- c(tab_parm2$Variable_code) 
 
-tab_parm2$Variable <- as.character(paste(tab_parm2$Variable, '_suite', sep = ''))
+tab_parm2$Variable <- as.character(tab_parm2$Variable)
 names_vars <- c(tab_parm2$Variable)
 
 
