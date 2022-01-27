@@ -34,9 +34,11 @@ plot(mean.r)
 #############################################################
 #### Data extraction under several locations / TEST ZONE ####
 #############################################################
-argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.txt",
-                    sep = '\t',
-                    h = T)
+# argos <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED.txt",
+#                     sep = '\t',
+#                     h = T)
+argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED_speed.rds")
+argos <- do.call('rbind', argos)
 head(argos)
 summary(argos)
 dim(argos)
@@ -46,7 +48,7 @@ argos.s
 
 # help(extract)
 extract(r[[1]],
-        argos.s[, c("Longitude", "Latitude")])
+        as.data.frame(argos.s[, c("Longitude", "Latitude")]))
 
 env.folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R" 
 list.names <- list.files(env.folder)
@@ -148,9 +150,9 @@ argos_list2 <- lapply(argos_list, function(x){
     CHLO_raster <- chlo_stack[[str_which(names(chlo_stack), unique(x$dt))]] 
 
     x$SST <- extract(SST_raster,
-                     x[, c('Longitude', 'Latitude')])
+                     as.data.frame(x[, c('Longitude', 'Latitude')]))
     x$CHLO <- extract(CHLO_raster,
-                      x[, c('Longitude', 'Latitude')])
+                      as.data.frame(x[, c('Longitude', 'Latitude')]))
     
     x
 })
@@ -174,7 +176,8 @@ j <- names(wind_east_stack)[str_length(names(wind_east_stack)) > 20]
 east_wind_deletion <- j[str_detect(j, '.00.2')]
 dim(wind_east_stack)
 wind_east_stack <- dropLayer(wind_east_stack,
-                             match(east_wind_deletion, names(wind_east_stack)))
+                             match(east_wind_deletion,
+                                   names(wind_east_stack)))
 dim(wind_east_stack)   
 names(wind_east_stack)
 
@@ -184,7 +187,8 @@ k <- names(wind_north_stack)[str_length(names(wind_north_stack)) > 20]
 north_wind_deletion <- k[str_detect(k, '.00.2')]
 dim(wind_north_stack)
 wind_north_stack <- dropLayer(wind_north_stack,
-                             match(north_wind_deletion, names(wind_north_stack)))
+                              match(north_wind_deletion, 
+                                    names(wind_north_stack)))
 dim(wind_north_stack) 
 
 # ---> wind_speed_stack
@@ -193,7 +197,8 @@ l <- names(wind_speed_stack)[str_length(names(wind_speed_stack)) > 20]
 speed_wind_deletion <- l[str_detect(l, '.00.2')]
 dim(wind_speed_stack)
 wind_speed_stack <- dropLayer(wind_speed_stack,
-                             match(speed_wind_deletion, names(wind_speed_stack)))
+                              match(speed_wind_deletion,
+                                    names(wind_speed_stack)))
 dim(wind_speed_stack)
 
 # Test zone
@@ -219,13 +224,15 @@ test$raster_hour[test$minutes >= 901 & test$minutes <= 1260] <- "18.00"
 # unique(hour(test$Date[test$raster_hour == "12.00"]))
 # test[test$minutes == 1260,]
 
-test$raster_date <- ifelse(test$minutes >= 1261, as.character(date(test$Date)+1), as.character(date(test$Date)))
+test$raster_date <- ifelse(test$minutes >= 1261,
+                           as.character(date(test$Date)+1),
+                           as.character(date(test$Date)))
 # test[test$minutes >= 1261,]
 # test[test$minutes < 1261,]
 
 test$raster_layer <- paste(str_replace_all(test$raster_date, '-', '.'),
-                          test$raster_hour,
-                          sep = '.')
+                           test$raster_hour,
+                           sep = '.')
 head(test)
 
 test_list <- split(test, test$raster_layer)
@@ -233,16 +240,19 @@ length(test_list)
 
 test_list2 <- lapply(test_list, function(x){
 # ----- #
-    speed_raster <- wind_speed_stack[[str_which(names(wind_speed_stack), unique(x$raster_layer))]]
-    north_raster <- wind_north_stack[[str_which(names(wind_north_stack), unique(x$raster_layer))]]
-    east_raster <- wind_east_stack[[str_which(names(wind_east_stack), unique(x$raster_layer))]]
+    speed_raster <- wind_speed_stack[[str_which(names(wind_speed_stack),
+                                                unique(x$raster_layer))]]
+    north_raster <- wind_north_stack[[str_which(names(wind_north_stack),
+                                                unique(x$raster_layer))]]
+    east_raster <- wind_east_stack[[str_which(names(wind_east_stack),
+                                              unique(x$raster_layer))]]
 # ----- #
     x$wind_speed <- extract(speed_raster,
-                     x[, c('Longitude', 'Latitude')])
+                            as.data.frame(x[, c("Longitude", "Latitude")]))
     x$wind_north <- extract(north_raster,
-                      x[, c('Longitude', 'Latitude')])
+                            as.data.frame(x[, c("Longitude", "Latitude")]))
     x$wind_east <- extract(east_raster,
-                      x[, c('Longitude', 'Latitude')])
+                           as.data.frame(x[, c("Longitude", "Latitude")]))
 # ----- #
     print(unique(x$raster_layer))
     print(str_which(unique(test$raster_layer), unique(x$raster_layer)))
@@ -275,24 +285,27 @@ argos2$raster_date <- ifelse(argos2$minutes >= 1261,
                              as.character(date(argos2$Date)))
 
 argos2$raster_layer <- paste(str_replace_all(argos2$raster_date, '-', '.'),
-                          argos2$raster_hour,
-                          sep = '.')
+                             argos2$raster_hour,
+                             sep = '.')
 
 argos2_list <- split(argos2, argos2$raster_layer)
 length(argos2_list)
 
-argos3_list <- lapply(argos2_list, function(x){
+argos3_list <- lapply(argos2_list, function(x) {
 # ----- #
-    speed_raster <- wind_speed_stack[[str_which(names(wind_speed_stack), unique(x$raster_layer))]]
-    north_raster <- wind_north_stack[[str_which(names(wind_north_stack), unique(x$raster_layer))]]
-    east_raster <- wind_east_stack[[str_which(names(wind_east_stack), unique(x$raster_layer))]]
+    speed_raster <- wind_speed_stack[[str_which(names(wind_speed_stack),
+                                                unique(x$raster_layer))]]
+    north_raster <- wind_north_stack[[str_which(names(wind_north_stack),
+                                                unique(x$raster_layer))]]
+    east_raster <- wind_east_stack[[str_which(names(wind_east_stack),
+                                              unique(x$raster_layer))]]
 # ----- #
     x$wind_speed <- extract(speed_raster,
-                     x[, c('Longitude', 'Latitude')])
+                            as.data.frame(x[, c("Longitude", "Latitude")]))
     x$wind_north <- extract(north_raster,
-                      x[, c('Longitude', 'Latitude')])
+                            as.data.frame(x[, c("Longitude", "Latitude")]))
     x$wind_east <- extract(east_raster,
-                      x[, c('Longitude', 'Latitude')])
+                           as.data.frame(x[, c("Longitude", "Latitude")]))
 # ----- #
     print(unique(x$raster_layer))
     print(str_which(unique(test$raster_layer), unique(x$raster_layer)))
@@ -319,4 +332,7 @@ head(argos3)
 #########################################
 # saveRDS(argos3,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA.rds")
+
+# saveRDS(argos3,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_V2.rds")
 
