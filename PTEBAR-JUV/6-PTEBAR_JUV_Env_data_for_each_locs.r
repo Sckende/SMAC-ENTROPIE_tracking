@@ -331,8 +331,5 @@ head(argos3)
 # Write the output data with extraction #
 #########################################
 # saveRDS(argos3,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA.rds")
-
-# saveRDS(argos3,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_V2.rds")
 
