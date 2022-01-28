@@ -5,6 +5,7 @@ rm(list = ls())
 # Exploration
 library(terra)
 library(raster)
+library(sf)
 # help(rast)
 
 # filename <- system.file("ex/logo.tif", package="terra")
@@ -39,6 +40,8 @@ plot(mean.r)
 #                     h = T)
 argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_Pinet_data_CLEANED_speed.rds")
 argos <- do.call('rbind', argos)
+argos <- st_drop_geometry(argos)
+names(argos)
 head(argos)
 summary(argos)
 dim(argos)
@@ -48,7 +51,7 @@ argos.s
 
 # help(extract)
 extract(r[[1]],
-        as.data.frame(argos.s[, c("Longitude", "Latitude")]))
+        argos.s[, c("Longitude", "Latitude")])
 
 env.folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R" 
 list.names <- list.files(env.folder)
@@ -99,10 +102,20 @@ stack.var.list
 names(stack.var.list)
 
 SST_stack <- stack.var.list[[1]]
+# saveRDS(SST_stack,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/SST_stack.rds")
 chlo_stack <- stack.var.list[[2]]
+# saveRDS(chlo_stack,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/chlo_stack.rds")
 wind_speed_stack <- stack.var.list[[3]]
+# saveRDS(wind_speed_stack,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_speed_stack.rds")
 wind_north_stack <- stack.var.list[[4]]
+# saveRDS(wind_north_stack,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_north_stack.rds")
 wind_east_stack <- stack.var.list[[5]]
+# saveRDS(wind_east_stack,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_east_stack.rds")
 
 
 ##############################################################################
