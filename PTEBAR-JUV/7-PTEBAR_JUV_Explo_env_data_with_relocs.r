@@ -1,9 +1,11 @@
 rm(list = ls())
-library(languageserver)
+# library(languageserver)
 library(sf)
 library(rasterVis)
 library(viridis)
 library(stringr)
+library(terra)
+# library(raster)
 
 ################
 # Data loading #
@@ -40,12 +42,35 @@ period_1 <- names(zon_stack)[str_which(names(zon_stack), "X2017.")]
 
 u_2017 <- zon_stack[[which(names(zon_stack) %in% period_1)]]
 names(u_2017)
+hist(values(u_2017[[1]]))
+mean_u_2017 <- mean(u_2017)
+
 # ----- #
 v_2017 <- mer_stack[[which(names(mer_stack) %in% period_1)]]
 names(v_2017)
+hist(values(v_2017[[1]]))
+
+mean_v_2017 <- mean(v_2017)
 # ----- #
-vec_stack_2017 <- atan2(u_2017, v_2017) + 180
-vec_stack_2017
+x11()
+vectorplot(raster::stack(mean_u_2017, mean_v_2017),
+           isField = 'dXY',
+           aspX = 0.4,
+           region = T,
+           narrows = 500,
+           lwd.arrows = 1)
+
+# ---- > orientation computation
+# help(atan2) # return the angle in radians & WARNING, y before x in the arguments
+mean_orien_2017 <- ((180/pi)*atan2(mean_v_2017, mean_u_2017)) + 180
+
+x11()
+vectorplot(mean_orien_2017,
+          #  isField = 'dXY',
+           aspX = 0.4,
+          #  region = NA,
+           narrows = 500,
+           lwd.arrows = 1)
 
 # YEAR 2
 u_2018 <- dropLayer(zon_stack,
@@ -58,6 +83,10 @@ v_2018 <- dropLayer(mer_stack,
                           names(mer_stack)))
 names(v_2018)
 # ----- #
+t1 <- atan2(u_2018, v_2018)
+t2 <- atan2(u_2018, v_2018) + 180
+t3 <- 180/pi * atan2(u_2018, v_2018) + 180
+
 vec_stack_2018 <- atan2(u_2018, v_2018) + 180
 vec_stack_2018
 
@@ -65,11 +94,12 @@ hist(values(vec_stack))
 mean_vec <- mean(vec_stack)
 hist(mean_vec)
 
-vectorplot(mean_vec,
+vectorplot(vec_stack_2017[[1]],
            unit = 'degrees',
            col.regions = viridis(150),
            cuts = 149,
            region = T)
+help(vectorplot)
 
 
 ########################################
@@ -113,3 +143,49 @@ plot(argos_list[[1]]$SST,
      col = 'darkorange',
      type = 'l')
 View()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Tries to computation of the wind orientation
+# https://stackoverflow.com/questions/21484558/how-to-calculate-wind-direction-from-u-and-v-wind-components-in-r
+
+u <- u_2017
+u_mean <- mean(u)
+v <- v_2017
+v_mean <- mean(v)
+
+# Normalization of components
+abs_wind <- sqrt(u^2 + v^2)
+mean_abs_wind <- mean(abs_wind)
+
+# Conversion
+wind_dir_trig_to = atan2(u_mean/mean_abs_wind, v_mean/mean_abs_wind)
+hist(values(wind_dir_trig_to))
+ 
+wind_dir_trig_to_degrees = wind_dir_trig_to * 180/pi ## -111.6 degrees
+hist(values(wind_dir_trig_to_degrees))
+
+wind_dir_trig_from_degrees = wind_dir_trig_to_degrees + 180 ## 68.38 degrees
+hist(values(wind_dir_trig_from_degrees))
+
+wind_dir_cardinal = 90 - wind_dir_trig_from_degrees
+hist(values(wind_dir_cardinal))
+
+x11()
+vectorplot(wind_dir_cardinal)
