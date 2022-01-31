@@ -1,6 +1,8 @@
 #####################################
 ##### Test for the TERRA PACKAGE ####
 #####################################
+
+# extraction des dates des layers => time(raster)
 rm(list = ls())
 # Exploration
 library(terra)
