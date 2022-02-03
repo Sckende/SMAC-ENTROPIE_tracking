@@ -129,10 +129,12 @@ wind_east_stack <- stack.var.list[[5]]
 # argos.s$SST <- NA
 # argos.s$CHLO <- NA
 
-##################
-# For SST & CHLO #
-##################
-# # ----- > First method : loop with extraction for each row
+#####################
+# For SST & CHLO ####
+#####################
+
+# # ----- > First method : loop with extraction for each row #
+##############################################################
 
 # for(i in 1:length(argos.s$Date)){
 #     # lon <- argos.s$Longitude[i]
@@ -153,7 +155,8 @@ wind_east_stack <- stack.var.list[[5]]
 # argos.s
 
 
-# ----- > Second method : Split the dataframe by date and apply the exctraction by group of coordinates
+# ----- > Second method : Split the dataframe by date and apply the exctraction by group of coordinates #
+#########################################################################################################
 length(unique(date(argos$Date)))
 argos$dt <- str_replace_all(as.character(date(argos$Date)), '-', '.')
 argos_list <- split(argos, argos$dt)
@@ -180,12 +183,14 @@ summary(argos2$SST)
 mean(argos2$CHLO, na.rm = T)
 summary(argos2$CHLO)
 
-#################################
-# For WIND speed & orientation #
-################################
+###################################
+# For WIND speed & orientation ####
+###################################
 
 # Deletion of duplicated layers in raster
-# ---> wind_east_stack
+# ---> wind_east_stack #
+########################
+
 str_length(names(wind_east_stack))
 j <- names(wind_east_stack)[str_length(names(wind_east_stack)) > 20]
 east_wind_deletion <- j[str_detect(j, '.00.2')]
@@ -196,7 +201,8 @@ wind_east_stack <- dropLayer(wind_east_stack,
 dim(wind_east_stack)   
 names(wind_east_stack)
 
-# ---> wind_north_stack
+# ---> wind_north_stack #
+#########################
 str_length(names(wind_north_stack))
 k <- names(wind_north_stack)[str_length(names(wind_north_stack)) > 20]
 north_wind_deletion <- k[str_detect(k, '.00.2')]
@@ -206,7 +212,8 @@ wind_north_stack <- dropLayer(wind_north_stack,
                                     names(wind_north_stack)))
 dim(wind_north_stack) 
 
-# ---> wind_speed_stack
+# ---> wind_speed_stack #
+#########################
 str_length(names(wind_speed_stack))
 l <- names(wind_speed_stack)[str_length(names(wind_speed_stack)) > 20]
 speed_wind_deletion <- l[str_detect(l, '.00.2')]
@@ -216,13 +223,16 @@ wind_speed_stack <- dropLayer(wind_speed_stack,
                                     names(wind_speed_stack)))
 dim(wind_speed_stack)
 
-# Test zone
+# -----> Test zone #
+####################
 test <- argos[sample(nrow(argos), 1000), ]
 test <- test[, c("Date", "Vessel", "Longitude", "Latitude")]
 head(test)
 test$minutes <- hour(test$Date)*60 + minute(test$Date)
 
-# raster aux 6h 
+# -----> Split based on time range of rasters #
+##################################################
+# raster aux 6h
 # deb      fin       raster.hour     raster.day
 # 21:01 (1261) -> 03:00 (180)  ==> 00:00           J+1 or J depending on bef/aft midnight
 # 03:01 (181)  -> 09:00 (540)  ==> 06:00            J
@@ -275,9 +285,9 @@ test_list2 <- lapply(test_list, function(x){
     x
 })
 print("ayééé")
-#####################
-# On ALL Argos data #
-#####################
+
+# -----> On ALL Argos data #
+############################
 
 head(argos2, 50)
 argos2$minutes <- hour(argos2$Date)*60 + minute(argos2$Date)
@@ -342,9 +352,29 @@ summary(argos3$wind_east)
 argos3 <- argos3[order(argos3$Vessel, argos3$Date),]
 head(argos3)
 
-#########################################
-# Write the output data with extraction #
-#########################################
+
+
+
+#####################
+# For BATHYMETRY ####
+#####################
+
+str(argos3)
+
+bathy <- terra::rast("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/ETOPO1_Bed_g_geotiff_BATHY.tif")
+bathy
+mapview::mapview(bathy)
+plot(bathy)
+
+argos_df <- st_drop_geometry(argos3)
+argos3$bathy <- extract(bathy,
+                        argos_df[, c("Longitude", "Latitude")])
+
+summary(argos3$bathy)
+names(argos3)
+
+##################################################
+# Write the new file with extracted env. data ####
+##################################################
 # saveRDS(argos3,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA.rds")
-
