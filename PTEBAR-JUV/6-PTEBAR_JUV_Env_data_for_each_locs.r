@@ -367,11 +367,23 @@ mapview::mapview(bathy)
 plot(bathy)
 
 argos_df <- st_drop_geometry(argos3)
-argos3$bathy <- extract(bathy,
-                        argos_df[, c("Longitude", "Latitude")])
+t <- extract(bathy,
+             argos_df[, c("Longitude", "Latitude")]) # The output is a dataframe
+class(t)
+head(t)
+names(t)
+
+argos3$bathy <- t[, 2]
 
 summary(argos3$bathy)
-names(argos3)
+class(argos3$bathy)
+
+for(i in unique(argos3$Vessel)){
+    x11()
+    plot(argos3$bathy[argos3$Vessel == i],
+         type = "b",
+         main = i)
+}
 
 ##################################################
 # Write the new file with extracted env. data ####
