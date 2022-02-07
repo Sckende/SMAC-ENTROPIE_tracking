@@ -110,14 +110,10 @@ chlo_stack <- stack.var.list[[2]]
 # saveRDS(chlo_stack,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/chlo_stack.rds")
 wind_speed_stack <- stack.var.list[[3]]
-# saveRDS(wind_speed_stack,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_speed_stack.rds")
+
 wind_north_stack <- stack.var.list[[4]]
-# saveRDS(wind_north_stack,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_north_stack.rds")
+
 wind_east_stack <- stack.var.list[[5]]
-# saveRDS(wind_east_stack,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_east_stack.rds")
 
 
 ##############################################################################
@@ -195,11 +191,14 @@ str_length(names(wind_east_stack))
 j <- names(wind_east_stack)[str_length(names(wind_east_stack)) > 20]
 east_wind_deletion <- j[str_detect(j, '.00.2')]
 dim(wind_east_stack)
-wind_east_stack <- dropLayer(wind_east_stack,
+wind_east_stack2 <- dropLayer(wind_east_stack,
                              match(east_wind_deletion,
                                    names(wind_east_stack)))
-dim(wind_east_stack)   
-names(wind_east_stack)
+dim(wind_east_stack2)
+names(wind_east_stack2)
+
+# saveRDS(wind_east_stack2,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_east_stack.rds")
 
 # ---> wind_north_stack #
 #########################
@@ -207,10 +206,13 @@ str_length(names(wind_north_stack))
 k <- names(wind_north_stack)[str_length(names(wind_north_stack)) > 20]
 north_wind_deletion <- k[str_detect(k, '.00.2')]
 dim(wind_north_stack)
-wind_north_stack <- dropLayer(wind_north_stack,
+wind_north_stack2 <- dropLayer(wind_north_stack,
                               match(north_wind_deletion, 
                                     names(wind_north_stack)))
-dim(wind_north_stack) 
+dim(wind_north_stack2)
+
+# saveRDS(wind_north_stack2,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_north_stack.rds")
 
 # ---> wind_speed_stack #
 #########################
@@ -218,10 +220,13 @@ str_length(names(wind_speed_stack))
 l <- names(wind_speed_stack)[str_length(names(wind_speed_stack)) > 20]
 speed_wind_deletion <- l[str_detect(l, '.00.2')]
 dim(wind_speed_stack)
-wind_speed_stack <- dropLayer(wind_speed_stack,
+wind_speed_stack2 <- dropLayer(wind_speed_stack,
                               match(speed_wind_deletion,
                                     names(wind_speed_stack)))
-dim(wind_speed_stack)
+dim(wind_speed_stack2)
+
+# saveRDS(wind_speed_stack2,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_speed_stack.rds")
 
 # -----> Test zone #
 ####################
