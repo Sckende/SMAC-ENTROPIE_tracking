@@ -39,8 +39,18 @@ summary(argos_df)
 # v = Meridional velocity = y = north
 
 zon_stack <-readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_east_stack.rds")
+zon_stack <- zon_stack[[order(names(zon_stack))]]
+names(zon_stack)
+zon_stack[[1]]
+zon_stack[[5]]
+zon_stack[[60]]
 
 mer_stack <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_north_stack.rds")
+mer_stack <- mer_stack[[order(names(mer_stack))]]
+names(mer_stack)
+mer_stack[[1]]
+mer_stack[[5]]
+mer_stack[[60]]
 
 all(names(zon_stack) == names(mer_stack))
 
@@ -54,10 +64,15 @@ u_2017 <- zon_stack[[which(names(zon_stack) %in% period_1)]]
 names(u_2017)
 hist(values(u_2017[[1]]))
 
+mean_u_2017 <- mean(u_2017)
+
 # ----- #
 v_2017 <- mer_stack[[which(names(mer_stack) %in% period_1)]]
 names(v_2017)
 hist(values(v_2017[[1]]))
+
+mean_v_2017 <- mean(v_2017)
+mean_v_2017
 
 # ----- #
 x11()
@@ -67,7 +82,7 @@ vectorplot(raster::stack(mean_u_2017, mean_v_2017),
            region = T,
            narrows = 500,
            lwd.arrows = 1)
-
+dev.off()
 
 # YEAR 2018 ####
 ################
@@ -97,6 +112,7 @@ vectorplot(raster::stack(mean_u_2018, mean_v_2018),
            region = T,
            narrows = 500,
            lwd.arrows = 1)
+dev.off()
 
 
 ############################################
@@ -110,10 +126,12 @@ vectorplot(raster::stack(mean_u_2018, mean_v_2018),
 ################
 
 # dirs_2017 <- 180 * atan2(v_2017, u_2017) / pi # atan2 gives direction in radian, then *180/pi allows the conversion in degree from -180 to 180
-# # In addition, atan2 gives the angle with METEOROLOGICAL convention
-# # N = 0 = 360, E = 90, S = 180, W = 270
+# In addition, atan2 gives the angle with METEOROLOGICAL convention
+# N = 0 = 360, E = 90, S = 180, W = 270
+# dirs_2017
+
 # saveRDS(dirs_2017,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_dirs_2017.rds")
+     #    "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_dirs_2017.rds")
 
 dirs_2017 <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_dirs_2017.rds")
 dirs_2017 # From -180 to 180
@@ -121,8 +139,14 @@ dirs_2017 # From -180 to 180
 # -----> absolute wind speed from u & v components
 ##################################################
 
-abs_wind_sp_2017 <- sqrt(u_2017^2 + v_2017^2)
-abs_wind_sp_2017
+# abs_wind_sp_2017 <- sqrt(u_2017^2 + v_2017^2)
+# abs_wind_sp_2017
+# names(abs_wind_sp_2017) <- names(u_2017)
+# saveRDS(abs_wind_sp_2017,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/abs_wind_speed_2017.rds")
+
+
+abs_wind_sp_2017 <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/abs_wind_speed_2017.rds")
 
 # YEAR 2018 ####
 ################
@@ -130,6 +154,8 @@ abs_wind_sp_2017
 # dirs_2018 <- 180 * atan2(v_2018, u_2018) / pi # atan2 gives direction in radian, then *180/pi allows the conversion in degree from -180 to 180
 # In addition, HERE the atan2 gives the angle with METEOROLOGICAL convention
 # N = 0 = 360, E = 90, S = 180, W = 270
+# dirs_2018
+# names(dirs_2018) <- names(u_2018)
 # saveRDS(dirs_2018,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/wind_dirs_2018.rds")
 
@@ -139,8 +165,12 @@ dirs_2018 # From -180 to 180
 # -----> absolute wind speed fromm u & v components
 ###################################################
 
-abs_wind_sp_2018 <- sqrt(u_2018^2 + v_2018^2)
-abs_wind_sp_2018
+# abs_wind_sp_2018 <- sqrt(u_2018^2 + v_2018^2)
+# names(abs_wind_sp_2018) <- names(u_2018)
+# saveRDS(abs_wind_sp_2018,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/abs_wind_speed_2018.rds")
+
+abs_wind_sp_2018 <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/abs_wind_speed_2018.rds")
 
 
 ###########################################
@@ -218,7 +248,7 @@ for(i in t_2018){
 ###########################################
 
 g <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_argos_&_speed_ltraj.rds")
-g
+
 str(g)
 g2 <- do.call("rbind", g)
 summary(g2$abs.angle) # angles in radians
@@ -296,3 +326,10 @@ test$burst <- substring(row.names(test), 7, 10)
 # NEXT STEP, split in range of time
 # Extract wind direction for each loc of birds
 # Extract bathymetrie for each loc of birds
+
+head(argos3)
+str(argos3)
+vessel <- unique(argos3$Vessel)
+
+plot(argos3$Date[argos3$Vessel == vessel[1]],
+     argos3$bathy[argos3$Vessel == vessel[1]])
