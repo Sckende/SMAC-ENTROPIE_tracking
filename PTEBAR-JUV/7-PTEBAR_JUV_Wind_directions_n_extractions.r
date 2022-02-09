@@ -9,6 +9,7 @@ library(raster)
 library(viridis)
 library(openair)
 library(circular)
+library(lubridate)
 
 ######################
 #### Data loading ####
@@ -243,6 +244,44 @@ for(i in t_2018){
 
 # Next step - Work with the type argument of the function
 
+#############################################################################
+# -----> extraction of wind direction and absolute speed for each relocs ####
+#############################################################################
+dirs_stack <- stack(dirs_2017, dirs_2018)
+abs_wind_stack <- stack(abs_wind_sp_2017, abs_wind_sp_2018)
+
+head(argos_df)
+names(argos_df)
+
+argos_df_list <- split(argos_df, argos_df$raster_layer)
+length(argos_df_list)
+
+argos_df_list2 <- lapply(argos_df_list, function(x) {
+# ----- #
+    dirs_raster <- dirs_stack[[str_which(names(dirs_stack),
+                                         unique(x$raster_layer))]]
+    abs_ws_raster <- abs_wind_stack[[str_which(names(abs_wind_stack),
+                                               unique(x$raster_layer))]]
+# ----- #
+    x$wind_dir <- extract(dirs_raster,
+                          as.data.frame(x[, c("Longitude", "Latitude")]))
+    x$abs_ws <- extract(abs_ws_raster,
+                        as.data.frame(x[, c("Longitude", "Latitude")]))
+    
+# ----- #
+    print(unique(x$raster_layer))
+    print(str_which(unique(argos_df$raster_layer), unique(x$raster_layer)))
+# ----- #
+    x
+})
+print("ayééé")
+
+argos_df_2 <- do.call('rbind', argos_df_list2)
+summary(argos_df_2$wind_dir)
+summary(argos_df_2$abs_ws)
+
+# saveRDS(argos_df_2,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_wind_dirs_n_abs_speed.rds")
 ###########################################
 # ---- > Wind roses of bird directions ####
 ###########################################
