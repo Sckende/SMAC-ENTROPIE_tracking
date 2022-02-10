@@ -282,6 +282,7 @@ summary(argos_df_2$abs_ws)
 
 # saveRDS(argos_df_2,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_wind_dirs_n_abs_speed.rds")
+
 ###########################################
 # ---- > Wind roses of bird directions ####
 ###########################################
@@ -332,9 +333,9 @@ test$wd0_360_METEO_TOWARD <- (-1 * test$wd0_360 + 90) %% 360 # Direction que pre
 
 # ----------------> FROM WHICH DIRECTION
 
-test$wd0_360_METEO_FROM <- ifelse(test$wd0_360_METEO <= 180,
-                               test$wd0_360_METEO + 180,
-                               test$wd0_360_METEO - 180) # Direction d'où partent les oiseaux
+test$wd0_360_METEO_FROM <- ifelse(test$wd0_360_METEO_TOWARD <= 180,
+                               test$wd0_360_METEO_TOWARD + 180,
+                               test$wd0_360_METEO_TOWARD - 180) # Direction d'où partent les oiseaux
 summary(test$wd0_360_METEO_FROM)
 
 # -----> Calculating the absolute wind speed from dy & dx 
