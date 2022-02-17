@@ -69,8 +69,24 @@ names(mer2) <- date22
 names(zon2) <- date22
 names(speed2) <- date22
 
-# -----> test ####
-##################
+# -----> Speed of birds exploration ####
+########################################
+summary(argos$abs_bird_speed)
+summary(argos$speed.m.sec) # calcul perso
+summary(argos$speed.m.s) # calcul à partir de ltraj
+summary(argos$speed.km.h) # à partir de ltraj
+summary(argos$speed.m.sec * 3.6)
+argos$speed_km_h_perso <- argos$speed.m.sec * 3.6
+
+hard_speed <- argos[which(argos$speed_km_h_perso > 115),]
+dim(hard_speed)
+summary(hard_speed$reloc.del.sec/60)
+
+argos <- argos[-which(argos$speed_km_h_perso > 115),]
+summary(argos$speed_km_h_perso)
+
+# -----> Figures production ####
+########################################
 argos_ls <- split(argos,
                   argos$Vessel)
 
@@ -92,169 +108,165 @@ lapply(argos_ls,
 print(unique(x$Vessel))
 print(table(x$week_numb))
 year_dep <- unique(year(x$deploy))           
-weeks <- paste("W",
-               unique(x$week_numb),
-               sep = "")
+weeks_lett <- paste("W",
+                    unique(x$week_numb),
+                    sep = "")
+weeks_num <- unique(x$week_numb)
+
 
 
 x_sp <- SpatialPointsDataFrame(coords = x[, c("Longitude", "Latitude")],
                                data = x,
                                proj4string = CRS("EPSG:4326"))
+class(x_sp)
+print(dim(x_sp))
 
-for(i in weeks){
+for(i in 1:length(weeks_lett)){
     
-    print(i)
-    arg_data <- x[x$week_numb == substr(i, 2, 3),] # subset data
-    arg_data_2 <- arg_data[!is.na(arg_data$speed.m.s),] # retrait des des NA pour les vitesses des oiseaux
+    print(weeks_lett[i])
+    arg_data <- x[x$week_numb == weeks_num[i],] # subset data
+    arg_data_2 <- arg_data[!is.na(arg_data$speed_km_h_perso),] # retrait des des NA pour les vitesses des oiseaux
+    arg_data_2$abs_ws_km_h <- arg_data_2$abs_ws * 3.6
     
     if(dim(arg_data_2)[1] <= 2){
         next
     } # Avoid week with 2 points and less
     
     if(year_dep == 2017){
-        mer <- mean(mer1[[names(mer1)[which(str_detect(names(mer1), i))]]])
-        zon <- mean(zon1[[names(zon1)[which(str_detect(names(zon1), i))]]])
-        speed <- mean(speed1[[names(speed1)[which(str_detect(names(speed1), i))]]])        
+        mer <- mean(mer1[[names(mer1)[which(str_detect(names(mer1), weeks_lett[i]))]]])
+        zon <- mean(zon1[[names(zon1)[which(str_detect(names(zon1), weeks_lett[i]))]]])
+        speed <- mean(speed1[[names(speed1)[which(str_detect(names(speed1), weeks_lett[i]))]]])        
     } else {
-        mer <- mean(mer2[[names(mer2)[which(str_detect(names(mer2), i))]]])
-        zon <- mean(zon2[[names(zon2)[which(str_detect(names(zon2), i))]]])
-        speed <- mean(speed2[[names(speed2)[which(str_detect(names(speed2), i))]]])
+        mer <- mean(mer2[[names(mer2)[which(str_detect(names(mer2), weeks_lett[i]))]]])
+        zon <- mean(zon2[[names(zon2)[which(str_detect(names(zon2), weeks_lett[i]))]]])
+        speed <- mean(speed2[[names(speed2)[which(str_detect(names(speed2), weeks_lett[i]))]]])
     }
-    
-    grey <- x_sp[x_sp$week_numb != substr(i, 2, 3),]
-    print(grey)
-    white <- x_sp[x_sp$week_numb == substr(i, 2, 3),]
-    print(white)
 
     # x11()
     # WIND MAP
     ##########
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/WEEKLY/",
-              year_dep,
-              "-WindMap-",
-              unique(x_sp$Vessel),
-              "-",
-              i,
-              ".png",
-              sep = ""),
-        res = 300,
-        width = 50,
-        height = 30,
-        pointsize = 12,
-        unit = "cm",
-        bg = "transparent")
-    # x11()
-    print(
-    vectorplot(stack(zon, mer),
-               isField = 'dXY',
-               narrows = 200,
-               lwd.arrows = 1,
-               aspX = 0.4,
-               region = speed,
-               at = my_at,
-               col.regions = my_cols,
-               main = list(paste(year_dep,
-                                 " - ",
-                                 unique(x_sp$Vessel),
-                                 " - ",
-                                 i,
-                                 " - n=",
-                                 dim(x_sp[x_sp$week_numb == substr(i, 2, 3),])[1],
-                                 sep = ""),
-                           cex = 2),
-               xlab = list("Longitude", 
-                           cex = 2),
-               ylab = list("Latitude",
-                           cex = 2))  +
-    layer(c(sp.points(grey,
-                    col = "grey",
-                    cex = 2),
-            sp.points(white,
-                    col = "white",
-                    cex = 2)))
-    )
-    dev.off()
+    # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/WEEKLY/",
+    #           year_dep,
+    #           "-WindMap-",
+    #           unique(x_sp$Vessel),
+    #           "-",
+    #           weeks_lett[i],
+    #           ".png",
+    #           sep = ""),
+    #     res = 300,
+    #     width = 50,
+    #     height = 30,
+    #     pointsize = 12,
+    #     unit = "cm",
+    #     bg = "transparent")
+    # # x11()
+    # print(
+    # rasterVis::vectorplot(raster::stack(zon, mer),
+    #            isField = 'dXY',
+    #            narrows = 200,
+    #            lwd.arrows = 1,
+    #            aspX = 0.4,
+    #            region = speed,
+    #            at = my_at,
+    #            col.regions = my_cols,
+    #            main = list(paste(year_dep,
+    #                              " - ",
+    #                              unique(x_sp$Vessel),
+    #                              " - ",
+    #                              weeks_lett[i],
+    #                              " - n=",
+    #                              dim(x_sp[x_sp$week_numb == weeks_num[i],])[1],
+    #                              sep = ""),
+    #                        cex = 2),
+    #            xlab = list("Longitude", 
+    #                        cex = 2),
+    #            ylab = list("Latitude",
+    #                        cex = 2))  +
+    # layer(c(sp.points(x_sp[x_sp$week_numb == weeks_num[i],], col = "white", lwd = 3),
+    #         sp.points(x_sp[x_sp$week_numb != weeks_num[i],], col = "grey", lwd = 3)))
+    
+    # )
+    # dev.off()
+    
+
     
     # Wind Roses
     ############
-#     png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/WindRoses/WEEKLY/",
-#               year_dep,
-#               "-BirdDir-",
-#               unique(arg_data_2$Vessel),
-#               "-",
-#               i,
-#               ".png",
-#               sep = ""),
-#         res = 300,
-#         width = 30,
-#         height = 30,
-#         pointsize = 12,
-#         unit = "cm",
-#         bg = "white")
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/WindRoses/WEEKLY/",
+              year_dep,
+              "-BirdDir-",
+              unique(arg_data_2$Vessel),
+              "-",
+              weeks_lett[i],
+              ".png",
+              sep = ""),
+        res = 300,
+        width = 30,
+        height = 30,
+        pointsize = 12,
+        unit = "cm",
+        bg = "white")
     
-#     windRose(mydata = arg_data_2,
-#          wd = "bird_0_360_METEO_TOWARD",
-#          ws = "speed.m.s",
-#          max.freq = 35,
-#          breaks = c(0, 2, 5, 8, 11, 17),
-#          auto.text = F,
-#          paddle = F,
-#          annotate = F,
-#          grid.line = 5,
-#          key.footer = "WSP (m/s)",
-#          key.position = "bottom",
-#          par.settings = list(axis.line = list(col = "lightgray")),
-#          col = viridis(5, option = "D", direction = -1),
-#          main = paste(year_dep,
-#                        " - bird direction - ",
-#                        unique(arg_data_2$Vessel),
-#                        " - ",
-#                        i,
-#                        " - n=",
-#                        dim(arg_data_2)[1],
-#                        sep = ""))
-# dev.off()
+    windRose(mydata = arg_data_2,
+         wd = "bird_0_360_METEO_TOWARD",
+         ws = "speed_km_h_perso",
+         max.freq = 35,
+         breaks = c(0, 2, 5, 8, 11, 17),
+         auto.text = F,
+         paddle = F,
+         annotate = F,
+         grid.line = 5,
+         key.footer = "Bird speed (km/h)",
+         key.position = "bottom",
+         par.settings = list(axis.line = list(col = "lightgray")),
+         col = viridis(5, option = "D", direction = -1),
+         main = paste(year_dep,
+                       " - bird direction - ",
+                       unique(arg_data_2$Vessel),
+                       " - ",
+                       weeks_lett[i],
+                       " - n=",
+                       dim(arg_data_2)[1],
+                       sep = ""))
+dev.off()
 
-#     png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/WindRoses/WEEKLY/",
-#               year_dep,
-#               "-WindDir-",
-#               unique(arg_data_2$Vessel),
-#               "-",
-#               i,
-#               ".png",
-#               sep = ""),
-#         res = 300,
-#         width = 30,
-#         height = 30,
-#         pointsize = 12,
-#         unit = "cm",
-#         bg = "white")
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/WindRoses/WEEKLY/",
+              year_dep,
+              "-WindDir-",
+              unique(arg_data_2$Vessel),
+              "-",
+              weeks_lett[i],
+              ".png",
+              sep = ""),
+        res = 300,
+        width = 30,
+        height = 30,
+        pointsize = 12,
+        unit = "cm",
+        bg = "white")
     
-# windRose(mydata = arg_data_2,
-#          wd = "wind_dir_0_360",
-#          ws = "abs_ws",
-#          max.freq = 80,
-#          breaks = c(0, 2, 5, 8, 11, 17),
-#          auto.text = F,
-#          paddle = F,
-#          annotate = F,
-#          grid.line = 15,
-#          key.footer = "WSP (m/s)",
-#          key.position = "bottom",
-#          par.settings = list(axis.line = list(col = "lightgray")),
-#          col = viridis(5, option = "D", direction = -1),
-#          main = paste(year_dep,
-#                       " - wind direction - ",
-#                       unique(arg_data_2$Vessel),
-#                       " - ",
-#                       i,
-#                       " - n=",
-#                       dim(arg_data_2)[1],
-#                       sep = ""))
-# dev.off()
-}           
-       })
+windRose(mydata = arg_data_2,
+         wd = "wind_dir_0_360",
+         ws = "abs_ws_km_h",
+         max.freq = 80,
+         breaks = c(0, 2, 5, 8, 11, 17),
+         auto.text = F,
+         paddle = F,
+         annotate = F,
+         grid.line = 15,
+         key.footer = "abs ws (km/h)",
+         key.position = "bottom",
+         par.settings = list(axis.line = list(col = "lightgray")),
+         col = viridis(5, option = "D", direction = -1),
+         main = paste(year_dep,
+                      " - wind direction - ",
+                      unique(arg_data_2$Vessel),
+                      " - ",
+                      weeks_lett[i],
+                      " - n=",
+                      dim(arg_data_2)[1],
+                      sep = ""))
+dev.off()
 
-# -----> Debugging space
-##########################
-PRINT DES WIND MAPS !!!!!!! ESSAYER EN SORTANT DE lapply et fair eune boucle à la place
+    }           
+        })
