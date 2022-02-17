@@ -120,13 +120,13 @@ x11(); levelplot(mean.speed2,
 # --- Global vectorplot --- #
 argos.track.sp <- as(st_transform(argos.track, 4326), 'Spatial')
 
-png("C:/Users/ccjuhasz/Desktop/test/2017_global_Tracks_&_Wind.png",
-    res=300,
-    width=50,
-    height=30,
-    pointsize=12,
-    unit="cm",
-    bg="transparent")
+# png("C:/Users/ccjuhasz/Desktop/test/2017_global_Tracks_&_Wind.png",
+#     res=300,
+#     width=50,
+#     height=30,
+#     pointsize=12,
+#     unit="cm",
+#     bg="transparent")
 
 # x11()
 vectorplot(stack(mean.zon1, mean.mer1),
@@ -143,13 +143,13 @@ vectorplot(stack(mean.zon1, mean.mer1),
 
 dev.off()
 
-png("C:/Users/ccjuhasz/Desktop/test/2018_global_Tracks_&_Wind.png",
-    res=300,
-    width=50,
-    height=30,
-    pointsize=12,
-    unit="cm",
-    bg="transparent")
+# png("C:/Users/ccjuhasz/Desktop/test/2018_global_Tracks_&_Wind.png",
+#     res=300,
+#     width=50,
+#     height=30,
+#     pointsize=12,
+#     unit="cm",
+#     bg="transparent")
 
 # x11()
 vectorplot(stack(mean.zon2, mean.mer2),
