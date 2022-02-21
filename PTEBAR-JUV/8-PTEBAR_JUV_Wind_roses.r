@@ -51,68 +51,60 @@ head(argos_2017)
 argos_2017$wind_dir_0_360 <- ifelse(argos_2017$wind_dir >= 0,
                                     argos_2017$wind_dir,
                                     360 + argos_2017$wind_dir) # handmade conversion from-180/180 to 0/360 for windRose() plot
-     
+argos_2017$abs_ws_km_h <- argos_2017$abs_ws * 3.6
+summary(argos_2017$abs_ws_km_h)
+hist(argos_2017$abs_ws_km_h)
+
 x11()
 windRose(mydata = argos_2017,
          wd = "wind_dir_0_360",
-         ws = "abs_ws",
+         ws = "abs_ws_km_h",
          type = "bimonth",
-         breaks = c(0, 2, 5, 8, 11, 17),
+        #  breaks = c(0, 2, 5, 8, 11, 17), # for m/s
+        breaks = c(0, 15, 20, 25, 30, 35, 40, 50),
          auto.text = F,
          paddle = F,
          annotate = F,
          grid.line = 5,
-         key.footer = "WSP (m/s)",
+        #  key.footer = "WSP (m/s)", # for m/s
+        key.footer = "abs wind speed (km/h)",
          key.position = "bottom",
          par.settings = list(axis.line = list(col = "lightgray")),
-          col = viridis(5, option = "D"))
+          col = viridis(5, option = "D", direction = -1))
 
 
 argos_2017_list <- split(argos_2017,
                          argos_2017$bimonth)
 
 lapply(argos_2017_list, function(x){
-    # x11()
-windRose(mydata = x,
-         wd = "wind_dir_0_360",
-         ws = "abs_ws",
-         type = "bimonth",
-         max.freq = 90,
-         breaks = c(0, 2, 5, 8, 11, 17),
-         auto.text = F,
-         paddle = F,
-         annotate = F,
-         grid.line = 5,
-         key.footer = "WSP (m/s)",
-         key.position = "bottom",
-         par.settings = list(axis.line = list(col = "lightgray")),
-          col = viridis(5, option = "D"))
 
 # png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Wind_Roses/Wind_under_birds_relocs/2017_bimonthly/2017_",
 #           unique(x$bimonth),
 #           ".png",
 #           sep = ""),
-#     res=300,
-#     width=30,
-#     height= 30,
-#     pointsize=12,
-#     unit="cm",
-#     bg="white")
+#     res = 300,
+#     width = 30,
+#     height = 30,
+#     pointsize = 12,
+#     unit = "cm",
+#     bg = "white")
+# x11()
 windRose(mydata = x,
          wd = "wind_dir_0_360",
-         ws = "abs_ws",
+         ws = "abs_ws_km_h",
          type = "bimonth",
          max.freq = 90,
-         breaks = c(0, 2, 5, 8, 11, 17),
+         breaks = c(0, 15, 20, 25, 30, 35, 40, 50, 60),
          auto.text = F,
          paddle = F,
          annotate = F,
-         grid.line = 5,
-         key.footer = "WSP (m/s)",
+         grid.line = 15,
+         key.footer = "abs wind speed (km/h)",
          key.position = "bottom",
          par.settings = list(axis.line = list(col = "lightgray")),
-          col = viridis(5, option = "D"))
-# dev.off()
+          col = viridis(5, option = "D", direction = -1),
+          cex = 2)
+dev.off()
 })
 # ?windRose
 
@@ -131,9 +123,11 @@ head(argos_2018)
 
 argos_2018$wind_dir_0_360 <- ifelse(argos_2018$wind_dir >= 0,
                                     argos_2018$wind_dir,
-                                    360 + argos_2018$wind_dir) 
+                                    360 + argos_2018$wind_dir)
 # handmade conversion from-180/180 to 0/360 for windRose() plot
-     
+argos_2018$abs_ws_km_h <- argos_2018$abs_ws * 3.6
+summary(argos_2018$abs_ws_km_h)
+hist(argos_2018$abs_ws_km_h)     
 x11()
 windRose(mydata = argos_2018,
          wd = "wind_dir_0_360",
@@ -147,68 +141,57 @@ windRose(mydata = argos_2018,
          key.footer = "WSP (m/s)",
          key.position = "bottom",
          par.settings = list(axis.line = list(col = "lightgray")),
-          col = viridis(5, option = "D"))
+          col = viridis(5, option = "D", direction = -1))
 
 
 argos_2018_list <- split(argos_2018,
                          argos_2018$bimonth)
 
 lapply(argos_2018_list, function(x){
-    x11()
+png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Wind_Roses/Wind_under_birds_relocs/2018_bimonthly/",
+          unique(year(x$Date)),
+          "_",
+          unique(x$bimonth),
+          ".png",
+          sep = ""),
+    res=300,
+    width=30,
+    height= 30,
+    pointsize=12,
+    unit="cm",
+    bg="white")
+# x11()
 windRose(mydata = x,
          wd = "wind_dir_0_360",
-         ws = "abs_ws",
+         ws = "abs_ws_km_h",
          type = "bimonth",
          max.freq = 90,
-         breaks = c(0, 2, 5, 8, 11, 17),
+         breaks = c(0, 15, 20, 25, 30, 35, 40, 50, 60),
          auto.text = F,
          paddle = F,
          annotate = F,
-         grid.line = 5,
-         key.footer = "WSP (m/s)",
-         key.position = "bottom",
-         par.settings = list(axis.line = list(col = "lightgray")),
-          col = viridis(5, option = "D"))
-
-# png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Wind_Roses/Wind_under_birds_relocs/2018_bimonthly/",
-#           unique(year(x$Date)),
-#           "_",
-#           unique(x$bimonth),
-#           ".png",
-#           sep = ""),
-#     res=300,
-#     width=30,
-#     height= 30,
-#     pointsize=12,
-#     unit="cm",
-#     bg="white")
-windRose(mydata = x,
-         wd = "wind_dir_0_360",
-         ws = "abs_ws",
-         type = "bimonth",
-         max.freq = 90,
-         breaks = c(0, 2, 5, 8, 11, 17),
-         auto.text = F,
-         paddle = F,
-         annotate = F,
-         grid.line = 5,
-         key.footer = "WSP (m/s)",
+         grid.line = 15,
+         key.footer = "abs wind speed (km/h)",
          key.position = "bottom",
          par.settings = list(axis.line = list(col = "lightgray")),
           col = viridis(5, option = "D", direction = -1))
-# dev.off()
+dev.off()
 })
 graphics.off()
 
 ##############################################
 # Wind roses for bird direction bimonthly ####
 ##############################################
-g <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_argos_&_speed_ltraj.rds")
-
+g <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_wind_dirs_n_abs_speed_2.rds")
+class(g)
 str(g)
-g2 <- do.call("rbind", g)
-summary(g2$abs.angle) # angles in radians
-summary(g2$rel.angle)
+summary(g$abs.angle) # angles in radians
+summary(g$rel.angle)
+
+# speed cleaning ####
+g$speed_km_h_perso <- g$speed.m.sec * 3.6
+g2 <- g[-which(g$speed_km_h_perso > 115),]
+summary(g2$speed_km_h_perso)
 
 # -----> Working on the absolute angle alpha
 # Which corresponds to 180 * atan2(dx, dy) / pi
@@ -241,126 +224,94 @@ summary(g2$bird_0_360_METEO_FROM)
 g2$abs_bird_speed <- sqrt(g2$dx^2 + g2$dy^2)
 summary(g2$abs_bird_speed)
 
-# -----> Merge with argos df
+# -----> Creation of lists
 # -----> 2017
-g2_2017 <- g2[year(g2$date) == 2017,]
+g2_2017 <- g2[year(g2$Date) == 2017,]
 dim(g2_2017)
 
-argos_2017_2 <- left_join(argos_2017,
-                          g2_2017[, -c(1, 2, 14)],
-                          by = c("Vessel" = "Vessel",
-                                 "Date" = "date"))
+x11()
+par(mfrow = c(1, 2))
+hist(g2_2017$speed_km_h_perso)
+hist(g2_2018$speed_km_h_perso)
 
-argos_2017_2_list <- split(argos_2017_2,
-                           argos_2017_2$bimonth)
+# argos_2017_2 <- left_join(argos_2017,
+#                           g2_2017[, -c(1, 2, 14)],
+#                           by = c("Vessel" = "Vessel",
+#                                  "Date" = "date"))
+
+g2_2017_list <- split(g2_2017,
+                      g2_2017$bimonth)
+str(g2_2017_list)
+
 # -----> 2018
-g2_2018 <- g2[year(g2$date) != 2017,]
+g2_2018 <- g2[year(g2$Date) != 2017,]
 dim(g2_2018)
-
-argos_2018_2 <- left_join(argos_2018,
-                          g2_2018[, -c(1, 2, 14)],
-                          by = c("Vessel" = "Vessel",
-                                 "Date" = "date"))
-
-argos_2018_2_list <- split(argos_2018_2,
-                           argos_2018_2$bimonth)
+g2_2018_list <- split(g2_2018,
+                      g2_2018$bimonth)
+str(g2_2018_list)
 
 # -----> 2018 ####
 ##################
-lapply(argos_2017_2_list, function(x){
-    x11()
+lapply(g2_2018_list, function(x){
+png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Wind_Roses/Bird_directions/2018_bimonthly/BIRD_DIR_TOW_",
+          unique(year(x$Date)),
+          "_",
+          unique(x$bimonth),
+          ".png",
+          sep = ""),
+    res = 300,
+    width = 30,
+    height = 30,
+    pointsize = 12,
+    unit = "cm",
+    bg = "white")
 windRose(mydata = x,
          wd = "bird_0_360_METEO_TOWARD",
-         ws = "speed.m.s",
+         ws = "speed_km_h_perso",
          type = "bimonth",
          max.freq = 35,
-         breaks = c(0, 2, 5, 8, 11, 17),
+         breaks = c(0, 10, 20, 30, 40, 50, 60, 90, 120),
          auto.text = F,
          paddle = F,
          annotate = F,
          grid.line = 5,
-         key.footer = "WSP (m/s)",
+         key.footer = "Bird speed (km/h)",
          key.position = "bottom",
          par.settings = list(axis.line = list(col = "lightgray")),
-          col = viridis(5, option = "D"))
-
-# png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Wind_Roses/Bird_directions/2017_bimonthly/BIRD_DIR_TOW_",
-#           unique(year(x$Date)),
-#           "_",
-#           unique(x$bimonth),
-#           ".png",
-#           sep = ""),
-#     res = 300,
-#     width = 30,
-#     height = 30,
-#     pointsize = 12,
-#     unit = "cm",
-#     bg = "white")
-
-windRose(mydata = x,
-         wd = "bird_0_360_METEO_TOWARD",
-         ws = "speed.m.s",
-         type = "bimonth",
-         max.freq = 35,
-         breaks = c(0, 2, 5, 8, 11, 17),
-         auto.text = F,
-         paddle = F,
-         annotate = F,
-         grid.line = 5,
-         key.footer = "WSP (m/s)",
-         key.position = "bottom",
-         par.settings = list(axis.line = list(col = "lightgray")),
-          col = viridis(5, option = "D"))
-# dev.off()
+          col = viridis(5, option = "D", direction = -1))
+dev.off()
 })
 
-# -----> 2018 ####
+# -----> 2017 ####
 ##################
-lapply(argos_2018_2_list, function(x){
-    x11()
+lapply(g2_2017_list, function(x){
+png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Wind_Roses/Bird_directions/2017_bimonthly/BIRD_DIR_TOW_",
+          unique(year(x$Date)),
+          "_",
+          unique(x$bimonth),
+          ".png",
+          sep = ""),
+    res = 300,
+    width = 30,
+    height = 30,
+    pointsize = 12,
+    unit = "cm",
+    bg = "white")
 windRose(mydata = x,
          wd = "bird_0_360_METEO_TOWARD",
-         ws = "speed.m.s",
+         ws = "speed_km_h_perso",
          type = "bimonth",
          max.freq = 35,
-         breaks = c(0, 2, 5, 8, 11, 17),
+         breaks = c(0, 10, 20, 30, 40, 50, 60, 90, 120),
          auto.text = F,
          paddle = F,
          annotate = F,
          grid.line = 5,
-         key.footer = "WSP (m/s)",
+         key.footer = "Bird speed (km/h)",
          key.position = "bottom",
          par.settings = list(axis.line = list(col = "lightgray")),
-          col = viridis(5, option = "D"))
-
-# png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Wind_Roses/Bird_directions/2018_bimonthly/BIRD_DIR_TOW_",
-#           unique(year(x$Date)),
-#           "_",
-#           unique(x$bimonth),
-#           ".png",
-#           sep = ""),
-#     res = 300,
-#     width = 30,
-#     height = 30,
-#     pointsize = 12,
-#     unit = "cm",
-#     bg = "white")
-
-windRose(mydata = x,
-         wd = "bird_0_360_METEO_TOWARD",
-         ws = "speed.m.s",
-         type = "bimonth",
-         max.freq = 35,
-         breaks = c(0, 2, 5, 8, 11, 17),
-         auto.text = F,
-         paddle = F,
-         annotate = F,
-         grid.line = 5,
-         key.footer = "WSP (m/s)",
-         key.position = "bottom",
-         par.settings = list(axis.line = list(col = "lightgray")),
-          col = viridis(5, option = "D"))
-# dev.off()
+          col = viridis(5, option = "D", direction = -1))
+dev.off()
 })
 
 ###########################################
