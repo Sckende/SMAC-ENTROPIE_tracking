@@ -144,15 +144,16 @@ my_cols <- viridis_pal(begin = 1,
 # -----> 166564
 ###############
 for(i in 1:nlayers(zon_564)){
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/166564",
-              names(zon_564[[i]]),
-              ".png"),
-    res = 300,
-    width = 40,
-    height = 50,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
+    # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/166564/166564",
+    #           names(zon_564[[i]]),
+    #           ".png",
+    #           sep =""),
+    # res = 300,
+    # width = 40,
+    # height = 50,
+    # pointsize = 12,
+    # unit = "cm",
+    # bg = "transparent")
 
     dat <- substr(names(zon_564[[i]]), 2, 17)
     locs <- arg2_sp_564[arg2_sp_564$raster_layer == dat,]
@@ -182,15 +183,16 @@ print(i)
 # -----> 166565
 ###############
 for(i in 1:nlayers(zon_565)){
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/166565/166565",
-              names(zon_565[[i]]),
-              ".png"),
-    res = 300,
-    width = 40,
-    height = 50,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
+    # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/166565/166565",
+    #           names(zon_565[[i]]),
+    #           ".png",
+    #           sep = ""),
+    # res = 300,
+    # width = 40,
+    # height = 50,
+    # pointsize = 12,
+    # unit = "cm",
+    # bg = "transparent")
 
     dat <- substr(names(zon_565[[i]]), 2, 17)
     locs <- arg2_sp_565[arg2_sp_565$raster_layer == dat,]
@@ -216,3 +218,127 @@ for(i in 1:nlayers(zon_565)){
 dev.off()
 print(i)
 }
+
+# -----> Creation of PPT ####
+#############################
+
+library(officer)
+files_565 <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/166565/")
+length(files_565)
+
+files_564 <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/166564/")
+length(files_564)
+
+doc <- read_pptx()
+doc <- add_slide(doc,
+                 layout = "Two Content",
+                 master = "Office Theme")
+
+for(i in 1:length(files_564)){
+    
+    # file path
+    img_file_564 <- paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/166564/",
+                          files_564[i],
+                          sep = "")
+    if(!is.na(files_565[i])){
+        img_file_565 <- paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/166565/",
+                              files_565[i],
+                              sep = "")
+        doc <- ph_with(x = doc,
+                       value = substr(files_564[i],
+                                      8,
+                                      23),
+                       location = ph_location_type(type = "title"))
+        doc <- ph_with(x = doc,
+               external_img(img_file_564),
+               location = ph_location_left(),
+               use_loc_size = TRUE)
+        doc <- ph_with(x = doc,
+               external_img(img_file_565),
+               location = ph_location_right(),
+               use_loc_size = TRUE)
+        doc <- add_slide(doc)
+    } else {
+        doc <- ph_with(x = doc,
+               external_img(img_file_564),
+               location = ph_location_left(),
+               use_loc_size = TRUE)
+        doc <- add_slide(doc)        
+    }
+    print(i)
+}
+
+print(doc,
+      target = "FAKIR_166564_166565.pptx")
+
+
+# -----> Exploration de la zone sud OI ####
+###########################################
+# -----> Crop the rasters
+#extent(xmin, xmax, ymin, ymax)
+new_ext_2 <- extent(40, 120, -55, 0)
+new_z_2 <- crop(x = zon1,
+              y = new_ext_2)
+new_m_2 <- crop(x = mer1,
+              y = new_ext_2)
+new_s_2 <- crop(x = speed1,
+              y = new_ext_2)
+
+
+for(i in 1:nlayers(new_m_2)){
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/ZONE_SUD/",
+              names(new_m_2[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+    print(
+    vectorplot(stack(new_m_2[[i]], new_z_2[[i]]),
+                  isField = 'dXY',
+                  region =  new_s_2[[i]],
+                  at = my_at,
+                  lwd.arrows = 1,
+                  aspX = 0.2,
+                  narrows = 300,
+                  col.regions = my_cols,
+                  main = names(new_m_2[[i]]))
+    )
+
+dev.off()
+print(i)
+}
+
+# -----> Creation of PPT
+########################
+files_OI_SUD <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/ZONE_SUD/")
+
+doc2 <- read_pptx()
+doc2 <- add_slide(doc2,
+                 layout = "Two Content",
+                 master = "Office Theme")
+
+for(i in 1:length(files_OI_SUD)){
+    # file path
+    img_file_OI <- paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/ZONE_SUD/",
+                          files_OI_SUD[i],
+                          sep = "")
+    doc2 <- ph_with(x = doc2,
+                       value = substr(files_OI_SUD[i],
+                                      2,
+                                      17),
+                       location = ph_location_type(type = "title"))
+    doc2 <- ph_with(x = doc2,
+               external_img(img_file_OI),
+               location = ph_location_left(),
+               use_loc_size = TRUE)
+    doc2 <- add_slide(doc2)
+    print(i)
+}
+
+print(doc2,
+      target = "ZONE_SUD_OI.pptx")
