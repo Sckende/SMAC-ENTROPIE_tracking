@@ -39,7 +39,7 @@ layers1 <- names(speed1)
 mean.mer1 <- mean(mer1)
 mean.zon1 <- mean(zon1)
 mean.speed1 <- mean(speed1)
-x11();vectorplot(stack(mean.zon1, mean.mer1),
+x11();vectorplot(stack(mean.mer1, mean.zon1),
                  isField = 'dXY',
                  region = mean.speed1,
                  narrows = 300,
@@ -77,7 +77,7 @@ layers2 <- names(speed2)
 mean.mer2 <- mean(mer2)
 mean.zon2 <- mean(zon2)
 mean.speed2 <- mean(speed2)
-x11();vectorplot(stack(mean.zon2, mean.mer2),
+x11();vectorplot(stack(mean.mer2, mean.zon2),
            isField = 'dXY',
            region = mean.speed2,
            # narrows = 100,
@@ -129,7 +129,7 @@ argos.track.sp <- as(st_transform(argos.track, 4326), 'Spatial')
 #     bg="transparent")
 
 # x11()
-vectorplot(stack(mean.zon1, mean.mer1),
+vectorplot(stack(mean.mer1, mean.zon1),
                   isField = 'dXY',
                   region =  mean.speed1,
                   at = my.at,
@@ -152,7 +152,7 @@ dev.off()
 #     bg="transparent")
 
 # x11()
-vectorplot(stack(mean.zon2, mean.mer2),
+vectorplot(stack(mean.mer2, mean.zon2),
                  isField = 'dXY',
                  region = mean.speed2,
                  at = my.at,
