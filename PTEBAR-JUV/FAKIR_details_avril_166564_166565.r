@@ -143,7 +143,7 @@ my_cols <- viridis_pal(begin = 1,
 
 # -----> 166564
 ###############
-for(i in 1:nlayers(zon_564)){
+for(i in 1:nlayers(zon_564[[1:10]])){
     # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/166564/166564",
     #           names(zon_564[[i]]),
     #           ".png",
@@ -159,7 +159,7 @@ for(i in 1:nlayers(zon_564)){
     locs <- arg2_sp_564[arg2_sp_564$raster_layer == dat,]
     back_locs <- arg2_sp_564[arg2_sp_564$Date < as.POSIXlt(dat,
                                                            format = "%Y.%m.%d.%H.%M"),]
-    # x11()
+    x11()
     print(
     vectorplot(stack(mer_564[[i]], zon_564[[i]]),
                   isField = 'dXY',
@@ -176,7 +176,7 @@ for(i in 1:nlayers(zon_564)){
 # )
     )
 
-dev.off()
+# dev.off()
 print(i)
 }
 
