@@ -582,7 +582,7 @@ speed_2018 <- dropLayer(speed,
 
 argos_2018_sp <- argos_sp[year(argos_sp$deploy) == 2018, ]
 dim(argos_2018_sp)
-argos_2018_sp$Vessel <- as.character(argos_2018_sp)
+argos_2018_sp$Vessel <- as.character(argos_2018_sp$Vessel)
 
 # -----> Typical tracks
 #######################
@@ -613,12 +613,12 @@ mapview(argos_2018_typ, col.regions = "#0863eb") +
 
 # -----> ATYPICAL TRACKS <----- ####
 ####################################
-
+# Crops are based on temporal scale
 # -----> Extend organization ####
 #################################
 # -----> CROP 1 ####
 ####################
-# From 1 April 2017 to 19 May 2018
+# From 1 April 2018 to 19 May 2018
 
 # -----> Subset of argos data
 #############################
@@ -654,23 +654,27 @@ s_2018_atyp_crop1 <- crop(x = speed_1,
 
 # -----> CROP 2 ####
 ####################
-# From 20 May 2017 to 19 May 2018
+# From 20 May 2018 to 24 November 2018
 
 # -----> Subset of argos data
 #############################
+mapview(argos_2018_atyp[argos_2018_atyp$Vessel == "166565" & date(argos_2018_atyp$Date) >= as.POSIXlt("2018-05-20",
+                           format = "%Y-%m-%d"), ])
+mapview(argos_2018_atyp[argos_2018_atyp$Vessel == "166565" & date(argos_2018_atyp$Date) < as.POSIXlt("2018-05-20",
+                           format = "%Y-%m-%d"), ])
 
 # <----- Device 166565 ----->
-max_date <- max(argos_2018_atyp$Date)
-argos_2018_atyp_crop2 <- argos_2018_atyp[argos_2018_atyp$Date <= max_date, ]
+max_date_C1 <- max(argos_2018_atyp_crop1$Date)
+argos_2018_atyp_crop2 <- argos_2018_atyp[date(argos_2018_atyp$Date) >= as.POSIXlt("2018-05-20", format = "%Y-%m-%d"), ]
 summary(argos_2018_atyp_crop2$Date)
-# ==> min date = 2018-04-04 12:00:00
-# ==> max date = 2018-05-19 17:28:00
+# ==> min date = 2018-05-20 00:30:00
+# ==> max date = 2018-11-24 04:42:00
 
 # -----> Temporal selection of layers - CROP 2
 ###############################################
-# Number of first layer - 2018-05-10 00:00
+# Number of first layer - 2018-05-20 00:00:00
 raster_min_20178_crop2 <- str_which(names(zon_2018),
-                                   "2018.05.09.18.00") + 1
+                                   "2018.05.20.00.00")
 # Number of last layer based on the maximal date - 2018-11-24 04:42:00
 raster_max_2018_crop2 <- str_which(names(zon_2018),
                                    "2018.11.24.18.00")
@@ -681,13 +685,13 @@ speed_2 <- speed_2018[[raster_min_20178_crop2:raster_max_2018_crop2]]
 
 # -----> Spatial selection of layers - CROP 2
 ##############################################
-ext_2018_crop1 <- extent(40, 80, -40, 0) # xmin, xmax, ymin, ymax
-z_2018_atyp_crop1 <- crop(x = zon_1,
-                           y = ext_2018_crop1)
-m_2018_atyp_crop1 <- crop(x = mer_1,
-                          y = ext_2018_crop1)
-s_2018_atyp_crop1 <- crop(x = speed_1,
-                          y = ext_2018_crop1)
+ext_2018_crop2 <- extent(65, 105, -40, 0) # xmin, xmax, ymin, ymax
+z_2018_atyp_crop2 <- crop(x = zon_2,
+                          y = ext_2018_crop2)
+m_2018_atyp_crop2 <- crop(x = mer_2,
+                          y = ext_2018_crop2)
+s_2018_atyp_crop2 <- crop(x = speed_2,
+                          y = ext_2018_crop2)
 
 # -----> 2018 - ATYPICAL - CROP 1 MAPS PRODUCTION ####
 #######################################################
@@ -706,18 +710,18 @@ for (i in 1:nlayers(z_2018_atyp_crop1)) {
                                       & argos_2018_atyp_crop1$raster_layer == dat, ]
     back_locs_564 <- argos_2018_atyp_crop1[argos_2018_atyp_crop1$Vessel == "166564"
                                       & argos_2018_atyp_crop1$Date < dat_conv, ]
-    # ----- #
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-ATYP-166565/",
-                "2018-ATYP-166565-",
-                names(z_2018_atyp_crop1[[i]]),
-              ".png",
-              sep = ""),
-    res = 300,
-    width = 40,
-    height = 50,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
+    # ----- 166565 ----- #
+    # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-ATYP-166565/",
+    #             "2018-ATYP-166565-CROP1-",
+    #             names(z_2018_atyp_crop1[[i]]),
+    #           ".png",
+    #           sep = ""),
+    # res = 300,
+    # width = 40,
+    # height = 50,
+    # pointsize = 12,
+    # unit = "cm",
+    # bg = "transparent")
 
     # x11()
     print(
@@ -743,20 +747,18 @@ for (i in 1:nlayers(z_2018_atyp_crop1)) {
 
 dev.off()
 print(paste("166565 - ", i, "/", nlayers(z_2018_atyp_crop1), sep = ""))
-# ----- #
-# if (dat_conv <= max_date) {
-    # ----- #
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-ATYP-166564/",
-                "2018-ATYP-166564-",
-                names(z_2018_atyp_crop1[[i]]),
-              ".png",
-              sep = ""),
-    res = 300,
-    width = 40,
-    height = 50,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
+# ----- 166564 ----- #
+    # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-ATYP-166564/",
+    #             "2018-ATYP-166564-CROP1-",
+    #             names(z_2018_atyp_crop1[[i]]),
+    #           ".png",
+    #           sep = ""),
+    # res = 300,
+    # width = 40,
+    # height = 50,
+    # pointsize = 12,
+    # unit = "cm",
+    # bg = "transparent")
 
     # x11()
     print(
@@ -781,7 +783,56 @@ print(paste("166565 - ", i, "/", nlayers(z_2018_atyp_crop1), sep = ""))
     )
 
 dev.off()
-    # }
+}
+
+# -----> 2018 - ATYPICAL - CROP 2 MAPS PRODUCTION ####
+#######################################################
+for (i in 1:nlayers(z_2018_atyp_crop2)) {
+    
+    dat <- substr(names(z_2018_atyp_crop2[[i]]), 2, 17)
+    dat_conv <- as.POSIXlt(dat,
+                           format = "%Y.%m.%d.%H.%M")
+    # ----- #
+    locs_565 <- argos_2018_atyp_crop2[argos_2018_atyp_crop2$raster_layer == dat, ]
+    back_locs_565 <- argos_2018_atyp_crop2[argos_2018_atyp_crop2$Date < dat_conv, ]
+    # ----- 166565 ----- #
+    # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-ATYP-166565/",
+    #             "2018-ATYP-166565-CROP2-",
+    #             names(z_2018_atyp_crop2[[i]]),
+    #           ".png",
+    #           sep = ""),
+    # res = 300,
+    # width = 40,
+    # height = 50,
+    # pointsize = 12,
+    # unit = "cm",
+    # bg = "transparent")
+
+    # x11()
+    print(
+    vectorplot(stack(m_2018_atyp_crop2[[i]], z_2018_atyp_crop2[[i]]),
+                  isField = 'dXY',
+                  region =  s_2018_atyp_crop2[[i]],
+                  at = my_at,
+                  lwd.arrows = 1,
+                  aspX = 0.2,
+                  narrows = 300,
+                  col.regions = my_cols,
+                  main = paste("2018 - ATYP - 166565 - ",
+                               names(m_2018_atyp_crop2[[i]]))) +
+    layer(c(sp.points(back_locs_565,
+                      col = "#caf599",
+                      lwd = 3,
+                      cex = 2),
+            sp.points(locs_565,
+                      col = "#5aa505",
+                      lwd = 6,
+                      cex = 4)))
+    )
+
+dev.off()
+print(paste("166565 - ", i, "/", nlayers(z_2018_atyp_crop2), sep = ""))
+
 }
 
 # -----> PPT creation ####
@@ -789,7 +840,7 @@ dev.off()
 
 # File list
 files_2018_564 <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-ATYP-166564/")
-length(files_2018_564)
+length(files_2018_564) # the shortest
 
 files_2018_565 <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-ATYP-166565/")
 length(files_2018_565)
@@ -800,20 +851,21 @@ doc <- add_slide(doc,
                  layout = "Two Content",
                  master = "Office Theme")
 
-for (i in 1:length(files_2018_565)) {
+for (i in 1:length(files_2018_565)) {############################ !!!!!!!!!!!!!!!!!!!!!
     
     # file path
     img_file_565 <- paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-ATYP-166565/",
                           files_2018_565[i],
                           sep = "")
-    img_file_564 <- paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-ATYP-166564/",
+    if (!is.na(files_2018_564[i])) {
+        img_file_564 <- paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-ATYP-166564/",
                               files_2018_564[i],
                               sep = "")
         doc <- ph_with(x = doc,
                        value = paste("Atypical tracks in 2018 - ",
                        substr(files_2018_565[i],
-                                      20,
-                                      35),
+                                      25,
+                                      40),
                        sep = ""),
                        location = ph_location_type(type = "title"))
         doc <- ph_with(x = doc,
@@ -834,8 +886,587 @@ for (i in 1:length(files_2018_565)) {
                        location = ph_location_right(),
                        use_loc_size = TRUE)
         doc <- add_slide(doc)
-    print(i)
+    } else {
+                doc <- ph_with(x = doc,
+                       value = substr(files_2018_565[i],
+                                      25,
+                                      40),
+                       location = ph_location_type(type = "title"))
+        doc <- ph_with(x = doc,
+                       value = "166565",
+                       location = ph_location_left())
+        doc <- ph_with(x = doc,
+                       value = paste(i, "/", length(files_2018_565), sep = ""),
+                       location = ph_location_type(type = "ftr"))
+        doc <- ph_with(x = doc,
+                       value = external_img(img_file_565),
+                       location = ph_location_left(),
+                       use_loc_size = TRUE)
+        doc <- add_slide(doc)
     }
+    print(i)
+}
+
+# print(doc,
+#       target = "C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/2018_ATYPICAL_TRACKS.pptx")
+
+# -----> NORTHERN TYPICAL TRACKS <----- ####
+############################################
+# 2 Devices : 162070 & 166563
+ 
+# Crops are based on temporal scale
+# -----> Extend organization ####
+#################################
+# -----> CROP 1 ####
+####################
+
+# Time range : 1 avril 2018 to 5 mai 2018
+# -----> Subset of argos data
+#############################
+dim(argos_2018_typ)
+argos_2018_typ_N <- argos_2018_typ[argos_2018_typ$Vessel %in% c("162070", "166563"), ]
+dim(argos_2018_typ_N)
+table(argos_2018_typ_N$Vessel)
+
+mapview(argos_2018_typ_N, zcol = "Vessel")
+
+# <----- Device 162070 & 166563 ----->
+max_date <- as.POSIXlt("2018-05-05", format = "%Y-%m-%d")
+argos_2018_typ_N_crop1 <- argos_2018_typ_N[date(argos_2018_typ_N$Date) <= max_date, ]
+summary(argos_2018_typ_N_crop1$Date)
+# ==> min date = 2018-04-04 12:00:00
+# ==> max date = 2018-05-05 04:47:00
+
+# -----> Temporal selection of layers - CROP 1
+###############################################
+# Number of first layer
+raster_min_2018_crop1 <- 1
+# Number of last layer based on the maximal date - 2017-05-19
+raster_max_2018_crop1 <- str_which(names(zon_2018),
+                                   "2018.05.05.18.00")
+# Selection of layers
+zon_1 <- zon_2018[[raster_min_2018_crop1:raster_max_2018_crop1]]
+mer_1 <- mer_2018[[raster_min_2018_crop1:raster_max_2018_crop1]]
+speed_1 <- speed_2018[[raster_min_2018_crop1:raster_max_2018_crop1]]
+
+# -----> Spatial selection of layers - CROP 1
+##############################################
+ext_2018_crop1 <- extent(40, 70, -40, -5) # xmin, xmax, ymin, ymax
+z_2018_typ_N_crop1 <- crop(x = zon_1,
+                           y = ext_2018_crop1)
+m_2018_typ_N_crop1 <- crop(x = mer_1,
+                           y = ext_2018_crop1)
+s_2018_typ_N_crop1 <- crop(x = speed_1,
+                           y = ext_2018_crop1)
+
+# -----> 2018 - NORTHERN TYPICAL - CROP 1 MAPS PRODUCTION ####
+##############################################################
+for (i in 1:nlayers(z_2018_typ_N_crop1)) {
+    
+    dat <- substr(names(z_2018_typ_N_crop1[[i]]), 2, 17)
+    dat_conv <- as.POSIXlt(dat,
+                           format = "%Y.%m.%d.%H.%M")
+    # ----- #
+    locs_070 <- argos_2018_typ_N_crop1[argos_2018_typ_N_crop1$Vessel == "162070"
+                                      & argos_2018_typ_N_crop1$raster_layer == dat, ]
+    back_locs_070 <- argos_2018_typ_N_crop1[argos_2018_typ_N_crop1$Vessel == "162070"
+                                           & argos_2018_typ_N_crop1$Date < dat_conv, ]
+    # ----- #
+    locs_563 <- argos_2018_typ_N_crop1[argos_2018_typ_N_crop1$Vessel == "166563"
+                                      & argos_2018_typ_N_crop1$raster_layer == dat, ]
+    back_locs_563 <- argos_2018_typ_N_crop1[argos_2018_typ_N_crop1$Vessel == "166563"
+                                      & argos_2018_typ_N_crop1$Date < dat_conv, ]
+    # ----- 162070 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-162070/",
+                "2018-TYP-N-162070-CROP1-",
+                names(z_2018_typ_N_crop1[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+    # x11()
+    print(
+    vectorplot(stack(m_2018_typ_N_crop1[[i]], z_2018_typ_N_crop1[[i]]),
+                  isField = 'dXY',
+                  region =  s_2018_typ_N_crop1[[i]],
+                  at = my_at,
+                  lwd.arrows = 1,
+                  aspX = 0.2,
+                  narrows = 300,
+                  col.regions = my_cols,
+                  main = paste("2018 - TYP N - 162070 - ",
+                               names(m_2018_typ_N_crop1[[i]]))) +
+    layer(c(sp.points(back_locs_070,
+                      col = "#caf599",
+                      lwd = 3,
+                      cex = 2),
+            sp.points(locs_070,
+                      col = "#5aa505",
+                      lwd = 6,
+                      cex = 4)))
+    )
+
+dev.off()
+print(paste("162070 - ", i, "/", nlayers(z_2018_typ_N_crop1), sep = ""))
+# ----- 166563 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/",
+                "2018-TYP-N-166563-CROP1-",
+                names(z_2018_typ_N_crop1[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+    # x11()
+    print(
+    vectorplot(stack(m_2018_typ_N_crop1[[i]], z_2018_typ_N_crop1[[i]]),
+                  isField = 'dXY',
+                  region =  s_2018_typ_N_crop1[[i]],
+                  at = my_at,
+                  lwd.arrows = 1,
+                  aspX = 0.2,
+                  narrows = 300,
+                  col.regions = my_cols,
+                  main = paste("2018 - TYP N - 166563 -",
+                               names(m_2018_typ_N_crop1[[i]]))) +
+    layer(c(sp.points(back_locs_563,
+                      col = "#aec1f5",
+                      lwd = 3,
+                      cex = 2),
+            sp.points(locs_563,
+                      col = "#0042f8",
+                      lwd = 6,
+                      cex = 4)))
+    )
+
+dev.off()
+}
+
+# -----> CROP 2 ####
+####################
+
+# Time range : 6 mai 2018 to 27 juin 2018
+# -----> Subset of argos data
+#############################
+# <----- Device 162070 & 166563 ----->
+min_date <- as.POSIXlt("2018-05-06", format = "%Y-%m-%d")
+max_date <- as.POSIXlt("2018-06-27", format = "%Y-%m-%d")
+argos_2018_typ_N_crop2 <- argos_2018_typ_N[date(argos_2018_typ_N$Date) <= max_date & date(argos_2018_typ_N$Date) >= min_date, ]
+summary(argos_2018_typ_N_crop2$Date)
+# ==> min date = 2018-05-06 02:17:00 
+# ==> max date = 2018-06-27 22:43:00
+
+# -----> Temporal selection of layers - CROP 2
+###############################################
+# Number of first layer
+raster_min_2018_crop2 <- str_which(names(zon_2018),
+                                   "2018.05.06.00.00")
+# Number of last layer based on the maximal date
+raster_max_2018_crop2 <- str_which(names(zon_2018),
+                                   "2018.06.27.18.00")
+# Selection of layers
+zon_2 <- zon_2018[[raster_min_2018_crop2:raster_max_2018_crop2]]
+mer_2 <- mer_2018[[raster_min_2018_crop2:raster_max_2018_crop2]]
+speed_2 <- speed_2018[[raster_min_2018_crop2:raster_max_2018_crop2]]
+
+# -----> Spatial selection of layers - CROP 2
+##############################################
+ext_2018_crop2 <- extent(40, 75, -15, 15) # xmin, xmax, ymin, ymax
+z_2018_typ_N_crop2 <- crop(x = zon_2,
+                           y = ext_2018_crop2)
+m_2018_typ_N_crop2 <- crop(x = mer_2,
+                           y = ext_2018_crop2)
+s_2018_typ_N_crop2 <- crop(x = speed_2,
+                           y = ext_2018_crop2)
+
+# -----> 2018 - NORTHERN TYPICAL - CROP 2 MAPS PRODUCTION ####
+##############################################################
+for (i in 1:nlayers(z_2018_typ_N_crop2)) {
+    
+    dat <- substr(names(z_2018_typ_N_crop2[[i]]), 2, 17)
+    dat_conv <- as.POSIXlt(dat,
+                           format = "%Y.%m.%d.%H.%M")
+    # ----- #
+    locs_070 <- argos_2018_typ_N_crop2[argos_2018_typ_N_crop2$Vessel == "162070"
+                                      & argos_2018_typ_N_crop2$raster_layer == dat, ]
+    back_locs_070 <- argos_2018_typ_N_crop2[argos_2018_typ_N_crop2$Vessel == "162070"
+                                           & argos_2018_typ_N_crop2$Date < dat_conv, ]
+    # ----- #
+    locs_563 <- argos_2018_typ_N_crop2[argos_2018_typ_N_crop2$Vessel == "166563"
+                                      & argos_2018_typ_N_crop2$raster_layer == dat, ]
+    back_locs_563 <- argos_2018_typ_N_crop2[argos_2018_typ_N_crop2$Vessel == "166563"
+                                      & argos_2018_typ_N_crop2$Date < dat_conv, ]
+    # ----- 162070 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-162070/",
+                "2018-TYP-N-162070-CROP2-",
+                names(z_2018_typ_N_crop2[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+    # x11()
+    print(
+    vectorplot(stack(m_2018_typ_N_crop2[[i]], z_2018_typ_N_crop2[[i]]),
+                  isField = 'dXY',
+                  region =  s_2018_typ_N_crop2[[i]],
+                  at = my_at,
+                  lwd.arrows = 1,
+                  aspX = 0.2,
+                  narrows = 300,
+                  col.regions = my_cols,
+                  main = paste("2018 - TYP N - 162070 - ",
+                               names(m_2018_typ_N_crop2[[i]]))) +
+    layer(c(sp.points(back_locs_070,
+                      col = "#caf599",
+                      lwd = 3,
+                      cex = 2),
+            sp.points(locs_070,
+                      col = "#5aa505",
+                      lwd = 6,
+                      cex = 4)))
+    )
+
+dev.off()
+print(paste("162070 - ", i, "/", nlayers(z_2018_typ_N_crop2), sep = ""))
+# ----- 166563 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/",
+                "2018-TYP-N-166563-CROP2-",
+                names(z_2018_typ_N_crop2[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+    # x11()
+    print(
+    vectorplot(stack(m_2018_typ_N_crop2[[i]], z_2018_typ_N_crop2[[i]]),
+                  isField = 'dXY',
+                  region =  s_2018_typ_N_crop2[[i]],
+                  at = my_at,
+                  lwd.arrows = 1,
+                  aspX = 0.2,
+                  narrows = 300,
+                  col.regions = my_cols,
+                  main = paste("2018 - TYP N - 166563 -",
+                               names(m_2018_typ_N_crop2[[i]]))) +
+    layer(c(sp.points(back_locs_563,
+                      col = "#aec1f5",
+                      lwd = 3,
+                      cex = 2),
+            sp.points(locs_563,
+                      col = "#0042f8",
+                      lwd = 6,
+                      cex = 4)))
+    )
+
+dev.off()
+}
+
+# -----> CROP 3 ####
+####################
+
+# Time range : 28 juin 2018 to 11 juillet 2018
+# -----> Subset of argos data
+#############################
+# <----- Device 162070 & 166563 ----->
+min_date <- as.POSIXlt("2018-06-28", format = "%Y-%m-%d")
+max_date <- as.POSIXlt("2018-07-11", format = "%Y-%m-%d")
+argos_2018_typ_N_crop3 <- argos_2018_typ_N[date(argos_2018_typ_N$Date) <= max_date & date(argos_2018_typ_N$Date) >= min_date, ]
+summary(argos_2018_typ_N_crop3$Date)
+# ==> min date = 2018-06-28 00:25:00 
+# ==> max date = 2018-07-11 15:14:00
+mapview(argos_2018_typ_N_crop3, zcol = "Vessel")
+
+# -----> Temporal selection of layers - CROP 3
+###############################################
+# Number of first layer
+raster_min_2018_crop3 <- str_which(names(zon_2018),
+                                   "2018.06.28.00.00")
+# Number of last layer based on the maximal date
+raster_max_2018_crop3 <- str_which(names(zon_2018),
+                                   "2018.07.11.18.00")
+# Selection of layers
+zon_3 <- zon_2018[[raster_min_2018_crop3:raster_max_2018_crop3]]
+mer_3 <- mer_2018[[raster_min_2018_crop3:raster_max_2018_crop3]]
+speed_3 <- speed_2018[[raster_min_2018_crop3:raster_max_2018_crop3]]
+
+# -----> Spatial selection of layers - CROP 3
+##############################################
+ext_2018_crop3 <- extent(70, 100, -15, 15) # xmin, xmax, ymin, ymax
+z_2018_typ_N_crop3 <- crop(x = zon_3,
+                           y = ext_2018_crop3)
+m_2018_typ_N_crop3 <- crop(x = mer_3,
+                           y = ext_2018_crop3)
+s_2018_typ_N_crop3 <- crop(x = speed_3,
+                           y = ext_2018_crop3)
+
+# -----> 2018 - NORTHERN TYPICAL - CROP 3 MAPS PRODUCTION ####
+##############################################################
+for (i in 1:nlayers(z_2018_typ_N_crop3)) {
+    
+    dat <- substr(names(z_2018_typ_N_crop3[[i]]), 2, 17)
+    dat_conv <- as.POSIXlt(dat,
+                           format = "%Y.%m.%d.%H.%M")
+    # ----- #
+    locs_070 <- argos_2018_typ_N_crop3[argos_2018_typ_N_crop3$Vessel == "162070"
+                                      & argos_2018_typ_N_crop3$raster_layer == dat, ]
+    back_locs_070 <- argos_2018_typ_N_crop3[argos_2018_typ_N_crop3$Vessel == "162070"
+                                           & argos_2018_typ_N_crop3$Date < dat_conv, ]
+    # ----- #
+    locs_563 <- argos_2018_typ_N_crop3[argos_2018_typ_N_crop3$Vessel == "166563"
+                                      & argos_2018_typ_N_crop3$raster_layer == dat, ]
+    back_locs_563 <- argos_2018_typ_N_crop3[argos_2018_typ_N_crop3$Vessel == "166563"
+                                      & argos_2018_typ_N_crop3$Date < dat_conv, ]
+    # ----- 162070 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-162070/",
+                "2018-TYP-N-162070-CROP3-",
+                names(z_2018_typ_N_crop3[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+    # x11()
+    print(
+    vectorplot(stack(m_2018_typ_N_crop3[[i]], z_2018_typ_N_crop3[[i]]),
+                  isField = 'dXY',
+                  region =  s_2018_typ_N_crop3[[i]],
+                  at = my_at,
+                  lwd.arrows = 1,
+                  aspX = 0.2,
+                  narrows = 300,
+                  col.regions = my_cols,
+                  main = paste("2018 - TYP N - 162070 - ",
+                               names(m_2018_typ_N_crop3[[i]]))) +
+    layer(c(sp.points(back_locs_070,
+                      col = "#caf599",
+                      lwd = 3,
+                      cex = 2),
+            sp.points(locs_070,
+                      col = "#5aa505",
+                      lwd = 6,
+                      cex = 4)))
+    )
+
+dev.off()
+print(paste("162070 - ", i, "/", nlayers(z_2018_typ_N_crop3), sep = ""))
+# ----- 166563 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/",
+                "2018-TYP-N-166563-CROP3-",
+                names(z_2018_typ_N_crop3[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+    # x11()
+    print(
+    vectorplot(stack(m_2018_typ_N_crop3[[i]], z_2018_typ_N_crop3[[i]]),
+                  isField = 'dXY',
+                  region =  s_2018_typ_N_crop3[[i]],
+                  at = my_at,
+                  lwd.arrows = 1,
+                  aspX = 0.2,
+                  narrows = 300,
+                  col.regions = my_cols,
+                  main = paste("2018 - TYP N - 166563 -",
+                               names(m_2018_typ_N_crop3[[i]]))) +
+    layer(c(sp.points(back_locs_563,
+                      col = "#aec1f5",
+                      lwd = 3,
+                      cex = 2),
+            sp.points(locs_563,
+                      col = "#0042f8",
+                      lwd = 6,
+                      cex = 4)))
+    )
+
+dev.off()
+}
+# -----> CROP 4 ####
+####################
+
+# Time range : from 12 juillet 2018
+# -----> Subset of argos data
+#############################
+# <----- Device 166563 ----->
+min_date <- as.POSIXlt("2018-07-12", format = "%Y-%m-%d")
+argos_2018_typ_N_crop4 <- argos_2018_typ_N[date(argos_2018_typ_N$Date) >= min_date, ]
+summary(argos_2018_typ_N_crop4$Date)
+# ==> min date = 2018-07-12 14:39:00
+# ==> max date = 018-10-24 10:17:00
+mapview(argos_2018_typ_N_crop4, zcol = "Vessel")
+
+# -----> Temporal selection of layers - CROP 4
+###############################################
+# Number of first layer
+raster_min_2018_crop4 <- str_which(names(zon_2018),
+                                   "2018.07.12.00.00")
+# Number of last layer based on the maximal date
+raster_max_2018_crop4 <- str_which(names(zon_2018),
+                                   "2018.10.24.18.00")
+# Selection of layers
+zon_4 <- zon_2018[[raster_min_2018_crop4:raster_max_2018_crop4]]
+mer_4 <- mer_2018[[raster_min_2018_crop4:raster_max_2018_crop4]]
+speed_4 <- speed_2018[[raster_min_2018_crop4:raster_max_2018_crop4]]
+
+# -----> Spatial selection of layers - CROP 4
+##############################################
+ext_2018_crop4 <- extent(70, 110, -25, 5) # xmin, xmax, ymin, ymax
+z_2018_typ_N_crop4 <- crop(x = zon_4,
+                           y = ext_2018_crop4)
+m_2018_typ_N_crop4 <- crop(x = mer_4,
+                           y = ext_2018_crop4)
+s_2018_typ_N_crop4 <- crop(x = speed_4,
+                           y = ext_2018_crop4)
+
+# -----> 2018 - NORTHERN TYPICAL - CROP 4 MAPS PRODUCTION ####
+##############################################################
+for (i in 1:nlayers(z_2018_typ_N_crop4)) {
+    
+    dat <- substr(names(z_2018_typ_N_crop4[[i]]), 2, 17)
+    dat_conv <- as.POSIXlt(dat,
+                           format = "%Y.%m.%d.%H.%M")
+    # ----- #
+    locs_563 <- argos_2018_typ_N_crop4[argos_2018_typ_N_crop4$raster_layer == dat, ]
+    back_locs_563 <- argos_2018_typ_N_crop4[argos_2018_typ_N_crop4$Date < dat_conv, ]
+# ----- 166563 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/",
+                "2018-TYP-N-166563-CROP4-",
+                names(z_2018_typ_N_crop4[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+    # x11()
+    print(
+    vectorplot(stack(m_2018_typ_N_crop4[[i]], z_2018_typ_N_crop4[[i]]),
+                  isField = 'dXY',
+                  region =  s_2018_typ_N_crop4[[i]],
+                  at = my_at,
+                  lwd.arrows = 1,
+                  aspX = 0.2,
+                  narrows = 300,
+                  col.regions = my_cols,
+                  main = paste("2018 - TYP N - 166563 -",
+                               names(m_2018_typ_N_crop4[[i]]))) +
+    layer(c(sp.points(back_locs_563,
+                      col = "#aec1f5",
+                      lwd = 3,
+                      cex = 2),
+            sp.points(locs_563,
+                      col = "#0042f8",
+                      lwd = 6,
+                      cex = 4)))
+    )
+
+dev.off()
+
+print(paste("166563 - ", i, "/", nlayers(z_2018_typ_N_crop4), sep = ""))
+}
+
+# -----> PPT creation ####
+##########################
+
+# File list
+files_2018_563 <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/")
+length(files_2018_563) # the shortest
+
+files_2018_070 <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-162070/")
+length(files_2018_070)
+
+# Doc creation
+doc <- read_pptx()
+doc <- add_slide(doc,
+                 layout = "Two Content",
+                 master = "Office Theme")
+
+for (i in 1:length(files_2018_563)) {
+    
+    # file path
+    img_file_563 <- paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/",
+                          files_2018_563[i],
+                          sep = "")
+    if (!is.na(files_2018_070[i])) {
+        img_file_070 <- paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-162070/",
+                              files_2018_070[i],
+                              sep = "")
+        doc <- ph_with(x = doc,
+                       value = paste("Typical (North) tracks in 2018 - ",
+                       substr(files_2018_563[i],
+                                      26,
+                                      41),
+                       sep = ""),
+                       location = ph_location_type(type = "title"))
+        doc <- ph_with(x = doc,
+                       value = "166563",
+                       location = ph_location_left())
+        doc <- ph_with(x = doc,
+                       value = "162070",
+                       location = ph_location_right())
+        doc <- ph_with(x = doc,
+                       value = paste(i, "/", length(files_2018_563), sep = ""),
+                       location = ph_location_type(type = "ftr"))
+        doc <- ph_with(x = doc,
+                       value = external_img(img_file_563),
+                       location = ph_location_left(),
+                       use_loc_size = TRUE)
+        doc <- ph_with(x = doc,
+                       value = external_img(img_file_070),
+                       location = ph_location_right(),
+                       use_loc_size = TRUE)
+        doc <- add_slide(doc)
+    } else {
+                doc <- ph_with(x = doc,
+                       value = substr(files_2018_563[i],
+                                      26,
+                                      41),
+                       location = ph_location_type(type = "title"))
+        doc <- ph_with(x = doc,
+                       value = "166563",
+                       location = ph_location_left())
+        doc <- ph_with(x = doc,
+                       value = paste(i, "/", length(files_2018_563), sep = ""),
+                       location = ph_location_type(type = "ftr"))
+        doc <- ph_with(x = doc,
+                       value = external_img(img_file_563),
+                       location = ph_location_left(),
+                       use_loc_size = TRUE)
+        doc <- add_slide(doc)
+    }
+    print(i)
+}
 
 print(doc,
-      target = "C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/2018_ATYPICAL_TRACKS.pptx")
+      target = "C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/2018_TYPICAL_NORTH_TRACKS.pptx")
