@@ -1541,7 +1541,7 @@ for (i in 1:nlayers(z_2018_typ_S_crop1)) {
     back_locs_073 <- argos_2018_typ_S_crop1[argos_2018_typ_S_crop1$Vessel == "162073"
                                       & argos_2018_typ_S_crop1$Date < dat_conv, ]
         # ----- #
-    locs_561 <- argos_2018_typ_S_crop1[argos_2018_typ_S_crop1$Vessel == "155561"
+    locs_561 <- argos_2018_typ_S_crop1[argos_2018_typ_S_crop1$Vessel == "166561"
                                       & argos_2018_typ_S_crop1$raster_layer == dat, ]
     back_locs_561 <- argos_2018_typ_S_crop1[argos_2018_typ_S_crop1$Vessel == "166561"
                                       & argos_2018_typ_S_crop1$Date < dat_conv, ]
@@ -1557,83 +1557,63 @@ for (i in 1:nlayers(z_2018_typ_S_crop1)) {
                   main = paste("2018 - TYP S - ",
                                names(m_2018_typ_S_crop1[[i]])))
     # ----- 162072 ----- #
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162072/",
-                "2018-TYP-S-162072-CROP1-",
-                names(z_2018_typ_S_crop1[[i]]),
-              ".png",
-              sep = ""),
-    res = 300,
-    width = 40,
-    height = 50,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
+#     png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162072/",
+#                 "2018-TYP-S-162072-CROP1-",
+#                 names(z_2018_typ_S_crop1[[i]]),
+#               ".png",
+#               sep = ""),
+#     res = 300,
+#     width = 40,
+#     height = 50,
+#     pointsize = 12,
+#     unit = "cm",
+#     bg = "transparent")
 
-    # x11()
-    print(
-        vec +
-        # vectorplot(stack(m_2018_typ_S_crop1[[i]], z_2018_typ_S_crop1[[i]]),
-        #           isField = 'dXY',
-        #           region =  s_2018_typ_S_crop1[[i]],
-        #           at = my_at,
-        #           lwd.arrows = 1,
-        #           aspX = 0.2,
-        #           narrows = 300,
-        #           col.regions = my_cols,
-        #           main = paste("2018 - TYP S - ",
-        #                        names(m_2018_typ_S_crop1[[i]]))) +
-        layer(c(sp.points(back_locs_072,
-                          col = "#caf599",
-                          lwd = 3,
-                          cex = 2),
-                sp.points(locs_072,
-                          col = "#5aa505",
-                          lwd = 6,
-                          cex = 4))) +
-        layer(panel.key("162072"))
-    )
+#     # x11()
+#     print(
+#         vec +
+#         layer(c(sp.points(back_locs_072,
+#                           col = "#caf599",
+#                           lwd = 3,
+#                           cex = 2),
+#                 sp.points(locs_072,
+#                           col = "#5aa505",
+#                           lwd = 6,
+#                           cex = 4))) +
+#         layer(panel.key("162072"))
+#     )
 
-dev.off()
+# dev.off()
 print(paste("162072 - ", i, "/", nlayers(z_2018_typ_S_crop1), sep = ""))
 
 # ----- 162073 ----- #
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162073/",
-                "2018-TYP-S-162073-CROP1-",
-                names(z_2018_typ_S_crop1[[i]]),
-              ".png",
-              sep = ""),
-    res = 300,
-    width = 40,
-    height = 50,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
+#     png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162073/",
+#                 "2018-TYP-S-162073-CROP1-",
+#                 names(z_2018_typ_S_crop1[[i]]),
+#               ".png",
+#               sep = ""),
+#     res = 300,
+#     width = 40,
+#     height = 50,
+#     pointsize = 12,
+#     unit = "cm",
+#     bg = "transparent")
 
-    # x11()
-        print(
-        vec +
-        # vectorplot(stack(m_2018_typ_S_crop1[[i]], z_2018_typ_S_crop1[[i]]),
-        #           isField = 'dXY',
-        #           region =  s_2018_typ_S_crop1[[i]],
-        #           at = my_at,
-        #           lwd.arrows = 1,
-        #           aspX = 0.2,
-        #           narrows = 300,
-        #           col.regions = my_cols,
-        #           main = paste("2018 - TYP S - ",
-        #                        names(m_2018_typ_S_crop1[[i]]))) +
-        layer(c(sp.points(back_locs_073,
-                          col = "#aec1f5",
-                          lwd = 3,
-                          cex = 2),
-                sp.points(locs_073,
-                          col = "#0042f8",
-                          lwd = 6,
-                          cex = 4))) + 
-        layer(panel.key("162073"))
-    )
+#     # x11()
+#         print(
+#         vec +
+#         layer(c(sp.points(back_locs_073,
+#                           col = "#aec1f5",
+#                           lwd = 3,
+#                           cex = 2),
+#                 sp.points(locs_073,
+#                           col = "#0042f8",
+#                           lwd = 6,
+#                           cex = 4))) + 
+#         layer(panel.key("162073"))
+#     )
 
-dev.off()
+# dev.off()
 
 # ----- 166561 ----- #
     png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-166561/",
@@ -1651,22 +1631,12 @@ dev.off()
     # x11()
         print(
         vec +
-        # vectorplot(stack(m_2018_typ_S_crop1[[i]], z_2018_typ_S_crop1[[i]]),
-        #           isField = 'dXY',
-        #           region =  s_2018_typ_S_crop1[[i]],
-        #           at = my_at,
-        #           lwd.arrows = 1,
-        #           aspX = 0.2,
-        #           narrows = 300,
-        #           col.regions = my_cols,
-        #           main = paste("2018 - TYP S - ",
-        #                        names(m_2018_typ_S_crop1[[i]]))) +
         layer(c(sp.points(back_locs_561,
-                          col = "#f1d7a6",
+                          col = "mistyrose",
                           lwd = 3,
                           cex = 2),
                 sp.points(locs_561,
-                          col = "#cf8a08",
+                          col = "darkred",
                           lwd = 6,
                           cex = 4))) +
         layer(panel.key("166561"))
@@ -1676,7 +1646,436 @@ dev.off()
 
 }
 
+# -----> CROP 2 ####
+####################
 
+# Time range : 28 April 2018 to 16 June 2018
+
+# -----> Subset of argos data
+#############################
+# <----- All devices ----->
+min_date <- as.POSIXlt("2018-04-27", format = "%Y-%m-%d")
+max_date <- as.POSIXlt("2018-06-16", format = "%Y-%m-%d")
+argos_2018_typ_S_crop2 <- argos_2018_typ_S[date(argos_2018_typ_S$Date) > min_date & date(argos_2018_typ_S$Date) <= max_date, ]
+summary(argos_2018_typ_S_crop2$Date)
+# ==> min date = 2018-05-05 00:40:00
+# ==> max date = 2018-06-16 23:16:00
+
+mapview(argos_2018_typ_S_crop2, zcol = "Vessel")
+
+# -----> Temporal selection of layers - CROP 2
+###############################################
+# Number of first layer
+raster_min_2018_crop2 <- str_which(names(zon_2018),
+                                   "2018.05.05.00.00")
+# Number of last layer based on the maximal date
+raster_max_2018_crop2 <- str_which(names(zon_2018),
+                                   "2018.06.16.18.00")
+# Selection of layers
+zon_2 <- zon_2018[[raster_min_2018_crop2:raster_max_2018_crop2]]
+mer_2 <- mer_2018[[raster_min_2018_crop2:raster_max_2018_crop2]]
+speed_2 <- speed_2018[[raster_min_2018_crop2:raster_max_2018_crop2]]
+
+# -----> Spatial selection of layers - CROP 2A
+##############################################
+# -----> 162072/162073 <----- #
+
+ext_2018_crop2A <- extent(40, 70, -20, 10) # xmin, xmax, ymin, ymax
+z_2018_typ_S_crop2A <- crop(x = zon_2,
+                            y = ext_2018_crop2A)
+m_2018_typ_S_crop2A <- crop(x = mer_2,
+                            y = ext_2018_crop2A)
+s_2018_typ_S_crop2A <- crop(x = speed_2,
+                            y = ext_2018_crop2A)
+
+# -----> Spatial selection of layers - CROP 2B
+##############################################
+# -----> 166561 <----- #
+
+ext_2018_crop2B <- extent(40, 105, -20, 10) # xmin, xmax, ymin, ymax
+z_2018_typ_S_crop2B <- crop(x = zon_2,
+                            y = ext_2018_crop2B)
+m_2018_typ_S_crop2B <- crop(x = mer_2,
+                            y = ext_2018_crop2B)
+s_2018_typ_S_crop2B <- crop(x = speed_2,
+                            y = ext_2018_crop2B)
+
+
+# -----> 2018 - NORTHERN TYPICAL - CROP 2 A & B MAPS PRODUCTION ####
+####################################################################
+for (i in 1:nlayers(z_2018_typ_S_crop2A)) {
+    
+    dat <- substr(names(z_2018_typ_S_crop2A[[i]]), 2, 17)
+    dat_conv <- as.POSIXlt(dat,
+                           format = "%Y.%m.%d.%H.%M")
+    # ----- #
+    locs_072 <- argos_2018_typ_S_crop2[argos_2018_typ_S_crop2$Vessel == "162072"
+                                      & argos_2018_typ_S_crop2$raster_layer == dat, ]
+    back_locs_072 <- argos_2018_typ_S_crop2[argos_2018_typ_S_crop2$Vessel == "162072"
+                                           & argos_2018_typ_S_crop2$Date < dat_conv, ]
+    # ----- #
+    locs_073 <- argos_2018_typ_S_crop2[argos_2018_typ_S_crop2$Vessel == "162073"
+                                      & argos_2018_typ_S_crop2$raster_layer == dat, ]
+    back_locs_073 <- argos_2018_typ_S_crop2[argos_2018_typ_S_crop2$Vessel == "162073"
+                                      & argos_2018_typ_S_crop2$Date < dat_conv, ]
+        # ----- #
+    locs_561 <- argos_2018_typ_S_crop2[argos_2018_typ_S_crop2$Vessel == "166561"
+                                      & argos_2018_typ_S_crop2$raster_layer == dat, ]
+    back_locs_561 <- argos_2018_typ_S_crop2[argos_2018_typ_S_crop2$Vessel == "166561"
+                                      & argos_2018_typ_S_crop2$Date < dat_conv, ]
+    # ----- VECTORPLOT ----- #
+    vecA <- vectorplot(stack(m_2018_typ_S_crop2A[[i]], z_2018_typ_S_crop2A[[i]]),
+                  isField = 'dXY',
+                  region =  s_2018_typ_S_crop2A[[i]],
+                  at = my_at,
+                  lwd.arrows = 1,
+                  aspX = 0.2,
+                  narrows = 300,
+                  col.regions = my_cols,
+                  main = paste("2018 - TYP S - ",
+                               names(m_2018_typ_S_crop2A[[i]])))
+    
+    vecB <- vectorplot(stack(m_2018_typ_S_crop2B[[i]], z_2018_typ_S_crop2B[[i]]),
+                       isField = 'dXY',
+                       region =  s_2018_typ_S_crop2B[[i]],
+                       at = my_at,
+                       lwd.arrows = 1,
+                       aspX = 0.2,
+                       narrows = 300,
+                       col.regions = my_cols,
+                       main = paste("2018 - TYP S - ",
+                                    names(m_2018_typ_S_crop2B[[i]])))
+    # ----- 162072 ----- #
+#     png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162072/",
+#                 "2018-TYP-S-162072-CROP2-",
+#                 names(z_2018_typ_S_crop2A[[i]]),
+#               ".png",
+#               sep = ""),
+#     res = 300,
+#     width = 40,
+#     height = 50,
+#     pointsize = 12,
+#     unit = "cm",
+#     bg = "transparent")
+
+#     # x11()
+#     print(
+#         vecA +
+#         layer(c(sp.points(back_locs_072,
+#                           col = "#caf599",
+#                           lwd = 3,
+#                           cex = 2),
+#                 sp.points(locs_072,
+#                           col = "#5aa505",
+#                           lwd = 6,
+#                           cex = 4))) +
+#         layer(panel.key("162072"))
+#     )
+
+# dev.off()
+print(paste("162072 - ", i, "/", nlayers(z_2018_typ_S_crop2A), sep = ""))
+
+# # ----- 162073 ----- #
+#     png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162073/",
+#                 "2018-TYP-S-162073-CROP2-",
+#                 names(z_2018_typ_S_crop2A[[i]]),
+#               ".png",
+#               sep = ""),
+#     res = 300,
+#     width = 40,
+#     height = 50,
+#     pointsize = 12,
+#     unit = "cm",
+#     bg = "transparent")
+
+#     # x11()
+#         print(
+#         vecA +
+#         layer(c(sp.points(back_locs_073,
+#                           col = "#aec1f5",
+#                           lwd = 3,
+#                           cex = 2),
+#                 sp.points(locs_073,
+#                           col = "#0042f8",
+#                           lwd = 6,
+#                           cex = 4))) + 
+#         layer(panel.key("162073"))
+#     )
+
+# dev.off()
+
+# ----- 166561 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-166561/",
+                "2018-TYP-S-166561-CROP2-",
+                names(z_2018_typ_S_crop2B[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+    # x11()
+        print(
+        vecB +
+        layer(c(sp.points(back_locs_561,
+                          col = "mistyrose",
+                          lwd = 3,
+                          cex = 2),
+                sp.points(locs_561,
+                          col = "darkred",
+                          lwd = 6,
+                          cex = 4))) +
+        layer(panel.key("166561"))
+    )
+
+dev.off()
+
+}
+
+# -----> CROP 3 ####
+####################
+
+# Time range : 17 June 2018 to  23 September 2018
+
+# -----> Subset of argos data
+#############################
+# <----- All devices ----->
+min_date <- as.POSIXlt("2018-06-16", format = "%Y-%m-%d")
+max_date <- as.POSIXlt("2018-09-23", format = "%Y-%m-%d")
+argos_2018_typ_S_crop3 <- argos_2018_typ_S[date(argos_2018_typ_S$Date) > min_date & date(argos_2018_typ_S$Date) <= max_date, ]
+summary(argos_2018_typ_S_crop3$Date)
+# ==> min date = 2018-06-17 00:46:00
+# ==> max date = 2018-09-23 22:28:00
+
+mapview(argos_2018_typ_S_crop3, zcol = "Vessel")
+
+# -----> Temporal selection of layers - CROP 3
+###############################################
+# Number of first layer
+raster_min_2018_crop3 <- str_which(names(zon_2018),
+                                   "2018.06.17.00.00")
+# Number of last layer based on the maximal date
+raster_max_2018_crop3 <- str_which(names(zon_2018),
+                                   "2018.09.23.18.00")
+# Selection of layers
+zon_3 <- zon_2018[[raster_min_2018_crop3:raster_max_2018_crop3]]
+mer_3 <- mer_2018[[raster_min_2018_crop3:raster_max_2018_crop3]]
+speed_3 <- speed_2018[[raster_min_2018_crop3:raster_max_2018_crop3]]
+
+# -----> Spatial selection of layers - CROP 3A
+##############################################
+# -----> 162072/162073 <----- #
+
+ext_2018_crop3A <- extent(50, 120, -30, 10) # xmin, xmax, ymin, ymax
+z_2018_typ_S_crop3A <- crop(x = zon_3,
+                            y = ext_2018_crop3A)
+m_2018_typ_S_crop3A <- crop(x = mer_3,
+                            y = ext_2018_crop3A)
+s_2018_typ_S_crop3A <- crop(x = speed_3,
+                            y = ext_2018_crop3A)
+
+# -----> Spatial selection of layers - CROP 2B
+##############################################
+# -----> 166561 <----- #
+
+ext_2018_crop3B <- extent(80, 120, -25, 5) # xmin, xmax, ymin, ymax
+z_2018_typ_S_crop3B <- crop(x = zon_3,
+                            y = ext_2018_crop3B)
+m_2018_typ_S_crop3B <- crop(x = mer_3,
+                            y = ext_2018_crop3B)
+s_2018_typ_S_crop3B <- crop(x = speed_3,
+                            y = ext_2018_crop3B)
+
+# -----> 2018 - NORTHERN TYPICAL - CROP 3 A & B MAPS PRODUCTION ####
+####################################################################
+for (i in 1:nlayers(z_2018_typ_S_crop3A)) {
+    
+    dat <- substr(names(z_2018_typ_S_crop3A[[i]]), 2, 17)
+    dat_conv <- as.POSIXlt(dat,
+                           format = "%Y.%m.%d.%H.%M")
+    # ----- #
+    locs_072 <- argos_2018_typ_S_crop3[argos_2018_typ_S_crop3$Vessel == "162072"
+                                      & argos_2018_typ_S_crop3$raster_layer == dat, ]
+    back_locs_072 <- argos_2018_typ_S_crop3[argos_2018_typ_S_crop3$Vessel == "162072"
+                                           & argos_2018_typ_S_crop3$Date < dat_conv, ]
+    # ----- #
+    locs_073 <- argos_2018_typ_S_crop3[argos_2018_typ_S_crop3$Vessel == "162073"
+                                      & argos_2018_typ_S_crop3$raster_layer == dat, ]
+    back_locs_073 <- argos_2018_typ_S_crop3[argos_2018_typ_S_crop3$Vessel == "162073"
+                                      & argos_2018_typ_S_crop3$Date < dat_conv, ]
+        # ----- #
+    locs_561 <- argos_2018_typ_S_crop3[argos_2018_typ_S_crop3$Vessel == "166561"
+                                      & argos_2018_typ_S_crop3$raster_layer == dat, ]
+    back_locs_561 <- argos_2018_typ_S_crop3[argos_2018_typ_S_crop3$Vessel == "166561"
+                                      & argos_2018_typ_S_crop3$Date < dat_conv, ]
+    # ----- VECTORPLOT ----- #
+    vecA <- vectorplot(stack(m_2018_typ_S_crop3A[[i]], z_2018_typ_S_crop3A[[i]]),
+                  isField = 'dXY',
+                  region =  s_2018_typ_S_crop3A[[i]],
+                  at = my_at,
+                  lwd.arrows = 1,
+                  aspX = 0.2,
+                  narrows = 300,
+                  col.regions = my_cols,
+                  main = paste("2018 - TYP S - ",
+                               names(m_2018_typ_S_crop3A[[i]])))
+    
+    vecB <- vectorplot(stack(m_2018_typ_S_crop3B[[i]], z_2018_typ_S_crop3B[[i]]),
+                       isField = 'dXY',
+                       region =  s_2018_typ_S_crop3B[[i]],
+                       at = my_at,
+                       lwd.arrows = 1,
+                       aspX = 0.2,
+                       narrows = 300,
+                       col.regions = my_cols,
+                       main = paste("2018 - TYP S - ",
+                                    names(m_2018_typ_S_crop3B[[i]])))
+    # ----- 162072 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162072/",
+                "2018-TYP-S-162072-CROP3-",
+                names(z_2018_typ_S_crop3A[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+#     # x11()
+    print(
+        vecA +
+        layer(c(sp.points(back_locs_072,
+                          col = "#caf599",
+                          lwd = 3,
+                          cex = 2),
+                sp.points(locs_072,
+                          col = "#5aa505",
+                          lwd = 6,
+                          cex = 4))) +
+        layer(panel.key("162072"))
+    )
+
+dev.off()
+print(paste("162072 - ", i, "/", nlayers(z_2018_typ_S_crop3A), sep = ""))
+
+# # ----- 162073 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162073/",
+                "2018-TYP-S-162073-CROP3-",
+                names(z_2018_typ_S_crop3A[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+#     # x11()
+        print(
+        vecA +
+        layer(c(sp.points(back_locs_073,
+                          col = "#aec1f5",
+                          lwd = 3,
+                          cex = 2),
+                sp.points(locs_073,
+                          col = "#0042f8",
+                          lwd = 6,
+                          cex = 4))) + 
+        layer(panel.key("162073"))
+    )
+
+dev.off()
+
+# ----- 166561 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-166561/",
+                "2018-TYP-S-166561-CROP3-",
+                names(z_2018_typ_S_crop3B[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+    # x11()
+        print(
+        vecB +
+        layer(c(sp.points(back_locs_561,
+                          col = "mistyrose",
+                          lwd = 3,
+                          cex = 2),
+                sp.points(locs_561,
+                          col = "darkred",
+                          lwd = 6,
+                          cex = 4))) +
+        layer(panel.key("166561"))
+    )
+
+dev.off()
+
+}
+
+# -----> CROP 4 ####
+####################
+
+# Time range : 24 September 2018 to 24 October 2018
+
+# -----> Subset of argos data
+#############################
+# <----- All devices ----->
+min_date <- as.POSIXlt("2018-09-24", format = "%Y-%m-%d")
+max_date <- as.POSIXlt("2018-10-24", format = "%Y-%m-%d")
+argos_2018_typ_S_crop4 <- argos_2018_typ_S[date(argos_2018_typ_S$Date) > min_date & date(argos_2018_typ_S$Date) <= max_date, ]
+summary(argos_2018_typ_S_crop4$Date)
+# ==> min date = 2018-09-25 00:20:00
+# ==> max date = 22018-10-24 11:36:00
+
+mapview(argos_2018_typ_S_crop4, zcol = "Vessel")
+
+# -----> Temporal selection of layers - CROP 4
+###############################################
+# Number of first layer
+raster_min_2018_crop3 <- str_which(names(zon_2018),
+                                   "2018.06.17.00.00")
+# Number of last layer based on the maximal date
+raster_max_2018_crop3 <- str_which(names(zon_2018),
+                                   "2018.09.23.18.00")
+# Selection of layers
+zon_3 <- zon_2018[[raster_min_2018_crop3:raster_max_2018_crop3]]
+mer_3 <- mer_2018[[raster_min_2018_crop3:raster_max_2018_crop3]]
+speed_3 <- speed_2018[[raster_min_2018_crop3:raster_max_2018_crop3]]
+
+# -----> Spatial selection of layers - CROP 4
+##############################################
+# -----> 162073/166561 <----- #
+
+ext_2018_crop3A <- extent(50, 120, -30, 10) # xmin, xmax, ymin, ymax
+z_2018_typ_S_crop3A <- crop(x = zon_3,
+                            y = ext_2018_crop3A)
+m_2018_typ_S_crop3A <- crop(x = mer_3,
+                            y = ext_2018_crop3A)
+s_2018_typ_S_crop3A <- crop(x = speed_3,
+                            y = ext_2018_crop3A)
+
+# -----> Spatial selection of layers - CROP 2B
+##############################################
+# -----> 166561 <----- #
+
+ext_2018_crop3B <- extent(80, 120, -25, 5) # xmin, xmax, ymin, ymax
+z_2018_typ_S_crop3B <- crop(x = zon_3,
+                            y = ext_2018_crop3B)
+m_2018_typ_S_crop3B <- crop(x = mer_3,
+                            y = ext_2018_crop3B)
+s_2018_typ_S_crop3B <- crop(x = speed_3,
+                            y = ext_2018_crop3B)
 # -----> PPT creation ####
 ##########################
 
@@ -1766,3 +2165,5 @@ for (i in 1:length(files_2018_561)) {
 
 # print(doc,
 #       target = "C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/2017_TYPICAL_TRACKS.pptx")
+
+
