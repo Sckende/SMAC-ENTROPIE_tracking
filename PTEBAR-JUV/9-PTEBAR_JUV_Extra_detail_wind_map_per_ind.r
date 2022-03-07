@@ -977,17 +977,17 @@ for (i in 1:nlayers(z_2018_typ_N_crop1)) {
     back_locs_563 <- argos_2018_typ_N_crop1[argos_2018_typ_N_crop1$Vessel == "166563"
                                       & argos_2018_typ_N_crop1$Date < dat_conv, ]
     # ----- 162070 ----- #
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-162070/",
-                "2018-TYP-N-162070-CROP1-",
-                names(z_2018_typ_N_crop1[[i]]),
-              ".png",
-              sep = ""),
-    res = 300,
-    width = 40,
-    height = 50,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
+    # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-162070/",
+    #             "2018-TYP-N-162070-CROP1-",
+    #             names(z_2018_typ_N_crop1[[i]]),
+    #           ".png",
+    #           sep = ""),
+    # res = 300,
+    # width = 40,
+    # height = 50,
+    # pointsize = 12,
+    # unit = "cm",
+    # bg = "transparent")
 
     # x11()
     print(
@@ -1014,17 +1014,17 @@ for (i in 1:nlayers(z_2018_typ_N_crop1)) {
 dev.off()
 print(paste("162070 - ", i, "/", nlayers(z_2018_typ_N_crop1), sep = ""))
 # ----- 166563 ----- #
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/",
-                "2018-TYP-N-166563-CROP1-",
-                names(z_2018_typ_N_crop1[[i]]),
-              ".png",
-              sep = ""),
-    res = 300,
-    width = 40,
-    height = 50,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
+    # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/",
+    #             "2018-TYP-N-166563-CROP1-",
+    #             names(z_2018_typ_N_crop1[[i]]),
+    #           ".png",
+    #           sep = ""),
+    # res = 300,
+    # width = 40,
+    # height = 50,
+    # pointsize = 12,
+    # unit = "cm",
+    # bg = "transparent")
 
     # x11()
     print(
@@ -1106,17 +1106,17 @@ for (i in 1:nlayers(z_2018_typ_N_crop2)) {
     back_locs_563 <- argos_2018_typ_N_crop2[argos_2018_typ_N_crop2$Vessel == "166563"
                                       & argos_2018_typ_N_crop2$Date < dat_conv, ]
     # ----- 162070 ----- #
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-162070/",
-                "2018-TYP-N-162070-CROP2-",
-                names(z_2018_typ_N_crop2[[i]]),
-              ".png",
-              sep = ""),
-    res = 300,
-    width = 40,
-    height = 50,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
+    # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-162070/",
+    #             "2018-TYP-N-162070-CROP2-",
+    #             names(z_2018_typ_N_crop2[[i]]),
+    #           ".png",
+    #           sep = ""),
+    # res = 300,
+    # width = 40,
+    # height = 50,
+    # pointsize = 12,
+    # unit = "cm",
+    # bg = "transparent")
 
     # x11()
     print(
@@ -1143,17 +1143,17 @@ for (i in 1:nlayers(z_2018_typ_N_crop2)) {
 dev.off()
 print(paste("162070 - ", i, "/", nlayers(z_2018_typ_N_crop2), sep = ""))
 # ----- 166563 ----- #
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/",
-                "2018-TYP-N-166563-CROP2-",
-                names(z_2018_typ_N_crop2[[i]]),
-              ".png",
-              sep = ""),
-    res = 300,
-    width = 40,
-    height = 50,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
+    # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/",
+    #             "2018-TYP-N-166563-CROP2-",
+    #             names(z_2018_typ_N_crop2[[i]]),
+    #           ".png",
+    #           sep = ""),
+    # res = 300,
+    # width = 40,
+    # height = 50,
+    # pointsize = 12,
+    # unit = "cm",
+    # bg = "transparent")
 
     # x11()
     print(
@@ -1236,17 +1236,17 @@ for (i in 1:nlayers(z_2018_typ_N_crop3)) {
     back_locs_563 <- argos_2018_typ_N_crop3[argos_2018_typ_N_crop3$Vessel == "166563"
                                       & argos_2018_typ_N_crop3$Date < dat_conv, ]
     # ----- 162070 ----- #
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-162070/",
-                "2018-TYP-N-162070-CROP3-",
-                names(z_2018_typ_N_crop3[[i]]),
-              ".png",
-              sep = ""),
-    res = 300,
-    width = 40,
-    height = 50,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
+    # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-162070/",
+    #             "2018-TYP-N-162070-CROP3-",
+    #             names(z_2018_typ_N_crop3[[i]]),
+    #           ".png",
+    #           sep = ""),
+    # res = 300,
+    # width = 40,
+    # height = 50,
+    # pointsize = 12,
+    # unit = "cm",
+    # bg = "transparent")
 
     # x11()
     print(
@@ -1273,17 +1273,17 @@ for (i in 1:nlayers(z_2018_typ_N_crop3)) {
 dev.off()
 print(paste("162070 - ", i, "/", nlayers(z_2018_typ_N_crop3), sep = ""))
 # ----- 166563 ----- #
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/",
-                "2018-TYP-N-166563-CROP3-",
-                names(z_2018_typ_N_crop3[[i]]),
-              ".png",
-              sep = ""),
-    res = 300,
-    width = 40,
-    height = 50,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
+    # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/",
+    #             "2018-TYP-N-166563-CROP3-",
+    #             names(z_2018_typ_N_crop3[[i]]),
+    #           ".png",
+    #           sep = ""),
+    # res = 300,
+    # width = 40,
+    # height = 50,
+    # pointsize = 12,
+    # unit = "cm",
+    # bg = "transparent")
 
     # x11()
     print(
@@ -1357,17 +1357,17 @@ for (i in 1:nlayers(z_2018_typ_N_crop4)) {
     locs_563 <- argos_2018_typ_N_crop4[argos_2018_typ_N_crop4$raster_layer == dat, ]
     back_locs_563 <- argos_2018_typ_N_crop4[argos_2018_typ_N_crop4$Date < dat_conv, ]
 # ----- 166563 ----- #
-    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/",
-                "2018-TYP-N-166563-CROP4-",
-                names(z_2018_typ_N_crop4[[i]]),
-              ".png",
-              sep = ""),
-    res = 300,
-    width = 40,
-    height = 50,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
+    # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-N-166563/",
+    #             "2018-TYP-N-166563-CROP4-",
+    #             names(z_2018_typ_N_crop4[[i]]),
+    #           ".png",
+    #           sep = ""),
+    # res = 300,
+    # width = 40,
+    # height = 50,
+    # pointsize = 12,
+    # unit = "cm",
+    # bg = "transparent")
 
     # x11()
     print(
@@ -1468,5 +1468,301 @@ for (i in 1:length(files_2018_563)) {
     print(i)
 }
 
-print(doc,
-      target = "C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/2018_TYPICAL_NORTH_TRACKS.pptx")
+# print(doc,
+#       target = "C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/2018_TYPICAL_NORTH_TRACKS.pptx")
+
+
+# -----> SOUTHERN TYPICAL TRACKS <----- ####
+############################################
+# 3 Devices : 162072, 162073 & 166561
+
+dim(argos_2018_typ)
+argos_2018_typ_S <- argos_2018_typ[argos_2018_typ$Vessel %in%
+                                   c("162072", "162073", "166561"), ]
+dim(argos_2018_typ_S)
+table(argos_2018_typ_S$Vessel)
+
+mapview(argos_2018_typ_S, zcol = "Vessel")
+ 
+# Crops are based on temporal scale
+# -----> Extend organization ####
+#################################
+# -----> CROP 1 ####
+####################
+
+# Time range : 1 April 2018 to 27 April 2018
+
+# -----> Subset of argos data
+#############################
+# <----- All devices ----->
+max_date <- as.POSIXlt("2018-04-27", format = "%Y-%m-%d")
+argos_2018_typ_S_crop1 <- argos_2018_typ_S[date(argos_2018_typ_S$Date) <= max_date, ]
+summary(argos_2018_typ_S_crop1$Date)
+# ==> min date = 2018-04-04 12:00:00
+# ==> max date = 2018-04-27 05:55:00
+
+# -----> Temporal selection of layers - CROP 1
+###############################################
+# Number of first layer
+raster_min_2018_crop1 <- 1
+# Number of last layer based on the maximal date - 2018-04-27
+raster_max_2018_crop1 <- str_which(names(zon_2018),
+                                   "2018.04.27.18.00")
+# Selection of layers
+zon_1 <- zon_2018[[raster_min_2018_crop1:raster_max_2018_crop1]]
+mer_1 <- mer_2018[[raster_min_2018_crop1:raster_max_2018_crop1]]
+speed_1 <- speed_2018[[raster_min_2018_crop1:raster_max_2018_crop1]]
+
+# -----> Spatial selection of layers - CROP 1
+##############################################
+ext_2018_crop1 <- extent(40, 70, -40, -5) # xmin, xmax, ymin, ymax
+z_2018_typ_S_crop1 <- crop(x = zon_1,
+                           y = ext_2018_crop1)
+m_2018_typ_S_crop1 <- crop(x = mer_1,
+                           y = ext_2018_crop1)
+s_2018_typ_S_crop1 <- crop(x = speed_1,
+                           y = ext_2018_crop1)
+
+# -----> 2018 - NORTHERN TYPICAL - CROP 1 MAPS PRODUCTION ####
+##############################################################
+for (i in 1:nlayers(z_2018_typ_S_crop1)) {
+    
+    dat <- substr(names(z_2018_typ_S_crop1[[i]]), 2, 17)
+    dat_conv <- as.POSIXlt(dat,
+                           format = "%Y.%m.%d.%H.%M")
+    # ----- #
+    locs_072 <- argos_2018_typ_S_crop1[argos_2018_typ_S_crop1$Vessel == "162072"
+                                      & argos_2018_typ_S_crop1$raster_layer == dat, ]
+    back_locs_072 <- argos_2018_typ_S_crop1[argos_2018_typ_S_crop1$Vessel == "162072"
+                                           & argos_2018_typ_S_crop1$Date < dat_conv, ]
+    # ----- #
+    locs_073 <- argos_2018_typ_S_crop1[argos_2018_typ_S_crop1$Vessel == "162073"
+                                      & argos_2018_typ_S_crop1$raster_layer == dat, ]
+    back_locs_073 <- argos_2018_typ_S_crop1[argos_2018_typ_S_crop1$Vessel == "162073"
+                                      & argos_2018_typ_S_crop1$Date < dat_conv, ]
+        # ----- #
+    locs_561 <- argos_2018_typ_S_crop1[argos_2018_typ_S_crop1$Vessel == "155561"
+                                      & argos_2018_typ_S_crop1$raster_layer == dat, ]
+    back_locs_561 <- argos_2018_typ_S_crop1[argos_2018_typ_S_crop1$Vessel == "166561"
+                                      & argos_2018_typ_S_crop1$Date < dat_conv, ]
+    # ----- VECTORPLOT ----- #
+    vec <- vectorplot(stack(m_2018_typ_S_crop1[[i]], z_2018_typ_S_crop1[[i]]),
+                  isField = 'dXY',
+                  region =  s_2018_typ_S_crop1[[i]],
+                  at = my_at,
+                  lwd.arrows = 1,
+                  aspX = 0.2,
+                  narrows = 300,
+                  col.regions = my_cols,
+                  main = paste("2018 - TYP S - ",
+                               names(m_2018_typ_S_crop1[[i]])))
+    # ----- 162072 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162072/",
+                "2018-TYP-S-162072-CROP1-",
+                names(z_2018_typ_S_crop1[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+    # x11()
+    print(
+        vec +
+        # vectorplot(stack(m_2018_typ_S_crop1[[i]], z_2018_typ_S_crop1[[i]]),
+        #           isField = 'dXY',
+        #           region =  s_2018_typ_S_crop1[[i]],
+        #           at = my_at,
+        #           lwd.arrows = 1,
+        #           aspX = 0.2,
+        #           narrows = 300,
+        #           col.regions = my_cols,
+        #           main = paste("2018 - TYP S - ",
+        #                        names(m_2018_typ_S_crop1[[i]]))) +
+        layer(c(sp.points(back_locs_072,
+                          col = "#caf599",
+                          lwd = 3,
+                          cex = 2),
+                sp.points(locs_072,
+                          col = "#5aa505",
+                          lwd = 6,
+                          cex = 4))) +
+        layer(panel.key("162072"))
+    )
+
+dev.off()
+print(paste("162072 - ", i, "/", nlayers(z_2018_typ_S_crop1), sep = ""))
+
+# ----- 162073 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162073/",
+                "2018-TYP-S-162073-CROP1-",
+                names(z_2018_typ_S_crop1[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+    # x11()
+        print(
+        vec +
+        # vectorplot(stack(m_2018_typ_S_crop1[[i]], z_2018_typ_S_crop1[[i]]),
+        #           isField = 'dXY',
+        #           region =  s_2018_typ_S_crop1[[i]],
+        #           at = my_at,
+        #           lwd.arrows = 1,
+        #           aspX = 0.2,
+        #           narrows = 300,
+        #           col.regions = my_cols,
+        #           main = paste("2018 - TYP S - ",
+        #                        names(m_2018_typ_S_crop1[[i]]))) +
+        layer(c(sp.points(back_locs_073,
+                          col = "#aec1f5",
+                          lwd = 3,
+                          cex = 2),
+                sp.points(locs_073,
+                          col = "#0042f8",
+                          lwd = 6,
+                          cex = 4))) + 
+        layer(panel.key("162073"))
+    )
+
+dev.off()
+
+# ----- 166561 ----- #
+    png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-166561/",
+                "2018-TYP-S-166561-CROP1-",
+                names(z_2018_typ_S_crop1[[i]]),
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 40,
+    height = 50,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+
+    # x11()
+        print(
+        vec +
+        # vectorplot(stack(m_2018_typ_S_crop1[[i]], z_2018_typ_S_crop1[[i]]),
+        #           isField = 'dXY',
+        #           region =  s_2018_typ_S_crop1[[i]],
+        #           at = my_at,
+        #           lwd.arrows = 1,
+        #           aspX = 0.2,
+        #           narrows = 300,
+        #           col.regions = my_cols,
+        #           main = paste("2018 - TYP S - ",
+        #                        names(m_2018_typ_S_crop1[[i]]))) +
+        layer(c(sp.points(back_locs_561,
+                          col = "#f1d7a6",
+                          lwd = 3,
+                          cex = 2),
+                sp.points(locs_561,
+                          col = "#cf8a08",
+                          lwd = 6,
+                          cex = 4))) +
+        layer(panel.key("166561"))
+    )
+
+dev.off()
+
+}
+
+
+# -----> PPT creation ####
+##########################
+
+# File list
+files_2018_072 <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162072/")
+length(files_2018_072)
+
+files_2018_073 <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162073/")
+length(files_2018_073)
+
+files_2018_561 <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-166561/")
+length(files_2018_561)
+
+# Doc creation
+doc <- read_pptx("C:/Users/ccjuhasz/Downloads/three-content.pptx")
+three_content_properties <-  layout_properties(doc, layout = "Three contents")
+three_content_properties
+
+
+doc <- read_pptx("C:/Users/ccjuhasz/Downloads/four-content.pptx")
+four_content_properties <-  layout_properties(doc, layout = "Four contents")
+four_content_properties
+
+doc <- read_pptx()
+doc <- add_slide(doc,
+                 layout = "Three Content",
+                 master = "Office Theme")
+
+for (i in 1:length(files_2018_561)) {
+    
+    # file path
+    img_file_561 <- paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-166561/",
+                          files_2018_561[i],
+                          sep = "")
+    # if (!is.na(files_2017_566[i])) {
+        img_file_073 <- paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162073/",
+                              files_2018_073[i],
+                              sep = "")
+                img_file_072 <- paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/2018-TYP-S-162072/",
+                              files_2018_072[i],
+                              sep = "")
+        doc <- ph_with(x = doc,
+                       value = paste("Typical tracks in 2018 - ",
+                       substr(files_2017_561[i],
+                                      20,
+                                      35),
+                       sep = ""),
+                       location = ph_location_type(type = "title"))
+        doc <- ph_with(x = doc,
+                       value = "166561",
+                       location = ph_location_left())
+        doc <- ph_with(x = doc,
+                       value = "166566",
+                       location = ph_location_right())
+        doc <- ph_with(x = doc,
+                       value = paste(i, "/", length(files_2017_568), sep = ""),
+                       location = ph_location_type(type = "ftr"))
+        doc <- ph_with(x = doc,
+                       value = external_img(img_file_568),
+                       location = ph_location_left(),
+                       use_loc_size = TRUE)
+        doc <- ph_with(x = doc,
+                       value = external_img(img_file_566),
+                       location = ph_location_right(),
+                       use_loc_size = TRUE)
+        doc <- add_slide(doc)
+    } else {
+                doc <- ph_with(x = doc,
+                       value = substr(files_2017_568[i],
+                                      20,
+                                      35),
+                       location = ph_location_type(type = "title"))
+        doc <- ph_with(x = doc,
+                       value = "166568",
+                       location = ph_location_left())
+        doc <- ph_with(x = doc,
+                       value = paste(i, "/", length(files_2017_568), sep = ""),
+                       location = ph_location_type(type = "ftr"))
+        doc <- ph_with(x = doc,
+                       value = external_img(img_file_568),
+                       location = ph_location_left(),
+                       use_loc_size = TRUE)
+        doc <- add_slide(doc)
+    }
+    print(i)
+}
+
+# print(doc,
+#       target = "C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/2017_TYPICAL_TRACKS.pptx")
