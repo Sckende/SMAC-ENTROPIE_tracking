@@ -366,7 +366,7 @@ for (i in 1:length(files_2017_568)) {
 # print(doc,
 #       target = "C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/2017_TYPICAL_TRACKS.pptx")
 
-# -----> TYPICAL TRACKS <----- ####
+# -----> ATYPICAL TRACKS <----- ####
 # -----> Extend organization ####
 #################################
 
