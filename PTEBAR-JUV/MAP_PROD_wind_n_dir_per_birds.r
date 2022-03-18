@@ -143,8 +143,8 @@ for(i in 1:length(weeks_lett)){
     }
 
     # x11()
-    # WIND MAP
-    ##########
+    # WEEKLY WIND MAP
+    ##################
     # png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/WEEKLY/",
     #           year_dep,
     #           "-WindMap-",
@@ -188,10 +188,120 @@ for(i in 1:length(weeks_lett)){
     # )
     # dev.off()
     
-
+    # 6 hours WIND MAP
+    ##################
+    # 2017
+    for(i in 1:nlayers(mer1)){
+        
+        png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/Indian_Ocean/2017/2017_WindMap-IO",
+            names(mer1[[i]]),
+            ".png",
+              sep = ""),
+        res = 300,
+        width = 50,
+        height = 30,
+        pointsize = 12,
+        unit = "cm",
+        bg = "transparent")
+    # x11()
+    print(
+    rasterVis::vectorplot(raster::stack(zon1[[i]], mer1[[i]]),
+               isField = 'dXY',
+               narrows = 800,
+               lwd.arrows = 1,
+               aspX = 0.3,
+               region = speed1[[i]],
+               at = my_at,
+               col.regions = my_cols,
+               main = names(mer1[[i]]))
     
-    # Wind Roses
-    ############
+    )
+    dev.off()
+    }
+
+    # 2018
+    for(i in 13:665){
+        
+        png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/Indian_Ocean/2018/2018_WindMap-IO",
+            names(mer2[[i]]),
+            ".png",
+              sep = ""),
+        res = 300,
+        width = 50,
+        height = 30,
+        pointsize = 12,
+        unit = "cm",
+        bg = "transparent")
+    # x11()
+    print(
+    rasterVis::vectorplot(raster::stack(zon2[[i]], mer2[[i]]),
+               isField = 'dXY',
+               narrows = 800,
+               lwd.arrows = 1,
+               aspX = 0.3,
+               region = speed2[[i]],
+               at = my_at,
+               col.regions = my_cols,
+               main = names(mer2[[i]]))
+    
+    )
+    dev.off()
+    }
+    
+    # -----> PPT creation ####
+##########################
+
+# File list
+wind_2017 <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/Indian_Ocean/2017/",
+                        full.names = TRUE)
+length(wind_2017)
+
+wind_2018 <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/MAPS/FAKIR_6hours/Indian_Ocean/2018/",
+                        full.names = TRUE)
+length(wind_2018)
+
+# Doc creation
+doc <- read_pptx()
+doc <- add_slide(doc,
+                 layout = "Two Content",
+                 master = "Office Theme")
+
+for (i in 1:length(wind_2017)) {
+    
+    # file path
+    img_2017 <- wind_2017[i]
+    img_2018 <- wind_2018[i]
+    
+    doc <- ph_with(x = doc,
+                   value = paste("%mm.%d.%h.%m = ",
+                                 substr(wind_2017[i],
+                                      107,
+                                      117)),
+                       location = ph_location_type(type = "title"))
+        doc <- ph_with(x = doc,
+                       value = paste(i, "/", length(wind_2017), sep = ""),
+                       location = ph_location_type(type = "ftr"))
+        doc <- ph_with(x = doc,
+                       value = external_img(img_2017,
+                                            width = 4.96,
+                                            height = 2.98),
+                       location = ph_location_left(),
+                       use_loc_size = FALSE)
+        doc <- ph_with(x = doc,
+                       value = external_img(img_2018,
+                                            width = 4.96,
+                                            height = 2.98),
+                       location = ph_location_right(),
+                       use_loc_size = FALSE)
+        doc <- add_slide(doc)
+    print(i)
+}
+
+print(doc,
+      target = "C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/Meeting_Henri_MARS_2022/Animation_MP4/input/WIND_IO_2017-2018.pptx")
+    
+# Wind Roses
+############
     png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/WindRoses/WEEKLY/",
               year_dep,
               "-BirdDir-",
