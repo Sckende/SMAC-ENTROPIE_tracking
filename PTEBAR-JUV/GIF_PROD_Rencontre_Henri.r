@@ -12,7 +12,7 @@ gifski(png_files,
        height = 5905,
        delay = 0.5)
 
-# -----> Période de FAKIR 20-24 AVRIL 2018 ####
+# -----> Période de FAKIR 20-27 AVRIL 2018 ####
 # EXTRA LONG !
 png_files_TRACK <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/Meeting_Henri_MARS_2022/FAKIR",
                         # pattern = ".*png$",
@@ -34,3 +34,23 @@ for (i in png_files_TRACK) {
        delay = 0.5)
 }
 
+
+# 2017 tracks
+library(gifski)
+png_files_TRACK <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/Meeting_Henri_MARS_2022/Animation_MP4/input/2017_map_traj_lines", 
+                              full.names = TRUE)
+    gifski(png_files_TRACK,
+       gif_file = "C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/Meeting_Henri_MARS_2022/Animation_MP4/output/2017_tracks.gif",
+       width = 955,
+       height = 477,
+       delay = 0.75)
+
+# 2018 tracks
+library(gifski)
+png_files_TRACK <- list.files("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/Meeting_Henri_MARS_2022/Animation_MP4/input/2018_map_traj_lines", 
+                              full.names = TRUE)
+    gifski(png_files_TRACK,
+       gif_file = "C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/Meeting_Henri_MARS_2022/Animation_MP4/output/2018_tracks.gif",
+       width = 955,
+       height = 477,
+       delay = 0.75)
