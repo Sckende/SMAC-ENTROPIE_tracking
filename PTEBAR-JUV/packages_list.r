@@ -8,6 +8,7 @@ library(rgdal)
 library(sp)
 library(stringr)
 library(raster)
+library(terra)
 
 library(latticeExtra)
 library(rasterVis)
