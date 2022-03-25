@@ -47,10 +47,11 @@ lat_max = "31"          # latitude maximale de la zone à télécharger
 ### "Date_max" : Format jour/mois/année  (format Français)
 
 # Informations variables
-# link_tab_parm <- "F:/PNB_ENTROPIE/Input_R"     # Chemin du tableau contenant les paramètres des variables
-link_tab_parm <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Input_R"
+link_tab_parm <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Input_R" # Chemin du tableau contenant les paramètres des variables
 # nom_fichier_tab <- "Parametres_5_variables.csv"   # Nom du fichier contenant le tableau avec les paramètres des variables (.csv, séparateur point-virgule)
-nom_fichier_tab <- "Parametres_WIND_ORIENTATION.csv"
+# nom_fichier_tab <- "Parametres_WIND_ORIENTATION.csv"
+# nom_fichier_tab <- "Parametres_chlo_JANFEVMAR_2018.csv"
+nom_fichier_tab <- "Parametres_chlo_JANFEVMAR_OCTNOVDEC_2017.csv"
 
 ####################### DEBUT PARTIE 2 DU SCRIPT : Téléchargement variables sur Copernicus Marine Environment Monitoring Service #######################
 
