@@ -203,12 +203,3 @@ points(x = juv_argos$Longitude[year(juv_argos$deploy) == 2018 & juv_argos$year_p
        col = "blue")
 
 dev.off()
-
-
-
-
-
-
-
-
-
