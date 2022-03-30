@@ -187,7 +187,7 @@ for(i in t_2017){
      
      wind$wd0_360 <- ifelse(wind$wd1 >= 0,
                        wind$wd1,
-                       360 + wind$wd1) # handmade conversion from -180/180 to 0/360 for windRose() plot
+                       360 + wind$wd1 ) # handmade conversion from -180/180 to 0/360 for windRose() plot
      x11()
      windRose(mydata = wind, # meteorological wind projection with N = 0 = 360, E = 90, S = 180, W = 270 - Necessity to have angle from 0 to 360
          wd = "wd0_360",
