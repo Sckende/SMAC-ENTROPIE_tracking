@@ -54,98 +54,163 @@ table(ad_gls$year_period)
  ad_gls_sp <- SpatialPointsDataFrame(coords = ad_gls[, c("LON", "LAT")],
                                   data = ad_gls,
                                   proj4string = CRS("+init=epsg:4326"))
+ 
+#### ----- Map of Indian Ocean ----- ####
+# ------------------------------------- #
+library(maps)
+library(maptools)
+IndOcean <- map("world",
+             fill = T,
+             xlim = c(30, 120),
+             ylim = c(-50, 10),
+             col = "grey")
+
+IndOcean_sp <- maptools::map2SpatialPolygons(IndOcean,
+                                             IDs = IndOcean$names,
+                                             proj4string = CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
 
 #### ----- CHLO-A data ----- ####
 # ----------------------------- #
 
-# chlo2018 <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/",
-#                    pattern = "OCEANCOLOUR_GLO_CHL_L4_REP_OBSERVATIONS_009_082-TDS__CHLO-2018",
-#                    full.names = TRUE)
+chlo2018 <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/",
+                   pattern = "OCEANCOLOUR_GLO_CHL_L4_REP_OBSERVATIONS_009_082-TDS__CHLO-2018",
+                   full.names = TRUE)
 
-# # ----- Period JANFEVMAR
-# chlo_2018_1 <- terra::rast(chlo2018[1:3])
-# # Spatial crop
-# extend <- extent(30, 120, -50, 10) # xmin, xmax, ymin, ymax
-# chlo_2018_1 <- crop(chlo_2018_1,
-#                     extend)
+# ----- Period JANFEVMAR ----- #
+# ---------------------------- #
 
+chlo_2018_1 <- terra::rast(chlo2018[1:3])
 
-# names(chlo_2018_1) <- substr(as.character(terra::time(chlo_2018_1)),
-#                              1,
-#                              10)
-# mean_chlo_2018_1 <- mean(chlo_2018_1)
-# plot(mean_chlo_2018_1,
-#      main = "JFM 2018")
-# points(x = ad_gls$LON[ad_gls$year_period == "JFM"],
-#      y = ad_gls$LAT[ad_gls$year_period == "JFM"],
-#      pch = 19,
-#      col = "red")
-# points(x = juv_argos$Longitude[year(juv_argos$deploy) == 2018 & juv_argos$year_period == "JFM"],
-#        y = juv_argos$Latitude[year(juv_argos$deploy) == 2018 & juv_argos$year_period == "JFM"],
-#        pch = 19,
-#        col = "blue")
-# # ----- Period AVRMAIJUI
-# chlo_2018_2 <- terra::rast(chlo2018[4:6])
+# Spatial crop
+extend <- extent(30, 120, -50, 10) # xmin, xmax, ymin, ymax
+chlo_2018_1 <- crop(chlo_2018_1,
+                    extend)
 
-# # Spatial crop
-# chlo_2018_2 <- crop(chlo_2018_2,
-#                     extend)
+# Layer names
+names(chlo_2018_1) <- substr(as.character(terra::time(chlo_2018_1)),
+                             1,
+                             10)
 
-# names(chlo_2018_2) <- substr(as.character(terra::time(chlo_2018_2)),
-#                              1,
-#                              10)
-# mean_chlo_2018_2 <- mean(chlo_2018_2)
-# plot(mean_chlo_2018_2,
-#      main = "AMJ 2018")
-# points(x = ad_gls$LON[ad_gls$year_period == "AMJ"],
-#      y = ad_gls$LAT[ad_gls$year_period == "AMJ"],
-#      pch = 19,
-#      col = "red")
-# points(x = juv_argos$Longitude[year(juv_argos$deploy) == 2018 & juv_argos$year_period == "AMJ"],
-#        y = juv_argos$Latitude[year(juv_argos$deploy) == 2018 & juv_argos$year_period == "AMJ"],
-#        pch = 19,
-#        col = "blue")
-# # ----- Period JUIAIUSEP
-# chlo_2018_3 <- terra::rast(chlo2018[7:9])
-# # SPatial crop
-# chlo_2018_3 <- crop(chlo_2018_3,
-#                     extend)
+# Mean values
+mean_chlo_2018_1 <- mean(chlo_2018_1)
 
-# names(chlo_2018_3) <- substr(as.character(terra::time(chlo_2018_3)),
-#                              1,
-#                              10)
-# mean_chlo_2018_3 <- mean(chlo_2018_3)
-# plot(mean_chlo_2018_3,
-#      main = "JAS 2018")
-# points(x = ad_gls$LON[ad_gls$year_period == "JAS"],
-#      y = ad_gls$LAT[ad_gls$year_period == "JAS"],
-#      pch = 19,
-#      col = "red")
-# points(x = juv_argos$Longitude[year(juv_argos$deploy) == 2018 & juv_argos$year_period == "JAS"],
-#        y = juv_argos$Latitude[year(juv_argos$deploy) == 2018 & juv_argos$year_period == "JAS"],
-#        pch = 19,
-#        col = "blue")
+# ----- log transf chlo-a & plot ----- #
+log_JFM_2018 <- mean_chlo_2018_1
+values(log_JFM_2018) <- log(values(log_JFM_2018))
+x11()
+levelplot(log_JFM_2018,
+          main = "JFM 2018") +
+layer(c(sp.points(ad_gls_sp[ad_gls_sp$year_period == "JFM", ],
+                      col = rgb(0, 0, 1, alpha = 0.9),
+                      lwd = 2),
+            sp.points(juv_argos_sp[juv_argos_sp$year_period == "JFM" & year(juv_argos_sp$deploy) == 2018, ],
+                      col = "white",
+                      lwd = 2),
+            sp.polygons(IndOcean_sp,
+                        col = "grey",
+                        fill = "white")))
 
-# # ----- Period OCTNOVDEC
-# chlo_2018_4 <- terra::rast(chlo2018[10:12])
-# # Spatial crop
-# chlo_2018_4 <- crop(chlo_2018_4,
-#                     extend)
+# ----- Period AVRMAIJUI ----- #
+# ---------------------------- #
 
-# names(chlo_2018_4) <- substr(as.character(terra::time(chlo_2018_4)),
-#                              1,
-#                              10)
-# mean_chlo_2018_4 <- mean(chlo_2018_4)
-# plot(mean_chlo_2018_4,
-#      main = "OND 2018")
-# points(x = ad_gls$LON[ad_gls$year_period == "OND"],
-#      y = ad_gls$LAT[ad_gls$year_period == "OND"],
-#      pch = 19,
-#      col = "red")
-# points(x = juv_argos$Longitude[year(juv_argos$deploy) == 2018 & juv_argos$year_period == "OND"],
-#        y = juv_argos$Latitude[year(juv_argos$deploy) == 2018 & juv_argos$year_period == "OND"],
-#        pch = 19,
-#        col = "blue")
+chlo_2018_2 <- terra::rast(chlo2018[4:6])
+
+# Spatial crop
+chlo_2018_2 <- crop(chlo_2018_2,
+                    extend)
+
+# Layer names
+names(chlo_2018_2) <- substr(as.character(terra::time(chlo_2018_2)),
+                             1,
+                             10)
+
+# Mean values
+mean_chlo_2018_2 <- mean(chlo_2018_2)
+
+# ----- log transf chlo-a & plot ----- #
+log_AMJ_2018 <- mean_chlo_2018_2
+values(log_AMJ_2018) <- log(values(log_AMJ_2018))
+
+x11()
+levelplot(log_AMJ_2018,
+          main = "AMJ 2018") +
+layer(c(sp.points(ad_gls_sp[ad_gls_sp$year_period == "AMJ", ],
+                      col = rgb(0, 0, 1, alpha = 0.9),
+                      lwd = 2),
+            sp.points(juv_argos_sp[juv_argos_sp$year_period == "AMJ" & year(juv_argos_sp$deploy) == 2018, ],
+                      col = "white",
+                      lwd = 2),
+            sp.polygons(IndOcean_sp,
+                        col = "grey",
+                        fill = "white")))
+
+# # ----- Period JUIAIUSEP ----- #
+# ------------------------------ #
+
+chlo_2018_3 <- terra::rast(chlo2018[7:9])
+
+# Spatial crop
+chlo_2018_3 <- crop(chlo_2018_3,
+                    extend)
+
+# Layer names
+names(chlo_2018_3) <- substr(as.character(terra::time(chlo_2018_3)),
+                             1,
+                             10)
+
+# Mean values
+mean_chlo_2018_3 <- mean(chlo_2018_3)
+
+# ----- log transf chlo-a & plot ----- #
+log_JAS_2018 <- mean_chlo_2018_3
+values(log_JAS_2018) <- log(values(log_JAS_2018))
+
+x11()
+levelplot(log_JAS_2018,
+          main = "JAS 2018") +
+layer(c(sp.points(ad_gls_sp[ad_gls_sp$year_period == "JAS", ],
+                      col = rgb(0, 0, 1, alpha = 0.9),
+                      lwd = 2),
+            sp.points(juv_argos_sp[juv_argos_sp$year_period == "JAS" & year(juv_argos_sp$deploy) == 2018, ],
+                      col = "white",
+                      lwd = 2),
+            sp.polygons(IndOcean_sp,
+                        col = "grey",
+                        fill = "white")))
+
+# ----- Period OCTNOVDEC ----- #
+# ---------------------------- #
+
+chlo_2018_4 <- terra::rast(chlo2018[10:12])
+
+# Spatial crop
+chlo_2018_4 <- crop(chlo_2018_4,
+                    extend)
+
+# Layer names
+names(chlo_2018_4) <- substr(as.character(terra::time(chlo_2018_4)),
+                             1,
+                             10)
+
+# Mean values
+mean_chlo_2018_4 <- mean(chlo_2018_4)
+
+# ----- log transf chlo-a & plot ----- #
+log_OND_2018 <- mean_chlo_2018_4
+values(log_OND_2018) <- log(values(log_OND_2018))
+
+x11()
+levelplot(log_OND_2018,
+          main = "OND 2018") +
+layer(c(sp.points(ad_gls_sp[ad_gls_sp$year_period == "OND", ],
+                      col = rgb(0, 0, 1, alpha = 0.9),
+                      lwd = 2),
+            sp.points(juv_argos_sp[juv_argos_sp$year_period == "OND" & year(juv_argos_sp$deploy) == 2018, ],
+                      col = "white",
+                      lwd = 2),
+            sp.polygons(IndOcean_sp,
+                        col = "grey",
+                        fill = "white")))
 
 # #### ----- Graphical output - CHLO-A ----- ####
 # # ------------------------------------------- #
@@ -314,7 +379,7 @@ IndOcean_sp <- maptools::map2SpatialPolygons(IndOcean,
 nlev <- 100
 my_at <- seq(from = 0,
              to = 20,
-             length.out = nlev+1)
+             length.out = nlev + 1)
 my_cols <- viridis_pal(begin = 1,
                        end = 0,
                        option = "A")(nlev)
