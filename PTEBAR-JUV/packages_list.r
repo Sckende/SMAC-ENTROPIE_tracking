@@ -10,6 +10,8 @@ library(stringr)
 library(raster)
 library(terra)
 
+library(rnaturalearth)
+
 library(latticeExtra)
 library(rasterVis)
 
