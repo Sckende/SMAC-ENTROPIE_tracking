@@ -92,6 +92,8 @@ gls2 <- do.call("rbind",
 head(gls2)
 
 #### Segregation des points de gls ####
+# apres comparaison des donnees, retrait des balises
+# 2008-8099, 2008-8103, 2008-8116, 2008-8124, 2008-8127, 2008-8130, 2008-9137, 2008-9160
 
 test <- gls_ls1[[1]]
 test
@@ -108,3 +110,148 @@ my_col <- viridis(3)
 plot(test$LON,
      test$LAT,
      col = my_col[as.integer(as.factor(test$WIN_BEHAV))])
+
+gls3 <- gls2[!gls2$ID2 %in% c("2008-8099",
+                             "2008-8103",
+                             "2008-8116",
+                             "2008-8124",
+                             "2008-8127",
+                             "2008-8130",
+                             "2008-9137",
+                             "2008-9160"), ]
+gls_ls2 <- split(gls3,
+                 gls3$ID2)
+
+gls_ls3 <- lapply(gls_ls2,
+                  function(x) {
+                      arriv <- pap$ARRIVAL_CORE_WINTER[pap$ID2 == unique(x$ID2)]
+                      dep <- pap$DEPART_CORE_WINTER[pap$ID2 == unique(x$ID2)]
+                      x$WIN_BEHAV[x$DATE < arriv] <- "GO"
+                      x$WIN_BEHAV[x$DATE > dep] <- "BACK"
+                      x$WIN_BEHAV[x$DATE <= dep & x$DATE >= arriv] <- "STOP"
+                      
+                      print(unique(x$ID2))
+                      print(table(x$WIN_BEHAV, useNA = "always"))
+                      
+                      x
+                  })
+# Conversion en DF
+gls_behav <- do.call("rbind", gls_ls3)
+
+# Exploration via la liste
+lapply(gls_ls3,
+       function(x) {
+           x11()
+           plot(x$LON,
+                x$LAT,
+                col = my_col[as.integer(as.factor(x$WIN_BEHAV))],
+                main = unique(x$ID2))
+       })
+
+# pb avec 2009-8123
+
+ # ----- Exploration des behavs par oiseaux ----- #
+gls2008 <- gls_behav[gls_behav$DEPLOI == 2008, ]
+gls2008_ls <- split(gls2008,
+                    gls2008$ID2)
+x11(); par(mfrow = c(3, 4))
+lapply(gls2008_ls,
+       function(x) {
+           plot(x$LON,
+                x$LAT,
+                col = my_col[as.integer(as.factor(x$WIN_BEHAV))],
+                main = unique(x$ID2),
+                bty = "n",
+                xlim = c(30, 115),
+                ylim = c(-35, -5))
+           
+           x_sp <- SpatialPointsDataFrame(coords = x[, c("LON", "LAT")],
+                                  data = x,
+                                  proj4string = CRS("+init=epsg:4326"))
+
+KUD_p_href <- kernelUD(x_sp,
+                h = 'href' # ici 1 degré (relié au type de projection, si lat/lon (non projeté) = degré, si UTM (projeté) = m) en rapport à la précision des GLS env. 180km (1deg = 111km) - pour ARGOS précision environ 1km, donc 1/100 degré
+                #grid = 500
+                )# ici correspond 500x500 degrés (1deg = 111 km à l'équateur)
+
+
+KUDvol_p_href <- getvolumeUD(KUD_p_href)
+ver50_p_href <- getverticeshr(KUDvol_p_href, 50)
+
+plot(ver50_p_href, add = T)
+           
+       })
+
+# ----- #
+
+gls2009 <- gls_behav[gls_behav$DEPLOI == 2009, ]
+gls2009_ls <- split(gls2009,
+                    gls2009$ID2)
+x11(); par(mfrow = c(3, 4))
+lapply(gls2009_ls,
+       function(x) {
+           plot(x$LON,
+                x$LAT,
+                col = my_col[as.integer(as.factor(x$WIN_BEHAV))],
+                main = unique(x$ID2),
+                bty = "n",
+                xlim = c(30, 115),
+                ylim = c(-35, -5))
+           
+           x_sp <- SpatialPointsDataFrame(coords = x[, c("LON", "LAT")],
+                                  data = x,
+                                  proj4string = CRS("+init=epsg:4326"))
+
+KUD_p_href <- kernelUD(x_sp,
+                h = "href" # ici 1 degré (relié au type de projection, si lat/lon (non projeté) = degré, si UTM (projeté) = m) en rapport à la précision des GLS env. 180km (1deg = 111km) - pour ARGOS précision environ 1km, donc 1/100 degré
+                #grid = 500
+                )# ici correspond 500x500 degrés (1deg = 111 km à l'équateur)
+
+
+KUDvol_p_href <- getvolumeUD(KUD_p_href)
+ver50_p_href <- getverticeshr(KUDvol_p_href, 50)
+ver95_p_href <- getverticeshr(KUDvol_p_href, 95)
+plot(ver50_p_href, add = T)
+plot(ver95_p_href, add = T)
+       })
+
+
+
+
+
+
+
+
+
+
+
+
+test <- gls3[gls3$ID2 == "2009-8094", ]
+head(test)
+test_sp <- SpatialPointsDataFrame(coords = test[, c("LON", "LAT")],
+                                  data = test,
+                                  proj4string = CRS("+init=epsg:4326"))
+
+KUD_p_href <- kernelUD(test_sp,
+                h = 'href' # ici 1 degré (relié au type de projection, si lat/lon (non projeté) = degré, si UTM (projeté) = m) en rapport à la précision des GLS env. 180km (1deg = 111km) - pour ARGOS précision environ 1km, donc 1/100 degré
+                #grid = 500
+                )# ici correspond 500x500 degrés (1deg = 111 km à l'équateur)
+
+
+KUDvol_p_href <- getvolumeUD(KUD_p_href)
+# ver90_p_href <- getverticeshr(KUDvol_p_href, 90)
+ver50_p_href <- getverticeshr(KUDvol_p_href, 50)
+# ver25_p_href <- getverticeshr(KUDvol_p_href, 25)
+
+x11()
+plot(test$LON,
+     test$LAT,
+     type = "l")
+# plot(ver50_p_href, add = T)
+
+mapview(list(test_sp,
+             ver50_p_href,
+             test_sp[41,]))
+
+test[68,]
+test[209,]
