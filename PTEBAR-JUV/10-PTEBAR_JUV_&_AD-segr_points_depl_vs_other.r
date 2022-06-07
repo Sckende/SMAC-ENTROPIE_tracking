@@ -386,3 +386,248 @@ gls_behav$DATE[gls_behav$WIN_BEHAV == "STOP" & gls_behav$ID2 == "2009-8095"]
 
 # write.table(gls_behav,
 #             "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_2008-2009_MIGRATION_BEHAV.txt")
+
+# ----- kernel des adultes en zone hivernage ----- #
+# ------------------------------------------------ #
+
+gls_behav_sp <- SpatialPointsDataFrame(coords = gls_behav[, c("LON", "LAT")],
+                                  data = gls_behav,
+                                  proj4string = CRS("+init=epsg:4326"))
+
+winter_sp <- gls_behav_sp[gls_behav_sp$WIN_BEHAV == "STOP",]
+KUD_p_href <- kernelUD(winter_sp,
+                h = 'href' # ici 1 degré (relié au type de projection, si lat/lon (non projeté) = degré, si UTM (projeté) = m) en rapport à la précision des GLS env. 180km (1deg = 111km) - pour ARGOS précision environ 1km, donc 1/100 degré
+                #grid = 500
+                )# ici correspond 500x500 degrés (1deg = 111 km à l'équateur)
+
+
+KUDvol_p_href <- getvolumeUD(KUD_p_href)
+winHR90 <- getverticeshr(KUDvol_p_href, 90)
+winHR50 <- getverticeshr(KUDvol_p_href, 50)
+winHR25 <- getverticeshr(KUDvol_p_href, 25)
+
+mapview(list(winHR90,
+             winHR50,
+             winHR25))
+
+# ----- Chargement des donnees ARGOS JUV ----- #
+# -------------------------------------------- #
+
+argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_wind_dirs_n_abs_speed_2.rds")
+argos_sp <- SpatialPointsDataFrame(coords = argos[, c("Longitude", "Latitude")],
+                                  data = argos,
+                                  proj4string = CRS("+init=epsg:4326"))
+
+head(argos_sp)
+
+# ----- Superposition kernels ADULTES et trajets JUV ----- #
+# -------------------------------------------------------- #
+mapview(argos_sp,
+        zcol = "Vessel",
+        burst = T) + mapview(list(winHR90,
+                                  winHR50,
+                                  winHR25))
+
+# Vessel | HR95 | HR50 | HR25
+# 162072 |  X   |      |
+# 162073 |  X   |      |
+# 166561 |  X   |  X   |
+# 166563 |  X   |  X   |  X
+# 166565 |  X   |  X   |  X
+# 166572 |  X   |      |
+# ----- Subset des JUV a kernel adultes ----- #
+# ------------------------------------------- #
+
+juv_k <- argos_sp[argos_sp$Vessel %in% c("162072",
+                                         "162073",
+                                         "166561",
+                                         "166563",
+                                         "166565",
+                                         "166572"), ]
+
+# ----- Retrait du début du parcours pour le calcul des kernels 
+# consideration a partir de debut juin
+
+table(juv_k$Vessel)
+juv_k$Vessel <- droplevels(juv_k$Vessel)
+summary(juv_k)
+# juv_k_2 <- juv_k[month(juv_k$Date) > 5, ]
+
+juv_k_ls <- split(juv_k,
+                  juv_k$Vessel) 
+
+x11(); par(mfrow = c(2, 3))
+lapply(juv_k_ls, function(x) {
+  KUD_p_href <- kernelUD(x,
+                h = 'href')
+  KUDvol_p_href <- getvolumeUD(KUD_p_href)
+#   HR90 <- getverticeshr(KUDvol_p_href, 90)
+  HR50 <- getverticeshr(KUDvol_p_href, 50)
+  HR25 <- getverticeshr(KUDvol_p_href, 25)
+
+  plot(x,
+       main = unique(x$Vessel),
+       xlim = c(40, 120),
+       ylim = c(-40, 10))
+#   plot(HR90,
+#        add = T)
+  plot(HR50,
+       add = T,
+       col = "darkorange")
+  plot(HR25,
+       add = T,
+       col = "darkred")
+  axis(1)
+  axis(2)
+  })
+
+# ----- Cas par cas ----- #
+# 162072
+juv <- juv_k[juv_k$Vessel == "162072", ]
+# -----
+KUD_href <- kernelUD(juv,
+                     # h = 1
+                     h = "href")
+KUDvol_href <- getvolumeUD(KUD_href)
+HR90 <- getverticeshr(KUDvol_href, 90)
+HR50 <- getverticeshr(KUDvol_href, 50)
+HR25 <- getverticeshr(KUDvol_href, 25)
+# -----
+mapview(list(juv,
+             HR90,
+             HR50,
+             HR25)) + mapview(list(winHR50,
+                                   winHR90),
+                              col.regions = "darkorange")
+juv[306, ]
+
+# 162073
+juv <- juv_k[juv_k$Vessel == "162073", ]
+# -----
+KUD_href <- kernelUD(juv,
+                     # h = 1
+                     h = "href")
+KUDvol_href <- getvolumeUD(KUD_href)
+HR90 <- getverticeshr(KUDvol_href, 90)
+HR50 <- getverticeshr(KUDvol_href, 50)
+HR25 <- getverticeshr(KUDvol_href, 25)
+# -----
+mapview(list(juv,
+             HR90,
+             HR50,
+             HR25)) + mapview(list(winHR50,
+                                   winHR90),
+                              col.regions = "darkorange")
+
+# 166561
+juv <- juv_k[juv_k$Vessel == "166561", ]
+# -----
+KUD_href <- kernelUD(juv,
+                     # h = 1
+                     h = "href")
+KUDvol_href <- getvolumeUD(KUD_href)
+HR90 <- getverticeshr(KUDvol_href, 90)
+HR50 <- getverticeshr(KUDvol_href, 50)
+HR25 <- getverticeshr(KUDvol_href, 25)
+# -----
+mapview(list(juv,
+             HR90,
+             HR50,
+             HR25)) + mapview(list(winHR50,
+                                   winHR90),
+                              col.regions = "darkorange")
+
+# 166563
+juv <- juv_k[juv_k$Vessel == "166563", ]
+# -----
+KUD_href <- kernelUD(juv,
+                     # h = 1
+                     h = "href")
+KUDvol_href <- getvolumeUD(KUD_href)
+HR90 <- getverticeshr(KUDvol_href, 90)
+HR50 <- getverticeshr(KUDvol_href, 50)
+HR25 <- getverticeshr(KUDvol_href, 25)
+# -----
+mapview(list(juv,
+             HR90,
+             HR50,
+             HR25)) + mapview(list(winHR50,
+                                   winHR90),
+                              col.regions = "darkorange")
+
+# 166565
+juv <- juv_k[juv_k$Vessel == "166565", ]
+
+juv_line <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_tracks_ARGOS.rds')
+juv_line <- juv_line[juv_line$PTT == "166565",]
+# -----
+KUD_href <- kernelUD(juv,
+                     # h = 1
+                     h = "href")
+KUDvol_href <- getvolumeUD(KUD_href)
+HR90 <- getverticeshr(KUDvol_href, 90)
+HR50 <- getverticeshr(KUDvol_href, 50)
+HR25 <- getverticeshr(KUDvol_href, 25)
+# -----
+mapview(list(juv,
+             HR90,
+             HR50,
+             HR25)) + mapview(list(winHR50,
+                                   winHR90),
+                              col.regions = "darkorange") + mapview(juv_line)
+
+# 166572
+juv <- juv_k[juv_k$Vessel == "166572", ]
+
+juv_line <- readRDS('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_tracks_ARGOS.rds')
+juv_line <- juv_line[juv_line$PTT == "166572",]
+# -----
+KUD_href <- kernelUD(juv,
+                     # h = 1
+                     h = "href")
+KUDvol_href <- getvolumeUD(KUD_href)
+HR90 <- getverticeshr(KUDvol_href, 90)
+HR50 <- getverticeshr(KUDvol_href, 50)
+HR25 <- getverticeshr(KUDvol_href, 25)
+# -----
+mapview(list(juv,
+             HR90,
+             HR50,
+             HR25)) + mapview(list(winHR50,
+                                   winHR90),
+                              col.regions = "darkorange") + mapview(juv_line)
+
+# ==> retrait de l'oiseau de 2017 (166572), trop atypique
+# Vessel | date entree HR50 | date sortie HR50
+# 162072 |    18/07/2018    |        x
+# 162073 |    10/07/2018    |        x
+# 166561 |    04/06/2018    |    20/11/2018
+# 166563 |    30/06/2018    |    21/10/2018
+# 166565 |    23/05/2018    |    21/11/2018
+
+# ----- Segregation IMPARFAITE des track de juveniles ----- #
+# --------------------------------------------------------- #
+
+argos_sp2 <- argos_sp[argos_sp$Vessel %in% c("162072",
+                                             "162073",
+                                             "166561",
+                                             "166563",
+                                             "166565"), ]
+
+infos <- data.frame(Vessel = c("162072",
+                               "162073",
+                               "166561",
+                               "166563",
+                               "166565"),
+                    enter_HR50 = as.Date(c("18/07/2018",
+                                           "10/07/2018",
+                                           "04/06/2018",
+                                           "30/06/2018",
+                                           "23/05/2018"),
+                                         "%d/%m/%Y"),
+                    exit_HR50 = c(NA, NA, as.Date(c("20/11/2018",
+                                                    "21/10/2018",
+                                                    "21/11/2018"),
+                                                  "%d/%m/%Y"))) # ======> reprendre ici
+argos_sp2$Vessel <- droplevels(argos_sp2$Vessel)
+summary(argos_sp2)
