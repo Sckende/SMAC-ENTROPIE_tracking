@@ -1,6 +1,6 @@
 # ----- Division des points GLS adultes et ARGOS juveniles ----- #
 # ----- En fonction du deplacement ou non vers la zone d'hivernage ----- #
-
+rm(list = ls())
 # ---- Load packages ------ #
 source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
 
@@ -385,7 +385,8 @@ gls_behav$DATE[gls_behav$WIN_BEHAV == "STOP" & gls_behav$ID2 == "2009-8095"]
 # ----------------------------------------------------- #
 
 # write.table(gls_behav,
-#             "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_2008-2009_MIGRATION_BEHAV.txt")
+#             "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_2008-2009_MIGRATION_BEHAV.txt",
+#             sep = "\t")
 
 # ----- kernel des adultes en zone hivernage ----- #
 # ------------------------------------------------ #
@@ -613,7 +614,10 @@ argos_sp2 <- argos_sp[argos_sp$Vessel %in% c("162072",
                                              "166561",
                                              "166563",
                                              "166565"), ]
+table(argos_sp2$Vessel)
+argos_sp2$Vessel <- droplevels(argos_sp2$Vessel)
 
+# ----- #
 infos <- data.frame(Vessel = c("162072",
                                "162073",
                                "166561",
@@ -625,9 +629,192 @@ infos <- data.frame(Vessel = c("162072",
                                            "30/06/2018",
                                            "23/05/2018"),
                                          "%d/%m/%Y"),
-                    exit_HR50 = c(NA, NA, as.Date(c("20/11/2018",
+                    exit_HR50 = c(NA, NA, "20/11/2018",
                                                     "21/10/2018",
-                                                    "21/11/2018"),
-                                                  "%d/%m/%Y"))) # ======> reprendre ici
-argos_sp2$Vessel <- droplevels(argos_sp2$Vessel)
-summary(argos_sp2)
+                                                    "21/11/2018"))
+infos$exit_HR50 <- as.Date(infos$exit_HR50,
+                           "%d/%m/%Y")
+
+# ----- segregation #
+
+argos_sp2_ls <- split(argos_sp2,
+                      argos_sp2$Vessel)
+
+juv_behav <- lapply(argos_sp2_ls, function(x) {
+     id <- unique(x$Vessel)
+     date_enter <- infos$enter_HR50[infos$Vessel == id]
+     date_exit <- infos$exit_HR50[infos$Vessel == id]
+     
+     if (is.na(date_exit)) {
+          x$behav[as.Date(x$Date) >= date_enter] <- "STOP"
+          x$behav[as.Date(x$Date) < date_enter] <- "MOVE"
+          } else {
+               x$behav[as.Date(x$Date) >= date_enter & as.Date(x$Date) <= date_exit] <- "STOP"
+               x$behav[as.Date(x$Date) < date_enter | as.Date(x$Date) > date_exit] <- "MOVE"
+          }
+     x
+})
+
+# ----- visualisation #
+
+x11(); par(mfrow = c(2, 3))
+lapply(juv_behav, function(x) {
+     plot(x,
+          col = my_col[as.integer(as.factor(x$behav))],
+          main = unique(x$Vessel))
+     
+     KUD_href <- kernelUD(x[, c("Longitude", "Latitude")],
+                     # h = 1
+                     h = "href")
+     KUDvol_href <- getvolumeUD(KUD_href)
+     HR50 <- getverticeshr(KUDvol_href, 50)
+     plot(HR50, add = T)
+}) # ==> Verificatio OK
+
+# ----- enregistrement du fichier #
+# write.table(do.call("rbind", juv_behav),
+#             "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_ARGOS_MIGRATION_BEHAV.txt",
+#             sep = "\t")
+
+##### Carto de la chlorophylle avec les donnees adultes & juveniles #####
+# --------------------------------------------------------------------- #
+
+# Production des deux cartes
+# periode defavorable = NDJFMA = REPRO & periode favorable = MJJASO = HIVERNAGE
+# moyenne de 2008 a 2019 pour incllure la periode de donnees AD & JUV
+rm(list = ls())
+# ----- data #
+chlo <- terra::rast(c("C:/Users/ccjuhasz/Desktop/chlo/dataset-oc-glo-chl-multi_cci-l4-chl_4km_monthly-rep-v02_1654077104001.nc",
+                         "C:/Users/ccjuhasz/Desktop/chlo/dataset-oc-glo-chl-multi_cci-l4-chl_4km_monthly-rep-v02_1654077266568.nc",
+                         "C:/Users/ccjuhasz/Desktop/chlo/dataset-oc-glo-chl-multi_cci-l4-chl_4km_monthly-rep-v02_1654077502137.nc"))
+
+ad_behav <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_2008-2009_MIGRATION_BEHAV.txt",
+                       sep = "\t",
+                       header = T)
+head(ad_behav)
+ad_behav$DATE <- as.Date(ad_behav$DATE)
+ad_behav_sp <- SpatialPointsDataFrame(coords = ad_behav[, c("LON", "LAT")],
+                                  data = ad_behav,
+                                  proj4string = CRS("+init=epsg:4326"))
+
+juv_behav <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_ARGOS_MIGRATION_BEHAV.txt",
+                       sep = "\t",
+                       header = T)
+head(juv_behav)
+juv_behav$Date <- as.Date(juv_behav$Date)
+juv_behav_sp <- SpatialPointsDataFrame(coords = juv_behav[, c("Longitude", "Latitude")],
+                                  data = juv_behav,
+                                  proj4string = CRS("+init=epsg:4326"))
+
+
+
+# ----- periode favo = "WINTER" #
+chlo_fav <- chlo[[month(time(chlo)) %in% 5:10]]
+chlo_fav
+time(chlo_fav)
+chlo_fav_sg <- mean(chlo_fav, na.rm = T)
+# values(chlo_fav_sg)[values(chlo_fav_sg) > 1] <- NA 
+
+# ----- periode defav = "REPRO" #
+chlo_defav <- chlo[[month(time(chlo)) %in% c(1:4, 11:12)]]
+chlo_defav
+time(chlo_defav)
+chlo_defav_sg <- mean(chlo_defav, na.rm = T)
+summary(values(chlo_defav_sg))
+# values(chlo_defav_sg)[values(chlo_defav_sg) > 1] <- NA 
+# ----- #
+nlev <- 100
+my_at <- seq(from = -7,
+             to = 4.5,
+             length.out = nlev + 1)
+my_cols <- viridis_pal(begin = 1,
+                       end = 0,
+                       option = "A")(nlev)
+jet_colors <- colorRampPalette(c("#00007F",
+                                  "blue",
+                                  "#007FFF",
+                                  "cyan",
+                                  "#7FFF7F",
+                                  "yellow",
+                                  "#FF7F00",
+                                  "red",
+                                  "#7F0000"))
+
+x11()
+levelplot(log(chlo_defav_sg),
+          main = "NDJFMA - defav",
+          col.regions = jet_colors,
+          cuts = nlev - 1,
+          at = my_at) +
+layer(sp.polygons(ne_countries()))
+x11()
+levelplot(log(chlo_fav_sg),
+          main = "MJJASO - fav",
+          col.regions = jet_colors,
+          cuts = nlev - 1,
+          at = my_at) +
+layer(sp.polygons(ne_countries()))
+
+# ----- ajout des kernel adultes et des points juv
+# ----- periode fav #
+table(month(ad_behav$DATE[ad_behav$WIN_BEHAV == "STOP"]))
+table(month(ad_behav$DATE[ad_behav$WIN_BEHAV %in% c("BACK", "GO")]))
+
+table(month(juv_behav$Date[juv_behav$behav == "STOP"]))
+table(month(juv_behav$Date[juv_behav$behav == "MOVE"]))
+
+ad_stop <- ad_behav_sp[ad_behav_sp$WIN_BEHAV == "STOP", ]
+KUD_href <- kernelUD(ad_stop,
+                     # h = 1
+                     h = "href")
+KUDvol_href <- getvolumeUD(KUD_href)
+HR50_ad_stop <- getverticeshr(KUDvol_href, 50)
+
+juv_stop <- juv_behav_sp[juv_behav_sp$behav == "STOP", ]
+# ----- #
+x11()
+levelplot(log(chlo_fav_sg),
+          main = "MJJASON - fav",
+          col.regions = jet_colors,
+          cuts = nlev - 1,
+          at = my_at) +
+layer(sp.polygons(ne_countries())) + 
+layer(sp.polygons(HR50_ad_stop)) +
+layer(sp.points(juv_stop,
+                col = rgb(0, 0, 1, alpha = 0.2),
+                lwd = 1))
+
+# ----- ajout des kernel adultes/STOP et des kernel juv/STOP
+# ----- periode fav #
+KUD_href <- kernelUD(juv_stop,
+                     # h = 1
+                     h = "href")
+KUDvol_href <- getvolumeUD(KUD_href)
+HR50_juv_stop <- getverticeshr(KUDvol_href, 50)
+# ----- #
+x11()
+levelplot(log(chlo_fav_sg),
+          main = "MJJASON - fav",
+          col.regions = jet_colors,
+          cuts = nlev - 1,
+          at = my_at) +
+layer(sp.polygons(ne_countries())) + 
+layer(sp.polygons(HR50_ad_stop)) +
+layer(sp.polygons(HR50_juv_stop, col = "grey"))
+
+# ----- Ajout des points AD & JUV lors des dplts 
+# ----- Periode defav
+ad_move <- ad_behav_sp[ad_behav_sp$WIN_BEHAV %in% c("GO", "BACK"), ]
+juv_move <- juv_behav_sp[juv_behav_sp$behav == "MOVE", ]
+x11()
+levelplot(log(chlo_defav_sg),
+          main = "NDJFMA - defav",
+          col.regions = jet_colors,
+          cuts = nlev - 1,
+          at = my_at) +
+layer(sp.polygons(ne_countries())) +
+layer(sp.points(ad_behav_sp[ad_behav_sp$WIN_BEHAV %in% c("GO", "BACK"), ],
+                col = c("red", "blue")[as.numeric(as.factor(ad_behav_sp$WIN_BEHAV[ad_behav_sp$WIN_BEHAV %in% c("GO", "BACK")]))],
+                pch = 20,
+                cex = 0.5)) +
+layer(sp.points(juv_behav_sp[juv_behav_sp$behav == "MOVE", ], col = "grey", pch = 20, cex = 0.5))
