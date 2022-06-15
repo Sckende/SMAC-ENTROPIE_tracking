@@ -733,6 +733,8 @@ plot(log_chlo_diff)
 
 # writeRaster(log_chlo_diff,
 #             filename = "C:/Users/ccjuhasz/Desktop/log_diff_chloA.tif")
+# writeRaster(chlo_diff_sg,
+#             filename = "C:/Users/ccjuhasz/Desktop/diff_chloA.tif")
 # ----- #
 nlev <- 100
 ran <- range(values(c(log(chlo_defav_sg),
@@ -769,10 +771,38 @@ levelplot(log(c(chlo_defav_sg, chlo_fav_sg)),
           ) +
 layer(sp.polygons(ne_countries())) # ==> NICE PLOT
 
+# ----- utilisation des quantiles pour l'échelle de couleurs -----#
+# Tentative de reproduction de la carte de QGis #
+# --------------------------------------------- #
+quan <- quantile(values(chlo_fav_sg),
+         na.rm = T,
+         probs = seq(0, 1, 0.10))
+my_at <- quan
+my_cols <- colorRampPalette((RColorBrewer::brewer.pal(9,
+                                    "Greens")))(99)
+mycolorkey <- list(labels = list(labels = round(my_at, digit = 3),
+                                 at = my_at))
+x11()
+# png("C:/Users/ccjuhasz/Desktop/FAV_chloA.png")
+levelplot(chlo_fav_sg,
+          main = "MJJASO - fav - hivernage",
+          col.regions = my_cols,
+          cuts = 100,
+          at = quan,
+          colorkey = mycolorkey,
+          maxpixels = 1e7
+          ) +
+layer(sp.polygons(ne_countries()))
+dev.off()
+# file.show("C:/Users/ccjuhasz/Desktop/FAV_chloA.png")
 # writeRaster(log(chlo_defav_sg),
 #             filename = "C:/Users/ccjuhasz/Desktop/log_chloA_DEFAV.tif")
+# writeRaster(chlo_defav_sg,
+#             filename = "C:/Users/ccjuhasz/Desktop/chloA_DEFAV.tif")
 # writeRaster(log(chlo_fav_sg),
 #             filename = "C:/Users/ccjuhasz/Desktop/log_chloA_FAV.tif")
+# writeRaster(chlo_fav_sg,
+#             filename = "C:/Users/ccjuhasz/Desktop/chloA_FAV.tif")
 rrr <- c(chlo_defav_sg, chlo_fav_sg)
 plot(log(rrr, at = my_at))
 x11()
