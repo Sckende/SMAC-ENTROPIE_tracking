@@ -455,7 +455,7 @@ summary(juv_k)
 # juv_k_2 <- juv_k[month(juv_k$Date) > 5, ]
 
 juv_k_ls <- split(juv_k,
-                  juv_k$Vessel) 
+                  juv_k$Vessel)
 
 x11(); par(mfrow = c(2, 3))
 lapply(juv_k_ls, function(x) {
@@ -675,7 +675,7 @@ lapply(juv_behav, function(x) {
 # write.table(do.call("rbind", juv_behav),
 #             "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_ARGOS_MIGRATION_BEHAV.txt",
 #             sep = "\t")
-
+#### --------------------- PARTIE II ------------------------------- ####
 ##### Carto de la chlorophylle avec les donnees adultes & juveniles #####
 # --------------------------------------------------------------------- #
 
@@ -684,9 +684,9 @@ lapply(juv_behav, function(x) {
 # moyenne de 2008 a 2019 pour incllure la periode de donnees AD & JUV
 rm(list = ls())
 # ----- data #
-chlo <- terra::rast(c("C:/Users/ccjuhasz/Desktop/chlo/dataset-oc-glo-chl-multi_cci-l4-chl_4km_monthly-rep-v02_1654077104001.nc",
-                         "C:/Users/ccjuhasz/Desktop/chlo/dataset-oc-glo-chl-multi_cci-l4-chl_4km_monthly-rep-v02_1654077266568.nc",
-                         "C:/Users/ccjuhasz/Desktop/chlo/dataset-oc-glo-chl-multi_cci-l4-chl_4km_monthly-rep-v02_1654077502137.nc"))
+chlo <- terra::rast(c("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/chlo/dataset-oc-glo-chl-multi_cci-l4-chl_4km_monthly-rep-v02_1654077104001.nc",
+                         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/chlo/dataset-oc-glo-chl-multi_cci-l4-chl_4km_monthly-rep-v02_1654077266568.nc",
+                         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/chlo/dataset-oc-glo-chl-multi_cci-l4-chl_4km_monthly-rep-v02_1654077502137.nc"))
 
 ad_behav <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_2008-2009_MIGRATION_BEHAV.txt",
                        sep = "\t",
@@ -722,11 +722,25 @@ time(chlo_defav)
 chlo_defav_sg <- mean(chlo_defav, na.rm = T)
 summary(values(chlo_defav_sg))
 # values(chlo_defav_sg)[values(chlo_defav_sg) > 1] <- NA 
+
+# ----- diff entre fav et defav ----- #
+chlo_diff_sg <- chlo_fav_sg - chlo_defav_sg
+
+log_chlo_diff <- log(chlo_diff_sg)
+x11(); par(mfrow = c(1, 2))
+plot(chlo_diff_sg)
+plot(log_chlo_diff)
+
+# writeRaster(log_chlo_diff,
+#             filename = "C:/Users/ccjuhasz/Desktop/log_diff_chloA.tif")
 # ----- #
 nlev <- 100
-my_at <- seq(from = -7,
-             to = 4.5,
-             length.out = nlev + 1)
+ran <- range(values(c(log(chlo_defav_sg),
+                      log(chlo_fav_sg))), na.rm = T)
+my_at <- seq(from = ran[1],
+             to = ran[2],
+          #    length.out = nlev + 1
+             length.out = 5)
 my_cols <- viridis_pal(begin = 1,
                        end = 0,
                        option = "A")(nlev)
@@ -739,20 +753,35 @@ jet_colors <- colorRampPalette(c("#00007F",
                                   "#FF7F00",
                                   "red",
                                   "#7F0000"))
-
+mycolorkey <- list(labels = list(labels = round(exp(my_at), digit = 3),
+                                 at = my_at))
 x11()
-levelplot(log(chlo_defav_sg),
-          main = "NDJFMA - defav",
+levelplot(log(c(chlo_defav_sg, chlo_fav_sg)),
+          main = c("NDJFMA - defav - repro", "MJJASO - fav - hivernage"),
+          names.attr = c("", ""),
           col.regions = jet_colors,
-          cuts = nlev - 1,
-          at = my_at) +
-layer(sp.polygons(ne_countries()))
+          cuts = 99,
+          at = seq(ran[1], ran[2], length.out = 100),
+          colorkey = mycolorkey
+          # labels = list(exp(my_at))
+          # zscaleLog = "e"
+          # zscaleLog = TRUE
+          ) +
+layer(sp.polygons(ne_countries())) # ==> NICE PLOT
+
+# writeRaster(log(chlo_defav_sg),
+#             filename = "C:/Users/ccjuhasz/Desktop/log_chloA_DEFAV.tif")
+# writeRaster(log(chlo_fav_sg),
+#             filename = "C:/Users/ccjuhasz/Desktop/log_chloA_FAV.tif")
+rrr <- c(chlo_defav_sg, chlo_fav_sg)
+plot(log(rrr, at = my_at))
 x11()
-levelplot(log(chlo_fav_sg),
+levelplot(log(chlo_fav_sg, base = 10),
           main = "MJJASO - fav",
           col.regions = jet_colors,
           cuts = nlev - 1,
-          at = my_at) +
+          at = my_at)
+          # zscaleLog = "e") +
 layer(sp.polygons(ne_countries()))
 
 # ----- ajout des kernel adultes et des points juv
@@ -784,6 +813,11 @@ layer(sp.points(juv_stop,
                 col = rgb(0, 0, 1, alpha = 0.2),
                 lwd = 1))
 
+# writeOGR(HR50_ad_stop,
+#          dsn = "C:/Users/ccjuhasz/Desktop/shapefile_HR50_ad_stop",
+#          layer = "HR50_ad_stop",
+#          driver = "ESRI Shapefile")
+
 # ----- ajout des kernel adultes/STOP et des kernel juv/STOP
 # ----- periode fav #
 KUD_href <- kernelUD(juv_stop,
@@ -801,6 +835,11 @@ levelplot(log(chlo_fav_sg),
 layer(sp.polygons(ne_countries())) + 
 layer(sp.polygons(HR50_ad_stop)) +
 layer(sp.polygons(HR50_juv_stop, col = "grey"))
+
+# writeOGR(HR50_juv_stop,
+#          dsn = "C:/Users/ccjuhasz/Desktop/shapefile_HR50_juv_stop",
+#          layer = "HR50_juv_stop",
+#          driver = "ESRI Shapefile")
 
 # ----- Ajout des points AD & JUV lors des dplts 
 # ----- Periode defav
