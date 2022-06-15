@@ -69,8 +69,8 @@ IndOcean_sp <- maptools::map2SpatialPolygons(IndOcean,
                                              IDs = IndOcean$names,
                                              proj4string = CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
 
-#### ----- CHLO-A data ----- ####
-# ----------------------------- #
+#### ----- CHLO-A data _ ex-version ----- ####
+# ------------------------------------------ #
 
 chlo2018 <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/",
                    pattern = "OCEANCOLOUR_GLO_CHL_L4_REP_OBSERVATIONS_009_082-TDS__CHLO-2018",
@@ -396,14 +396,14 @@ mean_mer2_AMJ <- mean(mer2_AMJ)
 speed2_AMJ <- speed2[[names(speed2)[which(str_detect(names(speed2), "AMJ"))]]]
 mean_speed2_AMJ <- mean(speed2_AMJ)
 
-png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2018_AMJ.png",
-    res = 300,
-    width = 50,
-    height = 40,
-    pointsize = 20,
-    unit = "cm",
-    # bg = "transparent",
-    bg = "white")
+# png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2018_AMJ.png",
+#     res = 300,
+#     width = 50,
+#     height = 40,
+#     pointsize = 20,
+#     unit = "cm",
+#     # bg = "transparent",
+#     bg = "white")
 
 print(
      rasterVis::vectorplot(raster::stack(mean_zon2_AMJ, mean_mer2_AMJ),
@@ -432,7 +432,7 @@ print(
                         col = "grey",
                         fill = "white"))))
     
-dev.off()
+# dev.off()
 
 # ----- JAS 2018----- #
 # ------------------- #
@@ -445,14 +445,14 @@ mean_mer2_JAS <- mean(mer2_JAS)
 speed2_JAS <- speed2[[names(speed2)[which(str_detect(names(speed2), "JAS"))]]]
 mean_speed2_JAS <- mean(speed2_JAS)
 
-png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2018_JAS.png",
-    res = 300,
-    width = 50,
-    height = 40,
-    pointsize = 20,
-    unit = "cm",
-    # bg = "transparent",
-    bg = "white")
+# png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2018_JAS.png",
+#     res = 300,
+#     width = 50,
+#     height = 40,
+#     pointsize = 20,
+#     unit = "cm",
+#     # bg = "transparent",
+#     bg = "white")
 
 print(
      rasterVis::vectorplot(raster::stack(mean_zon2_JAS, mean_mer2_JAS),
@@ -481,7 +481,7 @@ print(
                       col = "grey",
                       fill = "white")))
     
-dev.off()
+# dev.off()
 
 # ----- OND 2018----- #
 # ------------------- #
@@ -494,14 +494,14 @@ mean_mer2_OND <- mean(mer2_OND)
 speed2_OND <- speed2[[names(speed2)[which(str_detect(names(speed2), "OND"))]]]
 mean_speed2_OND <- mean(speed2_OND)
 
-png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2018_OND.png",
-    res = 300,
-    width = 50,
-    height = 40,
-    pointsize = 20,
-    unit = "cm",
-    # bg = "transparent",
-    bg = "white")
+# png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2018_OND.png",
+#     res = 300,
+#     width = 50,
+#     height = 40,
+#     pointsize = 20,
+#     unit = "cm",
+#     # bg = "transparent",
+#     bg = "white")
 
 print(
      rasterVis::vectorplot(raster::stack(mean_zon2_OND, mean_mer2_OND),
@@ -530,7 +530,7 @@ print(
                       col = "grey",
                       fill = "white")))
     
-dev.off()
+# dev.off()
 
 # ----- JFM 2019----- #
 # ------------------- #
@@ -543,14 +543,14 @@ mean_mer2_JFM <- mean(mer2_JFM)
 speed2_JFM <- speed2[[names(speed2)[which(str_detect(names(speed2), "JFM"))]]]
 mean_speed2_JFM <- mean(speed2_JFM)
 
-png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2019_JFM.png",
-    res = 300,
-    width = 50,
-    height = 40,
-    pointsize = 20,
-    unit = "cm",
-    # bg = "transparent",
-    bg = "white")
+# png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2019_JFM.png",
+#     res = 300,
+#     width = 50,
+#     height = 40,
+#     pointsize = 20,
+#     unit = "cm",
+#     # bg = "transparent",
+#     bg = "white")
 
 print(
      rasterVis::vectorplot(raster::stack(mean_zon2_JFM, mean_mer2_JFM),
@@ -579,7 +579,89 @@ print(
                       col = "grey",
                       fill = "white")))
     
-dev.off()
+# dev.off()
+
+#### ----- WIND MAPS - FAVO/DEFAVO periods ----- ####
+# ------------------------------------------------- #
+
+speed <- terra::rast(c("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637652088629_YEAR1_SPEED.nc",
+                         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637653002349_YEAR2_SPEED.nc"))
+
+zon <- terra::rast(c("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637651769964_YEAR1_ZONAL.nc",
+                "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637652399617_YEAR2_ZONAL.nc"))
+
+mer <- terra::rast(c("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637651880863_YEAR1_MERIDIONAL.nc",
+              "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637652499961_YEAR2_MERIDIONAL.nc"))
+
+test <- terra::rast("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-REP_WIND_L4-OBS_FULL_TIME_SERIE_1654772499638.nc")
+
+
+
+# ----- FAV ----- #
+speed_fav <- mean(speed[[month(time(speed)) %in% 5:10]])
+zon_fav <- mean(zon[[month(time(speed)) %in% 5:10]])
+mer_fav <- mean(mer[[month(time(speed)) %in% 5:10]])
+
+table(month(time(speed[[month(time(speed)) %in% 5:10]])))
+table(month(time(zon[[month(time(zon)) %in% 5:10]])))
+table(month(time(mer[[month(time(mer)) %in% 5:10]])))
+
+# ----- DEFAV ----- #
+speed_defav <- mean(speed[[month(time(speed)) %in% c(11:12, 1:4)]])
+zon_defav <- mean(zon[[month(time(speed)) %in% c(11:12, 1:4)]])
+mer_defav <- mean(mer[[month(time(speed)) %in% c(11:12, 1:4)]])
+
+table(month(time(speed[[month(time(speed)) %in% c(11:12, 1:4)]])))
+table(month(time(zon[[month(time(zon)) %in% c(11:12, 1:4)]])))
+table(month(time(mer[[month(time(mer)) %in% c(11:12, 1:4)]])))
+
+# ----- carte FAV ----- #
+nlev <- 100
+my_at <- seq(from = 0,
+             to = 20,
+             length.out = nlev + 1)
+my_cols <- viridis_pal(begin = 1,
+                       end = 0,
+                       option = "A")(nlev)
+x11()
+rasterVis::vectorplot(raster::stack(raster(zon_fav), raster(mer_fav)),
+               isField = 'dXY',
+               narrows = 800,
+               lwd.arrows = 1,
+               aspX = 0.4,
+               region = raster(speed_fav),
+               at = my_at,
+               col.regions = my_cols,
+               # scales = list(cex = 1.5),
+               colorkey = list(labels = list(cex = 2)),
+               main = list("Periode fav - Mousson d'été",
+                           cex = 2.5),
+               xlab = list("Longitude", 
+                           cex = 2.5),
+               ylab = list("Latitude",
+                           cex = 2.5))
+
+# ----- carte DEFAV ----- #
+x11()
+rasterVis::vectorplot(raster::stack(raster(zon_defav), raster(mer_defav)),
+               isField = 'dXY',
+               narrows = 800,
+               lwd.arrows = 1,
+               aspX = 0.4,
+               region = raster(speed_defav),
+               at = my_at,
+               col.regions = my_cols,
+               # scales = list(cex = 1.5),
+               colorkey = list(labels = list(cex = 2)),
+               main = list("Periode defav - Mousson d'hiver",
+                           cex = 2.5),
+               xlab = list("Longitude", 
+                           cex = 2.5),
+               ylab = list("Latitude",
+                           cex = 2.5))
+
+
+
 
 #### ---------------------- Soustraction direction bird vs wind & histo --------------------- ####
 unique(juv_argos$Vessel)
@@ -612,18 +694,34 @@ juv_argos2 <- droplevels(juv_argos2)
 ju_list <- split(juv_argos2, juv_argos2$Vessel)
 
 # ----- Global histo per track ----- #
-x11(); par(mfrow = c(3, 3))
+# x11()
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_Global_per_track.png",
+    res = 300,
+    width = 50,
+    height = 50,
+    pointsize = 20,
+    unit = "cm",
+    bg = "white")
+
+par(mfrow = c(3, 3))
 lapply(ju_list, function(x) {
      
      
      hist(x$diff_dir,
           breaks = 36,
+          prob = T,
           main = paste(unique(year(x$deploy)),
                        unique(x$Vessel),
-                       sep = "-"))
+                       sep = "-"),
+          col = "turquoise3",
+          border = "turquoise4")
+     lines(density(x$diff_dir,
+                   na.rm = T),
+           lwd = 2,
+           col = "sienna3")
 
 })
-
+dev.off()
 # ----- Trimestrial histo per track ----- #
 juv_argos3 <- juv_argos2[juv_argos2$year_period %in%c("AMJ", "JAS", "OND"), ]
 juv_argos3 <- droplevels(juv_argos3)
@@ -632,7 +730,7 @@ ju_list2 <- split(juv_argos3, juv_argos3$Vessel)
 lapply(ju_list2, function(x) {
      x_list <- split(x, x$year_period)
      
-     png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_Trimestrial-",
+     png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_Trimestrial-",
                unique(year(x$deploy)),
                "-",
                unique(x$Vessel),
@@ -649,13 +747,19 @@ lapply(ju_list2, function(x) {
      par(mfrow = c(2, 2))
      lapply(x_list, function(y) {
           hist(y$diff_dir,
-               breaks = 36
-               ,
+               col = "turquoise3",
+               border = "turquoise4",
+               prob = T,
+               breaks = 36,
                main = paste(unique(year(y$deploy)),
                             unique(y$Vessel),
                             unique(y$year_period),
                sep = "-")
                )
+          lines(density(y$diff_dir,
+                        na.rm = T),
+                lwd = 2,
+                col = "sienna3")
      })
      dev.off()
 })
@@ -669,7 +773,7 @@ lapply(ju_list3, function(x) {
      
      print(length(x_list))
      
-     png(paste("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_Monthly-",
+     png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_Monthly-",
                unique(year(x$deploy)),
                "-",
                unique(x$Vessel),
@@ -686,12 +790,19 @@ lapply(ju_list3, function(x) {
      par(mfrow = c(3, 4))
      lapply(x_list, function(y) {
           hist(y$diff_dir,
+               prob = T,
                breaks = 36,
+               col = "turquoise3",
+               border = "turquoise4",
                main = paste(unique(year(y$deploy)),
                             unique(y$month_numb),
                             unique(y$Vessel),
                             sep = "-")
                )
+          lines(density(y$diff_dir,
+                        na.rm = T),
+                col = "sienna3",
+                lwd = 1.5)
      })
      dev.off()
 })
@@ -702,18 +813,34 @@ juv_2017 <- juv_argos[juv_argos$Vessel %in% c("166569",
 juv_2017 <- droplevels(juv_2017)
 
 # ----- Global histo ----- #
-x11()
+# x11()
+
+
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2017_group_global.png",
+    res = 300,
+    width = 70,
+    height = 50,
+    pointsize = 20,
+    unit = "cm",
+    bg = "white")
 hist(juv_2017$diff_dir,
      breaks = 36,
+     prob = T,
+     col = "turquoise3",
+     border = "turquoise4",
      main = paste(unique(year(juv_2017$deploy)),
                        "166569 & 166572",
                        sep = "-"))
-
+lines(density(juv_2017$diff_dir,
+              na.rm = T),
+      col = "sienna3",
+      lwd = 2)
+dev.off()
 
 # ----- Trimestrial histo per track ----- #
 juv_2017_list <- split(juv_2017, juv_2017$year_period)
 
-png("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2017_group_Trimestrial.png",
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2017_group_Trimestrial.png",
     res = 300,
     width = 50,
     height = 50,
@@ -725,12 +852,19 @@ par(mfrow = c(2, 2))
 
 lapply(juv_2017_list, function(x) {
      hist(x$diff_dir,
+          prob = T,
+          col = "turquoise3",
+          border = "turquoise4",
           breaks = 36,
           main = paste(unique(year(x$deploy)),
                        "166569 & 166572",
                        unique(x$year_period),
                        sep = "-")
                )
+     lines(density(x$diff_dir,
+                   na.rm = T),
+           col = "sienna3",
+           lwd = )
      })
 dev.off()
 
@@ -738,7 +872,7 @@ dev.off()
 juv_2017$month_numb <- month(juv_2017$Date)
 juv_2017_list2 <- split(juv_2017, juv_2017$month_numb)
 table(juv_2017$month_numb)
-png("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2017_group_Monthly.png",
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2017_group_Monthly.png",
     res = 300,
     width = 70,
     height = 50,
@@ -748,12 +882,19 @@ png("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF
 par(mfrow = c(2, 3))
 lapply(juv_2017_list2, function(x) {
      hist(x$diff_dir,
+          prob = T,
+          col = "turquoise3",
+          border = "turquoise4",
           breaks = 36,
           main = paste(unique(year(x$deploy)),
                        unique(x$month_numb),
                        "166569 & 166572",
                        sep = "-")
                )
+     lines(density(x$diff_dir,
+                   na.rm = T),
+           lwd = 2,
+           col = "sienna3")
      })
 
 dev.off()
@@ -764,18 +905,32 @@ juv_2018_sud <- juv_argos[juv_argos$Vessel %in% c("166564",
 juv_2018_sud <- droplevels(juv_2018_sud)
 
 # ----- Global histo ----- #
-x11()
+# x11()
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2018_group_SUD_global.png",
+    res = 300,
+    width = 70,
+    height = 50,
+    pointsize = 20,
+    unit = "cm",
+    bg = "white")
 hist(juv_2018_sud$diff_dir,
+     prob = T,
+     col = "turquoise3",
+     border = "turquoise4",
      breaks = 36,
      main = paste(unique(year(juv_2018_sud$deploy)),
                        "166564 & 166565",
                        sep = "-"))
-
+lines(density(juv_2018_sud$diff_dir,
+              na.rm = T),
+      col = "sienna3",
+      lwd = 2)
+dev.off()
 
 # ----- Trimestrial histo per track ----- #
 juv_2018_sud_list <- split(juv_2018_sud, juv_2018_sud$year_period)
 
-png("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2018_group_SUD_Trimestrial.png",
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2018_group_SUD_Trimestrial.png",
     res = 300,
     width = 50,
     height = 50,
@@ -787,12 +942,19 @@ par(mfrow = c(2, 2))
 
 lapply(juv_2018_sud_list, function(x) {
      hist(x$diff_dir,
+          prob = T,
+          col = "turquoise3",
+          border = "turquoise4",
           breaks = 36,
           main = paste(unique(year(x$deploy)),
                        "166564 & 166565",
                        unique(x$year_period),
                        sep = "-")
                )
+     lines(density(x$diff_dir,
+                   na.rm = T),
+           col = "sienna3",
+           lwd = 2)
      })
 dev.off()
 
@@ -800,7 +962,7 @@ dev.off()
 juv_2018_sud$month_numb <- month(juv_2018_sud$Date)
 juv_2018_sud_list2 <- split(juv_2018_sud, juv_2018_sud$month_numb)
 table(juv_2018_sud$month_numb)
-png("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2018_group_SUD_Monthly.png",
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2018_group_SUD_Monthly.png",
     res = 300,
     width = 70,
     height = 50,
@@ -810,12 +972,19 @@ png("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF
 par(mfrow = c(3, 3))
 lapply(juv_2018_sud_list2, function(x) {
      hist(x$diff_dir,
+          prob = T,
+          col = "turquoise3",
+          border = "turquoise4",
           breaks = 36,
           main = paste(unique(year(x$deploy)),
                        unique(x$month_numb),
                        "166564 & 166565",
                        sep = "-")
                )
+     lines(density(x$diff_dir,
+                   na.rm = T),
+           lwd = 2,
+           col = "sienna2")
      })
 
 dev.off()
@@ -830,18 +999,31 @@ juv_2018_nord <- juv_argos[juv_argos$Vessel %in% c("162070",
 juv_2018_nord <- droplevels(juv_2018_nord)
 
 # ----- Global histo ----- #
-x11()
+# x11()
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2018_group_NORD_global.png",
+    res = 300,
+    width = 70,
+    height = 50,
+    pointsize = 20,
+    unit = "cm",
+    bg = "white")
 hist(juv_2018_nord$diff_dir,
+     prob = T,
+     col = "turquoise3",
+     border = "turquoise4",
      breaks = 36,
      main = paste(unique(year(juv_2018_nord$deploy)),
                        "NORD",
                        sep = "-"))
-
-
+lines(density(juv_2018_nord$diff_dir,
+              na.rm = T),
+      lwd = 2,
+      col = "sienna3")
+dev.off()
 # ----- Trimestrial histo per track ----- #
 juv_2018_nord_list <- split(juv_2018_nord, juv_2018_nord$year_period)
 
-png("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2018_group_NORD_Trimestrial.png",
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2018_group_NORD_Trimestrial.png",
     res = 300,
     width = 50,
     height = 50,
@@ -853,12 +1035,19 @@ par(mfrow = c(2, 2))
 
 lapply(juv_2018_nord_list, function(x) {
      hist(x$diff_dir,
+          prob = T,
+          col = "turquoise3",
+          border = "turquoise4",
           breaks = 36,
           main = paste(unique(year(x$deploy)),
                        "NORD",
                        unique(x$year_period),
                        sep = "-")
                )
+     lines(density(x$diff_dir,
+                   na.rm = T),
+           lwd = 2,
+           col = "sienna3")
      })
 dev.off()
 
@@ -866,7 +1055,7 @@ dev.off()
 juv_2018_nord$month_numb <- month(juv_2018_nord$Date)
 juv_2018_nord_list2 <- split(juv_2018_nord, juv_2018_nord$month_numb)
 table(juv_2018_nord$month_numb)
-png("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2018_group_NORD_Monthly.png",
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_2018_group_NORD_Monthly.png",
     res = 300,
     width = 70,
     height = 50,
@@ -876,12 +1065,19 @@ png("C:/Users/ccjuhasz/Desktop/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF
 par(mfrow = c(3, 4))
 lapply(juv_2018_nord_list2, function(x) {
      hist(x$diff_dir,
+          prob = T,
+          col = "turquoise3",
+          border = "turquoise4",
           breaks = 36,
           main = paste(unique(year(x$deploy)),
                        unique(x$month_numb),
                        "NORD",
                        sep = "-")
                )
+     lines(density(x$diff_dir,
+                   na.rm = T),
+           lwd = 2,
+           col = "sienna3")
      })
 
 dev.off()
