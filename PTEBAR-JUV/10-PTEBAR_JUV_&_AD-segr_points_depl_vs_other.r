@@ -811,7 +811,8 @@ levelplot(log(chlo_fav_sg, base = 10),
           col.regions = jet_colors,
           cuts = nlev - 1,
           at = my_at)
-          # zscaleLog = "e") +
+          # zscaleLog = "e") 
+          +
 layer(sp.polygons(ne_countries()))
 
 # ----- ajout des kernel adultes et des points juv
