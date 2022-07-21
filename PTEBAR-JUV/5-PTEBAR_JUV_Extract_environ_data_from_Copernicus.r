@@ -29,7 +29,9 @@ user_name <- id
 mdp <- pwd
 
 # Chemin de stockage des fichiers exportés
-dossier_vars = "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R"
+# dossier_vars = "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R"
+dossier_vars = "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2019/"
+
 
 # Paramètres d'emprise des variables à télécharger
 long_min = "10"         # longitude minimale de la zone à télécharger
@@ -51,7 +53,8 @@ link_tab_parm <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV
 # nom_fichier_tab <- "Parametres_5_variables.csv"   # Nom du fichier contenant le tableau avec les paramètres des variables (.csv, séparateur point-virgule)
 # nom_fichier_tab <- "Parametres_WIND_ORIENTATION.csv"
 # nom_fichier_tab <- "Parametres_chlo_JANFEVMAR_2018.csv"
-nom_fichier_tab <- "Parametres_chlo_JANFEVMAR_OCTNOVDEC_2017.csv"
+# nom_fichier_tab <- "Parametres_chlo_JANFEVMAR_OCTNOVDEC_2017.csv"
+nom_fichier_tab <- "Parametres_WIND_2008-2018_2.csv"
 
 ####################### DEBUT PARTIE 2 DU SCRIPT : Téléchargement variables sur Copernicus Marine Environment Monitoring Service #######################
 
@@ -144,7 +147,7 @@ date_min <- as.character(tab_parm2$Date_min)
 date_min <- c(date_min)
 
 # tab_parm2$Date_max <- as.POSIXct(tab_parm2$Date_max, format = "%d/%m/%Y %H:%M:%S")
-tab_parm2$Date_max <- as.Date(tab_parm2$Date_max, format = "%d/%m/%Y")
+# tab_parm2$Date_max <- as.Date(tab_parm2$Date_max, format = "%d/%m/%Y")
 date_max <- as.character(tab_parm2$Date_max)
 date_max <- c(date_max)
 
@@ -157,3 +160,42 @@ names_vars <- c(tab_parm2$Variable)
 
 ########## Télécharger les variables
 # --> cf première partie du script
+
+####################### EXTRA PART : Creation du fichier "Parametres_WIND_2008-2018.csv" #######################
+
+day <- "01"
+month_min <- rep(c("01", "05", "09"), 11)
+month_max <- rep(c("05", "09", "01"), 11)
+year_min <- rep(2008:2018, each = 3)
+year_max <- c(year_min[-1], 2019)
+variable <- paste(rep(c("eastward_wind",
+                        "northward_wind",
+                        "wind_speed"),
+                      each = 33),
+                  rep(year, 3),
+                  rep(1:3, 3),
+                  sep = "-")
+
+date_min <- paste(day, month_min, year_min, sep = "/")
+date_max <- paste(day, month_max, year_max, sep = "/")
+
+param <- data.frame(Variable = variable,
+                    Motu = "https://my.cmems-du.eu/motu-web/Motu",
+                    Variable_code = rep(c("eastward_wind",
+                                          "northward_wind",
+                                          "wind_speed"),
+                                        each = 33),
+                    Product_id = "CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE",
+                    Service_id = "WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS",
+                    Date_min = date_min,
+                    Date_max = date_max,
+                    CRS = 4326)
+
+# write.table(param,
+#           "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Input_R/Parametres_WIND_2008-2018.csv",
+#           sep = ";")
+
+
+
+
+
