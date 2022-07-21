@@ -194,8 +194,3 @@ param <- data.frame(Variable = variable,
 # write.table(param,
 #           "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Input_R/Parametres_WIND_2008-2018.csv",
 #           sep = ";")
-
-
-
-
-
