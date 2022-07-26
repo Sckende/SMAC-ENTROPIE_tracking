@@ -11,7 +11,7 @@ rm(list = ls())
 source('C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r')
 
 # ----- #
-# Loading data 
+# Loading data #### 
 # ----- #
 
 east <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2019/",
@@ -22,9 +22,13 @@ east
 names(east) <- as.character(time(east))
 names(east)[duplicated(names(east))]
 east
-east2 <- east[[names(east)[!duplicated(names(east))]]]
-east2
+east2 <- east[[names(east)[!duplicated(names(east))]]] # retrait des couches dupliquées
+east3 <- east2[[-nlyr(east2)]] # retrait de la dernière date : 01-01-2019 00:00
+tail(time(east3))
+east3
+
 # ----- #
+
 north <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2019/",
                    pattern = "WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__northward",
                    full.names = TRUE)
@@ -33,9 +37,13 @@ north
 names(north) <- as.character(time(north))
 names(north)[duplicated(names(north))]
 north
-north2 <- north[[names(north)[!duplicated(names(north))]]]
-north2
+north2 <- north[[names(north)[!duplicated(names(north))]]] # retrait des couches dupliquées
+north3 <- north2[[-nlyr(north2)]] # retrait de la dernière date : 01-01-2019 00:00
+tail(time(north3))
+north3
+
 # ----- #
+
 speed <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2019/",
                    pattern = "WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__wind_speed",
                    full.names = TRUE)
@@ -44,64 +52,66 @@ speed
 names(speed) <- as.character(time(speed))
 names(speed)[duplicated(names(speed))]
 speed
-speed2 <- speed[[names(speed)[!duplicated(names(speed))]]]
-speed2
+speed2 <- speed[[names(speed)[!duplicated(names(speed))]]] # retrait des couches dupliquées
+speed3 <- speed2[[-nlyr(speed2)]] # retrait de la dernière date : 01-01-2019 00:00
+tail(time(speed3))
+speed3
 
-names(speed2)[year(time(speed2)) == 2008]
-names(speed2[[names(speed2)[month(time(speed2)) == 8]]])
+names(speed3)[year(time(speed3)) == 2008]
+names(speed3[[names(speed3)[month(time(speed3)) == 8]]])
 
 # ----- #
-# Mean values for speed
+# Mean values for speed ####
 # ----- #
  
-# for(i in 1:12) {
+for(i in 1:12) {
     
-#     mean_rast <- mean(speed2[[names(speed2)[month(time(speed2)) == i]]])
+    mean_rast <- mean(speed3[[names(speed3)[month(time(speed3)) == i]]])
     
-#     terra::writeRaster(mean_rast,
-#                        paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/mean_wind_speed_month_",
-#                              i,
-#                              ".tif",
-#                              sep = ""),
-#                        overwrite = T)
-#     print(paste(i, " is done", sep = ""))
-# }
+    terra::writeRaster(mean_rast,
+                       paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/mean_wind_speed_month_",
+                             i,
+                             ".tif",
+                             sep = ""),
+                       overwrite = T)
+    print(paste(i, " is done", sep = ""))
+}
 
 # ----- #
-# Mean values for east
+# Mean values for east ####
 # ----- #
 
-# for(i in 1:12) {
+for(i in 1:12) {
     
-#     mean_rast <- mean(east2[[names(east2)[month(time(east2)) == i]]])
+    mean_rast <- mean(east3[[names(east3)[month(time(east3)) == i]]])
     
-#     terra::writeRaster(mean_rast,
-#                        paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/mean_wind_east_month_",
-#                              i,
-#                              ".tif",
-#                              sep = ""),
-#                        overwrite = T)
-#     print(paste(i, " is done", sep = ""))
-# }
+    terra::writeRaster(mean_rast,
+                       paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/mean_wind_east_month_",
+                             i,
+                             ".tif",
+                             sep = ""),
+                       overwrite = T)
+    print(paste(i, " is done", sep = ""))
+}
 
 # ----- #
-# Mean values for north
+# Mean values for north ####
 # ----- #
 
-# for(i in 1:12) {
+for(i in 1:12) {
     
-#     mean_rast <- mean(north2[[names(north2)[month(time(north2)) == i]]])
+    mean_rast <- mean(north3[[names(north3)[month(time(north3)) == i]]])
     
-#     terra::writeRaster(mean_rast,
-#                        paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/mean_wind_north_month_",
-#                              i,
-#                              ".tif",
-#                              sep = ""),
-#                        overwrite = T)
-#     print(paste(i, " is done", sep = ""))
-# }
+    terra::writeRaster(mean_rast,
+                       paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/mean_wind_north_month_",
+                             i,
+                             ".tif",
+                             sep = ""),
+                       overwrite = T)
+    print(paste(i, " is done", sep = ""))
+}
 # ----- #
-# Stack des valeurs mensuelles par parametres 
+# Stack des valeurs mensuelles par parametres ####
 # ----- #
 
 m_speed <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/",
@@ -131,6 +141,10 @@ m_north <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argo
                    full.names = TRUE)
 mean_north <- terra::rast(m_north) # SpatRaster
 mn <- raster::stack(m_north) # RasterStack
+
+# ----- #
+# Visualisation ####
+# ----- #
 
 x11();plot(mean_north)
 x11(); plot(mn)
@@ -186,12 +200,90 @@ levelplot(mean_east)
 vectorplot(mean_east)
 
 
+# ----- #
+# Mean values for the MOBILE period (APRIL - MAY) - SPEED ####
+# ----- #
+
+mean_rast_speed <- mean(speed3[[names(speed3)[month(time(speed3)) %in% 4:5]]])
+terra::writeRaster(mean_rast_speed,
+                   "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/mean_wind_speed_mobile_period_2008-2018.tif",
+                   overwrite = T)
+
+# ----- #
+# Mean values for the MOBILE period (APRIL - MAY) - NORTH ####
+# ----- #
+
+mean_rast_north <- mean(north3[[names(north3)[month(time(north3)) %in% 4:5]]])
+terra::writeRaster(mean_rast_north,
+                   "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/mean_wind_north_mobile_period_2008-2018.tif",
+                   overwrite = T)
+
+# ----- #
+# Mean values for the MOBILE period (APRIL - MAY) - EAST ####
+# ----- #
+
+mean_rast_east <- mean(east3[[names(east3)[month(time(east3)) %in% 4:5]]])
+terra::writeRaster(mean_rast_east,
+                   "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/mean_wind_east_mobile_period_2008-2018.tif",
+                   overwrite = T)
+
+# ---- #
+# Visualisation ####
+# ----- #
+sp_mob <- raster::raster("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/mean_wind_speed_mobile_period_2008-2018.tif")
+no_mob <- raster::raster("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/mean_wind_north_mobile_period_2008-2018.tif")
+ea_mob <- raster::raster("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/mean_wind_east_mobile_period_2008-2018.tif")
+
+# zonal = x = east component
+# meridional = y = north component
+nlev <- 100
+my_at <- seq(from = 0,
+             to = 20,
+             length.out = nlev + 1)
+my_cols <- viridis_pal(begin = 1,
+                       end = 0,
+                       option = "A")(nlev)
+x11()
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/WIND_2008-2018/Mobile_periode_April-May_2008-2018.png",
+    res = 300,
+    width = 50,
+    height = 40,
+    pointsize = 20,
+    unit = "cm",
+    bg = "white")
+
+   print(vectorplot(raster::stack(ea_mob, no_mob),
+                 narrows = 800,
+                 aspX = 0.4,
+                 isField = 'dXY',
+                 region = sp_mob,
+                 at = my_at,
+                 col.regions = my_cols,
+                 lwd.arrows = 1,
+                 colorkey = list(labels = list(cex = 2)),
+                 main = list("period of mobility April-May 2008-2018",
+                             cex = 2.5),
+                 xlab = list("Longitude",
+                             cex = 2.5),
+                 ylab = list("Latitude",
+                             cex = 2.5)))
+   
+   dev.off()
 
 
-
-
-
-
+objet <- vectorplot(raster::stack(ea_mob, no_mob),
+                 narrows = 800,
+                 aspX = 0.4,
+                 isField = 'dXY',
+                 region = sp_mob,
+                 at = my_at,
+                 col.regions = my_cols,
+                 lwd.arrows = 1,
+                 colorkey = list(labels = list(cex = 2))
+                 )
+terra::writeRaster(objet,
+                   "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/TEST.tif",
+                   overwrite = T)
 
 
 
@@ -229,3 +321,11 @@ vectorplot(mean_east)
 #           sp.polygons(IndOcean_sp,
 #                       col = "grey",
 #                       fill = "white"))
+
+
+
+
+x1 <- as.Date("2008-01-01")
+x2 <- as.Date("2018-12-31")
+
+x2-x1
