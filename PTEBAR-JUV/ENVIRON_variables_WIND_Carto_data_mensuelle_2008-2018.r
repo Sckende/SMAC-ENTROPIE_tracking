@@ -244,13 +244,13 @@ my_cols <- viridis_pal(begin = 1,
                        end = 0,
                        option = "A")(nlev)
 x11()
-png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/WIND_2008-2018/Mobile_periode_April-May_2008-2018.png",
-    res = 300,
-    width = 50,
-    height = 40,
-    pointsize = 20,
-    unit = "cm",
-    bg = "white")
+# png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/WIND_2008-2018/Mobile_periode_April-May_2008-2018.png",
+#     res = 300,
+#     width = 50,
+#     height = 40,
+#     pointsize = 20,
+#     unit = "cm",
+#     bg = "white")
 
    print(vectorplot(raster::stack(ea_mob, no_mob),
                  narrows = 800,
@@ -270,21 +270,61 @@ png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_C
    
    dev.off()
 
+# ----- #
+# Ajout des points adultes et juveniles pour la période Avril & May ####
+# ----- #
 
-objet <- vectorplot(raster::stack(ea_mob, no_mob),
-                 narrows = 800,
-                 aspX = 0.4,
-                 isField = 'dXY',
-                 region = sp_mob,
-                 at = my_at,
-                 col.regions = my_cols,
-                 lwd.arrows = 1,
-                 colorkey = list(labels = list(cex = 2))
-                 )
-terra::writeRaster(objet,
-                   "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Pre_treat/Monthly_wind_2008-2018/TEST.tif",
-                   overwrite = T)
+ad_behav <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_2008-2009_MIGRATION_BEHAV.txt",
+                       sep = "\t",
+                       header = T)
+head(ad_behav)
+ad_behav$DATE <- as.Date(ad_behav$DATE)
+ad_behav_sp <- SpatialPointsDataFrame(coords = ad_behav[, c("LON", "LAT")],
+                                  data = ad_behav,
+                                  proj4string = CRS("+init=epsg:4326"))
 
+juv_behav <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_ARGOS_MIGRATION_BEHAV.txt",
+                       sep = "\t",
+                       header = T)
+head(juv_behav)
+juv_behav$Date <- as.Date(juv_behav$Date)
+juv_behav_sp <- SpatialPointsDataFrame(coords = juv_behav[, c("Longitude", "Latitude")],
+                                  data = juv_behav,
+                                  proj4string = CRS("+init=epsg:4326"))
+
+# png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/WIND_2008-2018/Mobile_periode_and_AD-JUV_points_April-May_2008-2018.png",
+#     res = 300,
+#     width = 50,
+#     height = 40,
+#     pointsize = 20,
+#     unit = "cm",
+#     bg = "white")
+# x11()
+vectorplot(raster::stack(ea_mob, no_mob),
+           narrows = 800,
+           aspX = 0.4,
+           isField = 'dXY',
+           region = sp_mob,
+           at = my_at,
+           col.regions = my_cols,
+           lwd.arrows = 1,
+           colorkey = list(labels = list(cex = 2)),
+           main = list("period of mobility April-May 2008-2018",
+                       cex = 2.5),
+           xlab = list("Longitude",
+                       cex = 2.5),
+           ylab = list("Latitude",
+                       cex = 2.5)) + 
+layer(sp.polygons(ne_countries())) +
+layer(sp.points(juv_behav_sp[month(juv_behav_sp$Date) %in% 4:5, ],
+                col = "yellow",
+                pch = 20,
+                cex = 1)) +
+layer(sp.points(ad_behav_sp[month(ad_behav_sp$DATE) %in% 4:5, ],
+                col = "grey",
+                pch = 20,
+                cex = 1))
+dev.off()
 
 
 # nlev <- 100
