@@ -122,6 +122,26 @@ argos_lines <- SpatialLinesDataFrame(lines, data)
 argos_lines
 head(argos_lines)
 argos_lines[argos_lines$Vessel == "166561", ]
+
+# ----- #
+# Bird TRACKS after the 24 april 2018 ####
+# ----- #
+
+ar <- argos_sp[as.Date(argos_sp$Date) >= as.Date("2018-04-24"), ]
+dim(ar)
+
+ar_list <- split(ar, ar$Vessel)
+track2 <- lapply(ar_list,
+                function(x) {
+                    Lines(list(Line(coordinates(x))),
+                          x$Vessel[1L])
+                })
+
+lines2 <- SpatialLines(track2)
+data2 <- data.frame(Vessel = unique(ar$Vessel))
+rownames(data2) <- data2$Vessel
+argos_lines2 <- SpatialLinesDataFrame(lines2, data2)
+argos_lines2
 # ----- #
 # Map prod with wind & tracks #####
 # ----- #
@@ -155,11 +175,18 @@ for (i in unique(argos_lines$Vessel)) {
             sp.lines(argos_lines[argos_lines$Vessel == i, ],
                      col = "darkgrey",
                      lwd = 5),
+            sp.lines(argos_lines2[argos_lines2$Vessel == i, ],
+                     col = "#35b835",
+                     lwd = 6),
             sp.points(argos_sp[argos_sp$Vessel == i, ],
                       col = "darkgrey",
                       cex = 2,
                       lwd = 2),
             sp.points(argos_sp[argos_sp$Vessel == i & as.Date(argos_sp$Date) == as.Date("2018-04-24"), ],
+                      col = "red",
+                      cex = 4,
+                      lwd = 4),
+            sp.points(argos_sp[argos_sp$Vessel == i & as.Date(argos_sp$Date) > as.Date("2018-04-24"), ],
                       col = "#35b835",
                       cex = 4,
                       lwd = 4))
