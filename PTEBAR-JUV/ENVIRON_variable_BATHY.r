@@ -1,4 +1,5 @@
 #### Bathymetry export ####
+library(raster)
 library(marmap)
 library(maps)
 library(mapdata)
@@ -10,6 +11,9 @@ indian <- getNOAA.bathy(lon1 = 20,
                         lat1 = -50,
                         lat2 = 30,
                         resolution = 4)
+bathy_raster <- marmap::as.raster(indian)
+# terra::writeRaster(bathy_raster,
+#                    "C:/Users/ccjuhasz/Desktop/SMAC/SPATIAL_data_RUN/Indian_Ocean_Bathy.tif")
 # Creating color palettes
 blues <- c("lightsteelblue4",
            "lightsteelblue3",
@@ -52,3 +56,8 @@ colorlegend(zlim = c(-max(indian), 0),
             main = "depth (m)",
             posx = c(0.85, 0.88))
 
+
+
+
+vignette("marmap-ImportExport")
+vignette("marmap-DataAnalysis")
