@@ -23,9 +23,10 @@ table(juv_argos$year_period)
 juv_argos_sp <- SpatialPointsDataFrame(coords = juv_argos[, c("Longitude", "Latitude")],
                                   data = juv_argos,
                                   proj4string = CRS("+init=epsg:4326"))
-##### ----- Adulte data - GLS from Pinet 2008 & 2009 ----- ####
+
+##### ----- Adulte data - cleaned GLS data from Audrey Jaeger 2008 & 2009 ----- ####
 # ----- Load data ----- #
-ad_gls <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_RUN_tripsplit.txt",
+ad_gls <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_2008-2009_clean_from_Audrey.txt",
                      h = T,
                      sep = "\t")
 head(ad_gls)
@@ -33,16 +34,17 @@ summary(ad_gls)
 dim(ad_gls)
 
 # ----- Year division in trimestre ----- #
-ad_gls$Date_GMT <- as.POSIXlt(ad_gls$Date_GMT,
-                              format = "%d/%m/%y %H:%M")
-ad_gls$year_period[month(ad_gls$Date_GMT) %in% 1:3] <- "JFM"
-ad_gls$year_period[month(ad_gls$Date_GMT) %in% 4:6] <- "AMJ"
-ad_gls$year_period[month(ad_gls$Date_GMT) %in% 7:9] <- "JAS"
-ad_gls$year_period[month(ad_gls$Date_GMT) %in% 10:12] <- "OND"
+ad_gls$DATE <- dmy_hm(ad_gls$DATE)
+ad_gls$year_period[month(ad_gls$DATE) %in% 1:3] <- "JFM"
+ad_gls$year_period[month(ad_gls$DATE) %in% 4:6] <- "AMJ"
+ad_gls$year_period[month(ad_gls$DATE) %in% 7:9] <- "JAS"
+ad_gls$year_period[month(ad_gls$DATE) %in% 10:12] <- "OND"
 
 table(ad_gls$year_period)
 
-# par(mfrow = c(2, 2))
+plot(ad_gls$LON,
+     ad_gls$LAT)
+par(mfrow = c(2, 2))
  for(i in unique(ad_gls$year_period)) {
      plot(x = ad_gls$LON[ad_gls$year_period == i],
           y = ad_gls$LAT[ad_gls$year_period == i],
@@ -59,6 +61,7 @@ table(ad_gls$year_period)
 # ------------------------------------- #
 library(maps)
 library(maptools)
+x11()
 IndOcean <- map("world",
              fill = T,
              xlim = c(30, 120),
@@ -68,6 +71,8 @@ IndOcean <- map("world",
 IndOcean_sp <- maptools::map2SpatialPolygons(IndOcean,
                                              IDs = IndOcean$names,
                                              proj4string = CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+plot(IndOcean_sp,
+     col = "grey")
 
 #### ----- CHLO-A data _ ex-version ----- ####
 # ------------------------------------------ #
@@ -144,7 +149,7 @@ layer(c(sp.points(ad_gls_sp[ad_gls_sp$year_period == "AMJ", ],
                         col = "grey",
                         fill = "white")))
 
-# # ----- Period JUIAIUSEP ----- #
+# # ----- Period JUIAOUSEP ----- #
 # ------------------------------ #
 
 chlo_2018_3 <- terra::rast(chlo2018[7:9])
@@ -276,8 +281,8 @@ layer(c(sp.points(ad_gls_sp[ad_gls_sp$year_period == "OND", ],
 
 # dev.off()
 
-#### ----- WIND data ----- ####
-# ----------------------------- #
+#### ----- WIND data per year 2017 & 2018----- ####
+# ----------------------------------------------- #
 
 ## YEAR 1 - 2017 ####
 speed1 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637652088629_YEAR1_SPEED.nc')
@@ -357,11 +362,71 @@ names(mer2) <- date22
 names(zon2) <- date22
 names(speed2) <- date22
 
+#### ----- WIND data per year FROM 2008 TO 2018----- ####
+# ----------------------------------------------------- #
+
+east_files <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018/",
+                         pattern = "WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__eastward",
+                         full.names = TRUE)
+north_files <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018/",
+                          pattern = "WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__northward",
+                          full.names = TRUE)
+speed_files <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018/",
+                          pattern = "WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__wind_speed",
+                          full.names = TRUE)
+
+extend <- extent(20, 130, -50, 30) # xmin, xmax, ymin, ymax
+
+# ----- #
+east <- terra::rast(east_files)
+
+east_JFM_08_18 <- east[[month(time(east)) %in% 1:3]]
+east_JFM_08_18 <- mean(east_JFM_08_18)
+east_JFM_08_18 <- crop(east_JFM_08_18, extend)
+
+east_AMJ_08_18 <- east[[month(time(east)) %in% 4:6]]
+east_AMJ_08_18 <- mean(east_AMJ_08_18)
+east_AMJ_08_18 <- crop(east_AMJ_08_18, extend)
+
+east_JAS_08_18 <- east[[month(time(east)) %in% 7:9]]
+east_JAS_08_18 <- mean(east_JAS_08_18)
+east_JAS_08_18 <- crop(east_JAS_08_18, extend)
+
+# ----- #
+north <- terra::rast(north_files)
+
+north_JFM_08_18 <- north[[month(time(north)) %in% 1:3]]
+north_JFM_08_18 <- mean(north_JFM_08_18)
+north_JFM_08_18 <- crop(north_JFM_08_18, extend)
+
+north_AMJ_08_18 <- north[[month(time(north)) %in% 4:6]]
+north_AMJ_08_18 <- mean(north_AMJ_08_18)
+north_AMJ_08_18 <- crop(north_AMJ_08_18, extend)
+
+north_JAS_08_18 <- north[[month(time(north)) %in% 7:9]]
+north_JAS_08_18 <- mean(north_JAS_08_18)
+north_JAS_08_18 <- crop(north_JAS_08_18, extend)
+
+# ----- #
+speed <- terra::rast(speed_files)
+
+speed_JFM_08_18 <- speed[[month(time(speed)) %in% 1:3]]
+speed_JFM_08_18 <- mean(speed_JFM_08_18)
+speed_JFM_08_18 <- crop(speed_JFM_08_18, extend)
+
+speed_AMJ_08_18 <- speed[[month(time(speed)) %in% 4:6]]
+speed_AMJ_08_18 <- mean(speed_AMJ_08_18)
+speed_AMJ_08_18 <- crop(speed_AMJ_08_18, extend)
+
+speed_JAS_08_18 <- speed[[month(time(speed)) %in% 7:9]]
+speed_JAS_08_18 <- mean(speed_JAS_08_18)
+speed_JAS_08_18 <- crop(speed_JAS_08_18, extend)
+
 #### ----- Graphical output - WIND ----- ####
 # ----------------------------------------- #
 
 # Map of Indian Ocean
-ext <- as.vector(extent(zon2[[1]]))
+ext <- as.vector(terra::ext(speed_AMJ_08_18[[1]]))
 library(maps)
 library(maptools)
 IndOcean <- map("world",
@@ -372,7 +437,8 @@ IndOcean <- map("world",
 
 IndOcean_sp <- maptools::map2SpatialPolygons(IndOcean,
                                           IDs = IndOcean$names,
-                                proj4string = CRS(projection(zon2[[1]])))
+                                proj4string = CRS(crs
+
 # color option for wind scale
 #############################
 
@@ -384,7 +450,132 @@ my_cols <- viridis_pal(begin = 1,
                        end = 0,
                        option = "A")(nlev)
 
-# ----------------------------------------- #
+
+# -------------------------------- #
+#### ----- JFM 2008-2018 ----- ####
+# ------------------------------ #
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2008-2018_JFM.png",
+    res = 300,
+    width = 50,
+    height = 40,
+    pointsize = 20,
+    unit = "cm",
+    # bg = "transparent",
+    bg = "white")
+
+print(rasterVis::vectorplot(raster::stack(raster::raster(east_JFM_08_18),
+                                    raster::raster(north_JFM_08_18)), # stack(x/east, y/north)
+               isField = 'dXY',
+               narrows = 800,
+               lwd.arrows = 1,
+               aspX = 0.4,
+               region = raster::raster(speed_JFM_08_18),
+               at = my_at,
+               col.regions = my_cols,
+               # scales = list(cex = 1.5),
+               colorkey = list(labels = list(cex = 2)),
+               main = list("JFM 2008-2018",
+                           cex = 2.5),
+               xlab = list("Longitude", 
+                           cex = 2.5),
+               ylab = list("Latitude",
+                           cex = 2.5))     +
+layer(c(sp.polygons(IndOcean_sp,
+                  col = "darkgrey",
+                  fill = "grey"),
+        sp.points(ad_gls_sp[ad_gls_sp$year_period == "JFM", ],
+                      col = rgb(141, 173, 52, maxColorValue = 255),
+                      lwd = 4,
+                      cex = 2))))
+
+dev.off()
+
+# -------------------------------- #
+#### ----- AMJ 2008-2018 ----- ####
+# ------------------------------ #
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2008-2018_AMJ.png",
+    res = 300,
+    width = 50,
+    height = 40,
+    pointsize = 20,
+    unit = "cm",
+    # bg = "transparent",
+    bg = "white")
+print(rasterVis::vectorplot(raster::stack(raster::raster(east_AMJ_08_18),
+                                    raster::raster(north_AMJ_08_18)), # stack(x/east, y/north)
+               isField = 'dXY',
+               narrows = 800,
+               lwd.arrows = 1,
+               aspX = 0.4,
+               region = raster::raster(speed_AMJ_08_18),
+               at = my_at,
+               col.regions = my_cols,
+               # scales = list(cex = 1.5),
+               colorkey = list(labels = list(cex = 2)),
+               main = list("AMJ 2008-2018",
+                           cex = 2.5),
+               xlab = list("Longitude", 
+                           cex = 2.5),
+               ylab = list("Latitude",
+                           cex = 2.5))     +
+layer(c(sp.polygons(IndOcean_sp,
+                  col = "darkgrey",
+                  fill = "grey"),
+        sp.points(ad_gls_sp[ad_gls_sp$year_period == "AMJ", ],
+                      col = rgb(141, 173, 52, maxColorValue = 255),
+                      lwd = 4,
+                      cex = 2),
+        sp.points(juv_argos_sp[juv_argos_sp$year_period == "AMJ", ],
+                      col = rgb(97, 250, 250, maxColorValue = 255),
+                      lwd = 4,
+                      cex = 2)
+        )))
+dev.off()
+
+# -------------------------------- #
+#### ----- JAS 2008-2018 ----- ####
+# ------------------------------ #
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2008-2018_JAS.png",
+    res = 300,
+    width = 50,
+    height = 40,
+    pointsize = 20,
+    unit = "cm",
+    # bg = "transparent",
+    bg = "white")
+print(rasterVis::vectorplot(raster::stack(raster::raster(east_JAS_08_18),
+                                    raster::raster(north_JAS_08_18)), # stack(x/east, y/north)
+               isField = 'dXY',
+               narrows = 800,
+               lwd.arrows = 1,
+               aspX = 0.4,
+               region = raster::raster(speed_JAS_08_18),
+               at = my_at,
+               col.regions = my_cols,
+               # scales = list(cex = 1.5),
+               colorkey = list(labels = list(cex = 2)),
+               main = list("JAS 2008-2018",
+                           cex = 2.5),
+               xlab = list("Longitude", 
+                           cex = 2.5),
+               ylab = list("Latitude",
+                           cex = 2.5))     +
+layer(c(sp.polygons(IndOcean_sp,
+                  col = "darkgrey",
+                  fill = "grey"),
+        sp.points(ad_gls_sp[ad_gls_sp$year_period == "JAS", ],
+                      col = rgb(141, 173, 52, maxColorValue = 255),
+                      lwd = 4,
+                      cex = 2),
+        sp.points(juv_argos_sp[juv_argos_sp$year_period == "JAS", ],
+                      col = rgb(97, 250, 250, maxColorValue = 255),
+                      lwd = 4,
+                      cex = 2)
+        )))
+dev.off()
+
+
+# ------------------- #
 # ----- AMJ 2018----- #
 # ------------------- #
 zon2_AMJ <- zon2[[names(zon2)[which(str_detect(names(zon2), "AMJ"))]]]
