@@ -884,7 +884,71 @@ juv_argos2 <- droplevels(juv_argos2)
 
 ju_list <- split(juv_argos2, juv_argos2$Vessel)
 
+# -------------------------------------------- #
+# ----- Global histo icluding all tracks ----- #
+# -------------------------------------------- #
+# x11()
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_Global_ALL_tracks.png",
+    res = 300,
+    width = 50,
+    height = 50,
+    pointsize = 20,
+    unit = "cm",
+    bg = "white")
+
+hist(juv_argos2$diff_dir,
+     breaks = 36,
+     prob = T,
+     main = "",
+     col = "turquoise3",
+     border = "turquoise4",
+     xlab = "angle (°)")
+lines(density(juv_argos2$diff_dir,
+              na.rm = T),
+      lwd = 2,
+      col = "sienna3")
+
+dev.off()
+
+# -------------------------------------------- #
+# ----- Monthly histo icluding all tracks ----- #
+# -------------------------------------------- #
+
+juv_argos2$month_numb <- month(juv_argos2$Date)
+table(juv_argos2$month_numb)
+list_juv <- split(juv_argos2, juv_argos2$month_numb)
+list_juv <- list_juv[-1] # retrait du mois de janvier car trop peu de points
+str(list_juv)
+
+png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_Monthly_ALL_tracks.png",
+    res = 300,
+    width = 70,
+    height = 50,
+    pointsize = 20,
+    unit = "cm",
+    bg = "white")
+#  x11()
+ par(mfrow = c(3, 3))
+ lapply(list_juv, function(x) {
+      
+      hist(x$diff_dir,
+           prob = T,
+           breaks = 36,
+           col = "turquoise3",
+           border = "turquoise4",
+           main = month.name[unique(x$month_numb)],
+           xlab = "angle (°)")
+      lines(density(x$diff_dir,
+                    na.rm = T),
+            col = "sienna3",
+            lwd = 1.5)
+     }
+            )
+dev.off()
+
+# ---------------------------------- #
 # ----- Global histo per track ----- #
+# ---------------------------------- #
 # x11()
 png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/Meeting_H_Weimerskirch/HISTO_diff_directions/DIFF_DIR_Global_per_track.png",
     res = 300,
