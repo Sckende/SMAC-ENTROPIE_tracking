@@ -1,0 +1,441 @@
+---
+title: "PSEATE - Localisations repro vs migration"
+subtitle: "Exploration des données"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+---
+
+```{r, include = F}
+# Output figure in HTML5
+if (knitr::is_html_output()) knitr::knit_hooks$set(
+  plot = function(x, options) {
+    cap  <- options$fig.cap  # figure caption
+    tags <- htmltools::tags
+    as.character(tags$figure(
+      tags$img(src = x, alt = cap),
+      tags$figcaption(cap)
+    ))
+  }
+)
+
+# packages
+source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
+
+```
+
+# Mise en contexte
+  
+## A développer
+  
+
+# Bilan data brutes  
+   
+```{r setup, include = FALSE}
+pseate <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/PSEATE_trips.rds")
+pseate <- pseate[pseate$ID != "PNB-C2143", ]
+
+pseate_sf <- st_as_sf(pseate,
+                      coords = c("LON", "LAT"),
+                      crs = 4326)
+
+ll <- split(pseate_sf,
+            pseate_sf$TYPE)
+
+ll2 <- split(pseate_sf,
+             pseate_sf$ID)
+```
+
+```{r, echo = F}
+mapview(ll,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+library(knitr)
+rg <- as.data.frame(lapply(ll,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 1.')
+```
+
+# Visualisation individuelle  
+
+## C2127  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2127"]],
+            ll2[["PNB-C2127"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 2.')
+```
+## C2127_2019  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2127_2019"]],
+            ll2[["PNB-C2127_2019"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 3.')
+```
+## C2128  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2128"]],
+            ll2[["PNB-C2128"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 4.')
+```
+## C2130  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2130"]],
+            ll2[["PNB-C2130"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 5.')
+```
+## C2133   
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2133"]],
+            ll2[["PNB-C2133"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 6.')
+```
+## C2133_2019
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2133_2019"]],
+            ll2[["PNB-C2133_2019"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 7.')
+```
+## C2134  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2134"]],
+            ll2[["PNB-C2134"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 8.')
+```
+## C2135  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2135"]],
+            ll2[["PNB-C2135"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 9.')
+```
+## C2136  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2136"]],
+            ll2[["PNB-C2136"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 10.')
+```
+## C2137  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2137"]],
+            ll2[["PNB-C2137"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 11.')
+```
+## C2137_2019  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2137_2019"]],
+            ll2[["PNB-C2137_2019"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 12.')
+```
+## C2138  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2138"]],
+            ll2[["PNB-C2138"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 13.')
+```
+## C2139  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2139"]],
+            ll2[["PNB-C2139"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 14.')
+```
+## C2141  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2141"]],
+            ll2[["PNB-C2141"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 15.')
+```
+## C2141_2019  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2141_2019"]],
+            ll2[["PNB-C2141_2019"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 16.')
+```
+## C2142  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2142"]],
+            ll2[["PNB-C2142"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 17.')
+```
+## C2142_2019  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2142_2019"]],
+            ll2[["PNB-C2142_2019"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 18.')
+```
+## C2144  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2144"]],
+            ll2[["PNB-C2144"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 19.')
+```
+## C2145  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2145"]],
+            ll2[["PNB-C2145"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 20.')
+```
+## C2859_2019  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2859_2019"]],
+            ll2[["PNB-C2859_2019"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 21.')
+```
+## C2860_2019  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2860_2019"]],
+            ll2[["PNB-C2860_2019"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 22.')
+```
+## C2866_2019  
+```{r, echo = F}
+ll1 <- split(ll2[["PNB-C2866_2019"]],
+            ll2[["PNB-C2866_2019"]]$TYPE)
+
+mapview(ll1,
+        col.region = c("#a9a9a976", "#000000a7"))
+
+rg <- as.data.frame(lapply(ll1,
+                           function(x) {
+                             range(x$DATE)
+                             }))
+row.names(rg) <- c("date min", "date max")
+kable(rg,
+      row.names = T,
+      caption = 'Tab. 23.')
+```
