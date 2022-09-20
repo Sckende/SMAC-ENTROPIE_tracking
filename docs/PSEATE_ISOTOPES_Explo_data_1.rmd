@@ -46,21 +46,33 @@ ll <- split(pseate_sf,
 
 ll2 <- split(pseate_sf,
              pseate_sf$ID)
+
+library(knitr)
 ```
 
 ```{r, echo = F}
 mapview(ll,
         col.region = c("#a9a9a976", "#000000a7"))
 
-library(knitr)
-rg <- as.data.frame(lapply(ll,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+
+kable(rg2,
       row.names = T,
-      caption = 'Tab. 1.')
+      caption = "Tab. 1.")
+
 ```
 
 # Visualisation individuelle  
@@ -73,12 +85,20 @@ ll1 <- split(ll2[["PNB-C2127"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 2.')
 ```
@@ -90,12 +110,20 @@ ll1 <- split(ll2[["PNB-C2127_2019"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 3.')
 ```
@@ -107,12 +135,20 @@ ll1 <- split(ll2[["PNB-C2128"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 4.')
 ```
@@ -124,12 +160,20 @@ ll1 <- split(ll2[["PNB-C2130"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 5.')
 ```
@@ -141,12 +185,20 @@ ll1 <- split(ll2[["PNB-C2133"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 6.')
 ```
@@ -158,12 +210,20 @@ ll1 <- split(ll2[["PNB-C2133_2019"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 7.')
 ```
@@ -175,12 +235,20 @@ ll1 <- split(ll2[["PNB-C2134"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 8.')
 ```
@@ -192,12 +260,20 @@ ll1 <- split(ll2[["PNB-C2135"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 9.')
 ```
@@ -209,12 +285,20 @@ ll1 <- split(ll2[["PNB-C2136"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 10.')
 ```
@@ -226,12 +310,20 @@ ll1 <- split(ll2[["PNB-C2137"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 11.')
 ```
@@ -243,12 +335,20 @@ ll1 <- split(ll2[["PNB-C2137_2019"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 12.')
 ```
@@ -260,12 +360,20 @@ ll1 <- split(ll2[["PNB-C2138"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 13.')
 ```
@@ -277,12 +385,20 @@ ll1 <- split(ll2[["PNB-C2139"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 14.')
 ```
@@ -294,12 +410,20 @@ ll1 <- split(ll2[["PNB-C2141"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 15.')
 ```
@@ -311,12 +435,20 @@ ll1 <- split(ll2[["PNB-C2141_2019"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 16.')
 ```
@@ -328,12 +460,20 @@ ll1 <- split(ll2[["PNB-C2142"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 17.')
 ```
@@ -345,12 +485,20 @@ ll1 <- split(ll2[["PNB-C2142_2019"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 18.')
 ```
@@ -362,12 +510,20 @@ ll1 <- split(ll2[["PNB-C2144"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 19.')
 ```
@@ -379,12 +535,20 @@ ll1 <- split(ll2[["PNB-C2145"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 20.')
 ```
@@ -396,12 +560,20 @@ ll1 <- split(ll2[["PNB-C2859_2019"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 21.')
 ```
@@ -413,12 +585,20 @@ ll1 <- split(ll2[["PNB-C2860_2019"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 22.')
 ```
@@ -430,12 +610,20 @@ ll1 <- split(ll2[["PNB-C2866_2019"]],
 mapview(ll1,
         col.region = c("#a9a9a976", "#000000a7"))
 
-rg <- as.data.frame(lapply(ll1,
-                           function(x) {
-                             range(x$DATE)
-                             }))
-row.names(rg) <- c("date min", "date max")
-kable(rg,
+rg <- lapply(ll,
+             function(x) {
+               date_min <- min(x$DATE)
+               date_max <- max(x$DATE)
+               n_loc <- nrow(x)
+               
+               dt <- data.frame(min_date = date_min,
+                                   max_date = date_max,
+                                   loc_number = n_loc)
+               dt
+                             })
+rg2 <- do.call("rbind", rg)
+row.names(rg2) <- c("MIGRATION", "REPRODUCTION")
+kable(rg2,
       row.names = T,
       caption = 'Tab. 23.')
 ```
