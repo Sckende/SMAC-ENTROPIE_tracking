@@ -35,6 +35,7 @@ source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/
    
 ```{r setup, include = FALSE}
 pseate <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/PSEATE_trips.rds")
+
 pseate <- pseate[pseate$ID != "PNB-C2143", ]
 
 pseate_sf <- st_as_sf(pseate,
@@ -46,6 +47,9 @@ ll <- split(pseate_sf,
 
 ll2 <- split(pseate_sf,
              pseate_sf$ID)
+
+kern <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/kernel50-90.rds")
+
 
 library(knitr)
 ```
@@ -81,11 +85,14 @@ kable(rg2,
 ```{r, echo = F}
 ll1 <- split(ll2[["PNB-C2127"]],
             ll2[["PNB-C2127"]]$TYPE)
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2127"]][[2]], kern[["PNB-C2127"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
 
-rg <- lapply(ll,
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -106,11 +113,14 @@ kable(rg2,
 ```{r, echo = F}
 ll1 <- split(ll2[["PNB-C2127_2019"]],
             ll2[["PNB-C2127_2019"]]$TYPE)
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2127_2019"]][[2]], kern[["PNB-C2127_2019"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
 
-rg <- lapply(ll,
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -132,10 +142,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2128"]],
             ll2[["PNB-C2128"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2128"]][[2]], kern[["PNB-C2128"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -157,10 +171,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2130"]],
             ll2[["PNB-C2130"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2130"]][[2]], kern[["PNB-C2130"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -182,10 +200,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2133"]],
             ll2[["PNB-C2133"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2133"]][[2]], kern[["PNB-C2133"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -204,13 +226,17 @@ kable(rg2,
 ```
 ## C2133_2019
 ```{r, echo = F}
-ll1 <- split(ll2[["PNB-C2133_2019"]],
+ll1 <- split(ll2[["PNB-C2134"]],
             ll2[["PNB-C2133_2019"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2134"]][[2]], kern[["PNB-C2134"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -232,10 +258,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2134"]],
             ll2[["PNB-C2134"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2134"]][[2]], kern[["PNB-C2134"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -257,10 +287,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2135"]],
             ll2[["PNB-C2135"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2135"]][[2]], kern[["PNB-C2135"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -282,10 +316,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2136"]],
             ll2[["PNB-C2136"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2136"]][[2]], kern[["PNB-C2136"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -307,10 +345,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2137"]],
             ll2[["PNB-C2137"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2137"]][[2]], kern[["PNB-C2137"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -332,10 +374,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2137_2019"]],
             ll2[["PNB-C2137_2019"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2137_2019"]][[2]], kern[["PNB-C2137_2019"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -357,10 +403,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2138"]],
             ll2[["PNB-C2138"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2138"]][[2]], kern[["PNB-C2138"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -382,10 +432,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2139"]],
             ll2[["PNB-C2139"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2139"]][[2]], kern[["PNB-C2139"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -407,10 +461,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2141"]],
             ll2[["PNB-C2141"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2141"]][[2]], kern[["PNB-C2141"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -432,10 +490,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2141_2019"]],
             ll2[["PNB-C2141_2019"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2141_2019"]][[2]], kern[["PNB-C2141_2019"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -457,10 +519,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2142"]],
             ll2[["PNB-C2142"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2142"]][[2]], kern[["PNB-C2142"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -482,10 +548,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2142_2019"]],
             ll2[["PNB-C2142_2019"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2142_2019"]][[2]], kern[["PNB-C2142_2019"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -507,10 +577,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2144"]],
             ll2[["PNB-C2144"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2144"]][[2]], kern[["PNB-C2144"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -532,10 +606,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2145"]],
             ll2[["PNB-C2145"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2145"]][[2]], kern[["PNB-C2145"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -557,10 +635,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2859_2019"]],
             ll2[["PNB-C2859_2019"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2859_2019"]][[2]], kern[["PNB-C2859_2019"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -582,10 +664,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2860_2019"]],
             ll2[["PNB-C2860_2019"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2860_2019"]][[2]], kern[["PNB-C2860_2019"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
@@ -607,10 +693,14 @@ kable(rg2,
 ll1 <- split(ll2[["PNB-C2866_2019"]],
             ll2[["PNB-C2866_2019"]]$TYPE)
 
-mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+ll3 <- list(ll1[[1]], ll1[[2]], kern[["PNB-C2866_2019"]][[2]], kern[["PNB-C2866_2019"]][[1]])
+names(ll3) <-  c("migration", "reproduction", "kernel 90", "kernel 50")
 
-rg <- lapply(ll,
+mapview(ll3,
+        col.region = c("#a9a9a976", "#000000a7", "#bfd1ff", "#004FFF"),
+        color = c("#666699", "black", "#bfd1ff", "#004FFF"))
+
+rg <- lapply(ll1,
              function(x) {
                date_min <- min(x$DATE)
                date_max <- max(x$DATE)
