@@ -365,13 +365,13 @@ names(speed2) <- date22
 #### ----- WIND data per year FROM 2008 TO 2018----- ####
 # ----------------------------------------------------- #
 
-east_files <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018/",
+east_files <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018/",
                          pattern = "WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__eastward",
                          full.names = TRUE)
-north_files <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018/",
+north_files <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018/",
                           pattern = "WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__northward",
                           full.names = TRUE)
-speed_files <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018/",
+speed_files <- list.files("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018/",
                           pattern = "WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__wind_speed",
                           full.names = TRUE)
 
@@ -437,7 +437,7 @@ IndOcean <- map("world",
 
 IndOcean_sp <- maptools::map2SpatialPolygons(IndOcean,
                                           IDs = IndOcean$names,
-                                proj4string = CRS(crs
+                                          proj4string = CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
 
 # color option for wind scale
 #############################
@@ -454,7 +454,7 @@ my_cols <- viridis_pal(begin = 1,
 # -------------------------------- #
 #### ----- JFM 2008-2018 ----- ####
 # ------------------------------ #
-png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2008-2018_JFM.png",
+png("C:/Users/ccjuhasz/Desktop/Wind_n_birds_2008-2018_JFM.png",
     res = 300,
     width = 50,
     height = 40,
@@ -476,24 +476,26 @@ print(rasterVis::vectorplot(raster::stack(raster::raster(east_JFM_08_18),
                colorkey = list(labels = list(cex = 2)),
                main = list("JFM 2008-2018",
                            cex = 2.5),
-               xlab = list("Longitude", 
+               xlab = list("Longitude",
                            cex = 2.5),
                ylab = list("Latitude",
-                           cex = 2.5))     +
-layer(c(sp.polygons(IndOcean_sp,
+                           cex = 2.5))      +
+layer(sp.polygons(IndOcean_sp,
                   col = "darkgrey",
-                  fill = "grey"),
-        sp.points(ad_gls_sp[ad_gls_sp$year_period == "JFM", ],
-                      col = rgb(141, 173, 52, maxColorValue = 255),
-                      lwd = 4,
-                      cex = 2))))
+                  fill = "grey"))
+          # ,
+#         sp.points(ad_gls_sp[ad_gls_sp$year_period == "JFM", ],
+#                       col = rgb(141, 173, 52, maxColorValue = 255),
+#                       lwd = 4,
+#                       cex = 2)))
+)
 
 dev.off()
 
 # -------------------------------- #
 #### ----- AMJ 2008-2018 ----- ####
 # ------------------------------ #
-png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2008-2018_AMJ.png",
+png("C:/Users/ccjuhasz/Desktop/Wind_n_birds_2008-2018_AMJ.png",
     res = 300,
     width = 50,
     height = 40,
@@ -518,24 +520,25 @@ print(rasterVis::vectorplot(raster::stack(raster::raster(east_AMJ_08_18),
                            cex = 2.5),
                ylab = list("Latitude",
                            cex = 2.5))     +
-layer(c(sp.polygons(IndOcean_sp,
+layer(sp.polygons(IndOcean_sp,
                   col = "darkgrey",
-                  fill = "grey"),
-        sp.points(ad_gls_sp[ad_gls_sp$year_period == "AMJ", ],
-                      col = rgb(141, 173, 52, maxColorValue = 255),
-                      lwd = 4,
-                      cex = 2),
-        sp.points(juv_argos_sp[juv_argos_sp$year_period == "AMJ", ],
-                      col = rgb(97, 250, 250, maxColorValue = 255),
-                      lwd = 4,
-                      cex = 2)
-        )))
+                  fill = "grey")))
+     #    ,
+     #    sp.points(ad_gls_sp[ad_gls_sp$year_period == "AMJ", ],
+     #                  col = rgb(141, 173, 52, maxColorValue = 255),
+     #                  lwd = 4,
+     #                  cex = 2),
+     #    sp.points(juv_argos_sp[juv_argos_sp$year_period == "AMJ", ],
+     #                  col = rgb(97, 250, 250, maxColorValue = 255),
+     #                  lwd = 4,
+     #                  cex = 2)
+     #    )))
 dev.off()
 
 # -------------------------------- #
 #### ----- JAS 2008-2018 ----- ####
 # ------------------------------ #
-png("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/Wind_n_birds_2008-2018_JAS.png",
+png("C:/Users/ccjuhasz/Desktop/Wind_n_birds_2008-2018_JAS.png",
     res = 300,
     width = 50,
     height = 40,
@@ -560,18 +563,19 @@ print(rasterVis::vectorplot(raster::stack(raster::raster(east_JAS_08_18),
                            cex = 2.5),
                ylab = list("Latitude",
                            cex = 2.5))     +
-layer(c(sp.polygons(IndOcean_sp,
+layer(sp.polygons(IndOcean_sp,
                   col = "darkgrey",
-                  fill = "grey"),
-        sp.points(ad_gls_sp[ad_gls_sp$year_period == "JAS", ],
-                      col = rgb(141, 173, 52, maxColorValue = 255),
-                      lwd = 4,
-                      cex = 2),
-        sp.points(juv_argos_sp[juv_argos_sp$year_period == "JAS", ],
-                      col = rgb(97, 250, 250, maxColorValue = 255),
-                      lwd = 4,
-                      cex = 2)
-        )))
+                  fill = "grey")))
+     #  ,
+     #    sp.points(ad_gls_sp[ad_gls_sp$year_period == "JAS", ],
+     #                  col = rgb(141, 173, 52, maxColorValue = 255),
+     #                  lwd = 4,
+     #                  cex = 2),
+     #    sp.points(juv_argos_sp[juv_argos_sp$year_period == "JAS", ],
+     #                  col = rgb(97, 250, 250, maxColorValue = 255),
+     #                  lwd = 4,
+     #                  cex = 2)
+     #    )))
 dev.off()
 
 
