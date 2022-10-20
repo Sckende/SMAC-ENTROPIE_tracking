@@ -1,5 +1,5 @@
 ---
-title: "PSEATE - Relations entre latitudes et dosages"
+title: "PSEATE - Relations entre latitudes/longitudes et dosages"
 subtitle: ""
 output:
   html_document:
@@ -29,12 +29,17 @@ iso <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DA
                       sep = "\t",
                       dec = ".",
                       h = TRUE)
-models <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/ISOSCAPE_lm_HG_13C_15N.rds")
+models_lat <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/ISOSCAPE_lm_LAT_vs_HG_C_N.rds")
+models_lon <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/ISOSCAPE_lm_LON_vs_HG_C_N.rds")
 
-glob_pred <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/ISOSCAPE_global_pred_HG_13C_15N.rds")
+glob_pred_lat <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/ISOSCAPE_pred_LAT_vs_HG_C_N.rds")
+glob_pred_lon <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/ISOSCAPE_pred_LON_vs_HG_C_N.rds")
 ```
 
-# Mercure vs Latitudes
+
+# Latitudes des centroides des kernels 50  
+
+## Mercure vs Latitudes
 
 ```{r, echo = F}
 plot(iso$CENTRO_LAT,
@@ -43,22 +48,22 @@ plot(iso$CENTRO_LAT,
      ylab = "Mean Hg",
      bty = "n")
 
-lines(glob_pred$lat,
-      glob_pred$fit_hg,
+lines(glob_pred_lat$lat,
+      glob_pred_lat$fit_hg,
       col = "red")
-lines(glob_pred$lat,
-      glob_pred$fit_hg - glob_pred$se_fit_hg,
+lines(glob_pred_lat$lat,
+      glob_pred_lat$fit_hg - glob_pred_lat$se_fit_hg,
       col = "red",
       lty = 4)
-lines(glob_pred$lat,
-      glob_pred$fit_hg + glob_pred$se_fit_hg,
+lines(glob_pred_lat$lat,
+      glob_pred_lat$fit_hg + glob_pred_lat$se_fit_hg,
       col = "red",
       lty = 4)
 
-summary(models[[1]])
+summary(models_lat[[1]])
 ```
 
-# Carbone vs Latitude
+## Carbone vs Latitude
 
 ```{r, echo = F}
 plot(iso$CENTRO_LAT,
@@ -67,21 +72,21 @@ plot(iso$CENTRO_LAT,
      ylab = "Mean d13C",
      bty = "n")
 
-lines(glob_pred$lat,
-      glob_pred$fit_13c,
+lines(glob_pred_lat$lat,
+      glob_pred_lat$fit_13c,
       col = "red")
-lines(glob_pred$lat,
-      glob_pred$fit_13c - glob_pred$se_fit_13c,
+lines(glob_pred_lat$lat,
+      glob_pred_lat$fit_13c - glob_pred_lat$se_fit_13c,
       col = "red",
       lty = 4)
-lines(glob_pred$lat,
-      glob_pred$fit_13c + glob_pred$se_fit_13c,
+lines(glob_pred_lat$lat,
+      glob_pred_lat$fit_13c + glob_pred_lat$se_fit_13c,
       col = "red",
       lty = 4)
 
-summary(models[[2]])
+summary(models_lat[[2]])
 ```
-# Azote vs Latitude
+## Azote vs Latitude
 
 ```{r, echo = F}
 plot(iso$CENTRO_LAT,
@@ -90,17 +95,92 @@ plot(iso$CENTRO_LAT,
      ylab = "Mean d15N",
      bty = "n")
 
-lines(glob_pred$lat,
-      glob_pred$fit_15n,
+lines(glob_pred_lat$lat,
+      glob_pred_lat$fit_15n,
       col = "red")
-lines(glob_pred$lat,
-      glob_pred$fit_15n - glob_pred$se_fit_15n,
+lines(glob_pred_lat$lat,
+      glob_pred_lat$fit_15n - glob_pred_lat$se_fit_15n,
       col = "red",
       lty = 4)
-lines(glob_pred$lat,
-      glob_pred$fit_15n + glob_pred$se_fit_15n,
+lines(glob_pred_lat$lat,
+      glob_pred_lat$fit_15n + glob_pred_lat$se_fit_15n,
       col = "red",
       lty = 4)
 
-summary(models[[3]])
+summary(models_lat[[3]])
+```
+
+
+
+# Longitudes des centroides des kernels 50  
+
+## Mercure vs Longitudes
+
+```{r, echo = F}
+plot(iso$CENTRO_LON,
+     iso$HG_MEAN,
+     xlab = "Longitude",
+     ylab = "Mean Hg",
+     bty = "n")
+
+lines(glob_pred_lon$lon,
+      glob_pred_lon$fit_hg,
+      col = "red")
+lines(glob_pred_lon$lon,
+      glob_pred_lon$fit_hg - glob_pred_lon$se_fit_hg,
+      col = "red",
+      lty = 4)
+lines(glob_pred_lon$lon,
+      glob_pred_lon$fit_hg + glob_pred_lon$se_fit_hg,
+      col = "red",
+      lty = 4)
+
+summary(models_lon[[1]])
+```
+
+## Carbone vs Longitudes
+
+```{r, echo = F}
+plot(iso$CENTRO_LON,
+     iso$d13C_MEAN,
+     xlab = "Longitude",
+     ylab = "Mean d13C",
+     bty = "n")
+
+lines(glob_pred_lon$lon,
+      glob_pred_lon$fit_13c,
+      col = "red")
+lines(glob_pred_lon$lon,
+      glob_pred_lon$fit_13c - glob_pred_lon$se_fit_13c,
+      col = "red",
+      lty = 4)
+lines(glob_pred_lon$lon,
+      glob_pred_lon$fit_13c + glob_pred_lon$se_fit_13c,
+      col = "red",
+      lty = 4)
+
+summary(models_lon[[2]])
+```
+## Azote vs Longitudes
+
+```{r, echo = F}
+plot(iso$CENTRO_LON,
+     iso$d15N_MEAN,
+     xlab = "longitude",
+     ylab = "Mean d15N",
+     bty = "n")
+
+lines(glob_pred_lon$lon,
+      glob_pred_lon$fit_15n,
+      col = "red")
+lines(glob_pred_lon$lon,
+      glob_pred_lon$fit_15n - glob_pred_lon$se_fit_15n,
+      col = "red",
+      lty = 4)
+lines(glob_pred_lon$lon,
+      glob_pred_lon$fit_15n + glob_pred_lon$se_fit_15n,
+      col = "red",
+      lty = 4)
+
+summary(models_lon[[3]])
 ```
