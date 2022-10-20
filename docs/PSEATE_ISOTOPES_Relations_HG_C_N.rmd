@@ -1,0 +1,106 @@
+---
+title: "PSEATE - Relations entre latitudes et dosages"
+subtitle: ""
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+---
+
+```{r, include = F}
+# Output figure in HTML5
+if (knitr::is_html_output()) knitr::knit_hooks$set(
+  plot = function(x, options) {
+    cap  <- options$fig.cap  # figure caption
+    tags <- htmltools::tags
+    as.character(tags$figure(
+      tags$img(src = x, alt = cap),
+      tags$figcaption(cap)
+    ))
+  }
+)
+
+# packages
+source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
+library(knitr)
+
+iso <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/PNB_SI_HG_GLS_centroide.txt",
+                      sep = "\t",
+                      dec = ".",
+                      h = TRUE)
+models <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/ISOSCAPE_lm_HG_13C_15N.rds")
+
+glob_pred <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/ISOSCAPE_global_pred_HG_13C_15N.rds")
+```
+
+# Mercure vs Latitudes
+
+```{r, echo = F}
+plot(iso$CENTRO_LAT,
+     iso$HG_MEAN,
+     xlab = "Latitude",
+     ylab = "Mean Hg",
+     bty = "n")
+
+lines(glob_pred$lat,
+      glob_pred$fit_hg,
+      col = "red")
+lines(glob_pred$lat,
+      glob_pred$fit_hg - glob_pred$se_fit_hg,
+      col = "red",
+      lty = 4)
+lines(glob_pred$lat,
+      glob_pred$fit_hg + glob_pred$se_fit_hg,
+      col = "red",
+      lty = 4)
+
+summary(models[[1]])
+```
+
+# Carbone vs Latitude
+
+```{r, echo = F}
+plot(iso$CENTRO_LAT,
+     iso$d13C_MEAN,
+     xlab = "Latitude",
+     ylab = "Mean d13C",
+     bty = "n")
+
+lines(glob_pred$lat,
+      glob_pred$fit_13c,
+      col = "red")
+lines(glob_pred$lat,
+      glob_pred$fit_13c - glob_pred$se_fit_13c,
+      col = "red",
+      lty = 4)
+lines(glob_pred$lat,
+      glob_pred$fit_13c + glob_pred$se_fit_13c,
+      col = "red",
+      lty = 4)
+
+summary(models[[2]])
+```
+# Azote vs Latitude
+
+```{r, echo = F}
+plot(iso$CENTRO_LAT,
+     iso$d15N_MEAN,
+     xlab = "Latitude",
+     ylab = "Mean d15N",
+     bty = "n")
+
+lines(glob_pred$lat,
+      glob_pred$fit_15n,
+      col = "red")
+lines(glob_pred$lat,
+      glob_pred$fit_15n - glob_pred$se_fit_15n,
+      col = "red",
+      lty = 4)
+lines(glob_pred$lat,
+      glob_pred$fit_15n + glob_pred$se_fit_15n,
+      col = "red",
+      lty = 4)
+
+summary(models[[3]])
+```
