@@ -30,7 +30,7 @@ mdp <- pwd
 
 # Chemin de stockage des fichiers exportés
 # dossier_vars = "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R"
-dossier_vars = "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2019/"
+dossier_vars = "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/SST_2018-2019/"
 
 
 # Paramètres d'emprise des variables à télécharger
@@ -49,12 +49,14 @@ lat_max = "31"          # latitude maximale de la zone à télécharger
 ### "Date_max" : Format jour/mois/année  (format Français)
 
 # Informations variables
-link_tab_parm <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Input_R" # Chemin du tableau contenant les paramètres des variables
+link_tab_parm <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Input_R" # Chemin du tableau contenant les paramètres des variables
 # nom_fichier_tab <- "Parametres_5_variables.csv"   # Nom du fichier contenant le tableau avec les paramètres des variables (.csv, séparateur point-virgule)
 # nom_fichier_tab <- "Parametres_WIND_ORIENTATION.csv"
 # nom_fichier_tab <- "Parametres_chlo_JANFEVMAR_2018.csv"
 # nom_fichier_tab <- "Parametres_chlo_JANFEVMAR_OCTNOVDEC_2017.csv"
-nom_fichier_tab <- "Parametres_WIND_2008-2018_2.csv"
+# nom_fichier_tab <- "Parametres_WIND_2008-2018_2.csv"
+nom_fichier_tab <- "Parametres_SST_PNB_ISOSCAPE.csv"
+
 
 ####################### DEBUT PARTIE 2 DU SCRIPT : Téléchargement variables sur Copernicus Marine Environment Monitoring Service #######################
 
