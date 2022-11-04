@@ -25,7 +25,7 @@ if (knitr::is_html_output()) knitr::knit_hooks$set(
 source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
 library(knitr)
 
-iso <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/PNB_SI_HG_GLS_centroide.txt",
+iso <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/PNB_ISOTOPES_locs_in_kernels_dates_SST.txt",
                       sep = "\t",
                       dec = ".",
                       h = TRUE)
@@ -183,4 +183,205 @@ lines(glob_pred_lon$lon,
       lty = 4)
 
 summary(models_lon[[3]])
+```
+
+
+
+# SST moyenne sous les kernels 50  
+  
+La taille des cercles sont corrélés à la taille des kernels 50.  
+  
+## SST vs Latitudes
+
+```{r, echo=FALSE}
+           plot(x = iso$CENTRO_LAT,
+                y = iso$SST_MEAN,
+                xlim = c(min(iso$CENTRO_LAT), max(iso$CENTRO_LAT)),
+                ylim = c(min(iso$SST_MEAN - iso$SST_SD), max(iso$SST_MEAN + iso$SST_SD)),
+                bty = "n",
+                ylab = "SST (K)",
+                xlab = "Centroide latitude (°)",
+                cex = scales::rescale(as.numeric(iso$N_PIX), to = c(1, 5)))
+           segments(x0 = iso$CENTRO_LAT,
+                    y0 = iso$SST_MEAN + iso$SST_SD,
+                    x1 = iso$CENTRO_LAT,
+                    y1 = iso$SST_MEAN - iso$SST_SD)
+           
+           mod <- lm(iso$SST_MEAN ~ iso$CENTRO_LAT)
+          
+           pred_mod <- predict.lm(mod,
+                                  se.fit = TRUE)
+           pred_df <- data.frame(x = iso$CENTRO_LAT,
+                                 fit_sst = pred_mod$fit,
+                                 se_fit_sst = pred_mod$se.fit)
+           pred_df <- pred_df[order(pred_df$x), ]
+           lines(pred_df$x,
+                 pred_df$fit_sst,
+                 col = "red")
+           lines(pred_df$x,
+                 pred_df$fit_sst - pred_df$se_fit_sst,
+                 col = "red",
+                 lty = 4)
+           lines(pred_df$x,
+                 pred_df$fit_sst + pred_df$se_fit_sst,
+                 col = "red",
+                 lty = 4)      
+
+summary(mod)
+```
+  
+## SST vs Longitudes
+
+```{r, echo=FALSE}
+           plot(x = iso$CENTRO_LON,
+                y = iso$SST_MEAN,
+                xlim = c(min(iso$CENTRO_LON), max(iso$CENTRO_LON)),
+                ylim = c(min(iso$SST_MEAN - iso$SST_SD), max(iso$SST_MEAN + iso$SST_SD)),
+                bty = "n",
+                ylab = "SST (K)",
+                xlab = "Centroide longitude (°)",
+                cex = scales::rescale(as.numeric(iso$N_PIX), to = c(1, 5)))
+           segments(x0 = iso$CENTRO_LON,
+                    y0 = iso$SST_MEAN + iso$SST_SD,
+                    x1 = iso$CENTRO_LON,
+                    y1 = iso$SST_MEAN - iso$SST_SD)
+           
+           mod <- lm(iso$SST_MEAN ~ iso$CENTRO_LON)
+          
+           pred_mod <- predict.lm(mod,
+                                  se.fit = TRUE)
+           pred_df <- data.frame(x = iso$CENTRO_LON,
+                                 fit_sst = pred_mod$fit,
+                                 se_fit_sst = pred_mod$se.fit)
+           pred_df <- pred_df[order(pred_df$x), ]
+           lines(pred_df$x,
+                 pred_df$fit_sst,
+                 col = "red")
+           lines(pred_df$x,
+                 pred_df$fit_sst - pred_df$se_fit_sst,
+                 col = "red",
+                 lty = 4)
+           lines(pred_df$x,
+                 pred_df$fit_sst + pred_df$se_fit_sst,
+                 col = "red",
+                 lty = 4)      
+
+summary(mod)
+```
+  
+## SST vs Mercure
+
+```{r, echo=FALSE}
+           plot(x = iso$HG_MEAN,
+                y = iso$SST_MEAN,
+                xlim = c(min(iso$HG_MEAN), max(iso$HG_MEAN)),
+                ylim = c(min(iso$SST_MEAN - iso$SST_SD), max(iso$SST_MEAN + iso$SST_SD)),
+                bty = "n",
+                ylab = "SST (K)",
+                xlab = "HG",
+                cex = scales::rescale(as.numeric(iso$N_PIX), to = c(1, 5)))
+           segments(x0 = iso$HG_MEAN,
+                    y0 = iso$SST_MEAN + iso$SST_SD,
+                    x1 = iso$HG_MEAN,
+                    y1 = iso$SST_MEAN - iso$SST_SD)
+           
+           mod <- lm(iso$SST_MEAN ~ iso$HG_MEAN)
+          
+           pred_mod <- predict.lm(mod,
+                                  se.fit = TRUE)
+           pred_df <- data.frame(x = iso$HG_MEAN,
+                                 fit_sst = pred_mod$fit,
+                                 se_fit_sst = pred_mod$se.fit)
+           pred_df <- pred_df[order(pred_df$x), ]
+           lines(pred_df$x,
+                 pred_df$fit_sst,
+                 col = "red")
+           lines(pred_df$x,
+                 pred_df$fit_sst - pred_df$se_fit_sst,
+                 col = "red",
+                 lty = 4)
+           lines(pred_df$x,
+                 pred_df$fit_sst + pred_df$se_fit_sst,
+                 col = "red",
+                 lty = 4)      
+
+summary(mod)
+```
+  
+## SST vs Carbone
+
+```{r, echo=FALSE}
+           plot(x = iso$d13C_MEAN,
+                y = iso$SST_MEAN,
+                xlim = c(min(iso$d13C_MEAN), max(iso$d13C_MEAN)),
+                ylim = c(min(iso$SST_MEAN - iso$SST_SD), max(iso$SST_MEAN + iso$SST_SD)),
+                bty = "n",
+                ylab = "SST (K)",
+                xlab = "d13C",
+                cex = scales::rescale(as.numeric(iso$N_PIX), to = c(1, 5)))
+           segments(x0 = iso$d13C_MEAN,
+                    y0 = iso$SST_MEAN + iso$SST_SD,
+                    x1 = iso$d13C_MEAN,
+                    y1 = iso$SST_MEAN - iso$SST_SD)
+           
+           mod <- lm(iso$SST_MEAN ~ iso$d13C_MEAN)
+          
+           pred_mod <- predict.lm(mod,
+                                  se.fit = TRUE)
+           pred_df <- data.frame(x = iso$d13C_MEAN,
+                                 fit_sst = pred_mod$fit,
+                                 se_fit_sst = pred_mod$se.fit)
+           pred_df <- pred_df[order(pred_df$x), ]
+           lines(pred_df$x,
+                 pred_df$fit_sst,
+                 col = "red")
+           lines(pred_df$x,
+                 pred_df$fit_sst - pred_df$se_fit_sst,
+                 col = "red",
+                 lty = 4)
+           lines(pred_df$x,
+                 pred_df$fit_sst + pred_df$se_fit_sst,
+                 col = "red",
+                 lty = 4)      
+
+summary(mod)
+```
+  
+## SST vs Azote
+
+```{r, echo=FALSE}
+           plot(x = iso$d15N_MEAN,
+                y = iso$SST_MEAN,
+                xlim = c(min(iso$d15N_MEAN), max(iso$d15N_MEAN)),
+                ylim = c(min(iso$SST_MEAN - iso$SST_SD), max(iso$SST_MEAN + iso$SST_SD)),
+                bty = "n",
+                ylab = "SST (K)",
+                xlab = "d15N",
+                cex = scales::rescale(as.numeric(iso$N_PIX), to = c(1, 5)))
+           segments(x0 = iso$d15N_MEAN,
+                    y0 = iso$SST_MEAN + iso$SST_SD,
+                    x1 = iso$d15N_MEAN,
+                    y1 = iso$SST_MEAN - iso$SST_SD)
+           
+           mod <- lm(iso$SST_MEAN ~ iso$d15N_MEAN)
+          
+           pred_mod <- predict.lm(mod,
+                                  se.fit = TRUE)
+           pred_df <- data.frame(x = iso$d15N_MEAN,
+                                 fit_sst = pred_mod$fit,
+                                 se_fit_sst = pred_mod$se.fit)
+           pred_df <- pred_df[order(pred_df$x), ]
+           lines(pred_df$x,
+                 pred_df$fit_sst,
+                 col = "red")
+           lines(pred_df$x,
+                 pred_df$fit_sst - pred_df$se_fit_sst,
+                 col = "red",
+                 lty = 4)
+           lines(pred_df$x,
+                 pred_df$fit_sst + pred_df$se_fit_sst,
+                 col = "red",
+                 lty = 4)      
+
+summary(mod)
 ```
