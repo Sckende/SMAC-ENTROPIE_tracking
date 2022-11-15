@@ -50,6 +50,16 @@ ll2 <- split(pseate_sf,
 
 kern <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/kernel50-90.rds")
 
+ker50 <- lapply(kern, function(x) {x[[1]]})
+ker90 <- lapply(kern, function(x) {x[[2]]})
+
+iso <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/PNB_ISOTOPES_locs_in_kernels_dates_SST.txt",
+                  sep = "\t",
+                  dec = ".",
+                  h = TRUE)
+iso_sf <- sf::st_as_sf(iso,
+                       coords = c("CENTRO_LON", "CENTRO_LAT"),
+                       crs = 4326)
 
 library(knitr)
 ```
@@ -87,7 +97,16 @@ ll1 <- split(ll2[["PNB-C2127"]],
             ll2[["PNB-C2127"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2127", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2127"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2127"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -112,7 +131,16 @@ ll1 <- split(ll2[["PNB-C2127_2019"]],
             ll2[["PNB-C2127_2019"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2127_2019", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2127_2019"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2127_2019"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -137,7 +165,16 @@ ll1 <- split(ll2[["PNB-C2128"]],
             ll2[["PNB-C2128"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2128", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2128"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2128"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -162,7 +199,16 @@ ll1 <- split(ll2[["PNB-C2130"]],
             ll2[["PNB-C2130"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2130", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2130"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2130"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -187,7 +233,16 @@ ll1 <- split(ll2[["PNB-C2133"]],
             ll2[["PNB-C2133"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2133", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2133"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2133"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -212,7 +267,16 @@ ll1 <- split(ll2[["PNB-C2133_2019"]],
             ll2[["PNB-C2133_2019"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2133_2019", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2133_2019"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2133_2019"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -237,7 +301,16 @@ ll1 <- split(ll2[["PNB-C2134"]],
             ll2[["PNB-C2134"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2134", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2134"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2134"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -262,7 +335,16 @@ ll1 <- split(ll2[["PNB-C2135"]],
             ll2[["PNB-C2135"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2135", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2135"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2135"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -287,7 +369,16 @@ ll1 <- split(ll2[["PNB-C2136"]],
             ll2[["PNB-C2136"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2136", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2136"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2136"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -312,7 +403,16 @@ ll1 <- split(ll2[["PNB-C2137"]],
             ll2[["PNB-C2137"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2137", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2137"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2137"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -337,7 +437,16 @@ ll1 <- split(ll2[["PNB-C2137_2019"]],
             ll2[["PNB-C2137_2019"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2137_2019", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2137_2019"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2137_2019"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -362,7 +471,16 @@ ll1 <- split(ll2[["PNB-C2138"]],
             ll2[["PNB-C2138"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2138", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2138"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2138"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -387,7 +505,16 @@ ll1 <- split(ll2[["PNB-C2139"]],
             ll2[["PNB-C2139"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2139", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2139"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2139"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -412,7 +539,16 @@ ll1 <- split(ll2[["PNB-C2141"]],
             ll2[["PNB-C2141"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2141", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2141"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2141"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -437,7 +573,16 @@ ll1 <- split(ll2[["PNB-C2141_2019"]],
             ll2[["PNB-C2141_2019"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2141_2019", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2141_2019"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2141_2019"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -462,7 +607,16 @@ ll1 <- split(ll2[["PNB-C2142"]],
             ll2[["PNB-C2142"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2142", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2142"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2142"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -487,7 +641,16 @@ ll1 <- split(ll2[["PNB-C2142_2019"]],
             ll2[["PNB-C2142_2019"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2142_2019", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2142_2019"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2142_2019"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -512,7 +675,16 @@ ll1 <- split(ll2[["PNB-C2144"]],
             ll2[["PNB-C2144"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2144", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2144"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2144"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -537,7 +709,16 @@ ll1 <- split(ll2[["PNB-C2145"]],
             ll2[["PNB-C2145"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2145", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2145"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2145"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -562,7 +743,16 @@ ll1 <- split(ll2[["PNB-C2859_2019"]],
             ll2[["PNB-C2859_2019"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2859_2019", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2859_2019"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2859_2019"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -587,7 +777,16 @@ ll1 <- split(ll2[["PNB-C2860_2019"]],
             ll2[["PNB-C2860_2019"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2860_2019", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2860_2019"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2860_2019"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
@@ -612,7 +811,16 @@ ll1 <- split(ll2[["PNB-C2866_2019"]],
             ll2[["PNB-C2866_2019"]]$TYPE)
 
 mapview(ll1,
-        col.region = c("#a9a9a976", "#000000a7"))
+        col.region = c("#a9a9a976", "#000000a7")) +
+  mapview(iso_sf[iso_sf$ID == "PNB-C2866_2019", ],
+          col.region = "red",
+          layer.name = "centroïde") +
+  mapview(ker90[["PNB-C2866_2019"]],
+          layer.name = "kernel 90",
+          col.region = "#8acef2") +
+  mapview(ker50[["PNB-C2866_2019"]],
+          layer.name = "kernel 50",
+          col.region = "#009bed")
 
 rg <- lapply(ll,
              function(x) {
