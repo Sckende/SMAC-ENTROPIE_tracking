@@ -36,6 +36,9 @@ glob_pred_lat <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isot
 glob_pred_lon <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/ISOSCAPE_pred_LON_vs_HG_C_N.rds")
 ```
 
+Courbe rouge = regression linéaire  
+Courbe bleue = GAM  
+Si juste une courbe bleue, c'est que les deux relations se superposent.  
 
 # Latitudes des centroides des kernels 50  
 
@@ -58,6 +61,26 @@ lines(glob_pred_lat$lat,
 lines(glob_pred_lat$lat,
       glob_pred_lat$fit_hg + glob_pred_lat$se_fit_hg,
       col = "red",
+      lty = 4)
+
+mod_gam <- mgcv::gam(iso$HG_MEAN ~ s(iso$CENTRO_LAT))
+pred_mod_gam <- predict(mod_gam,
+                        se.fit = TRUE)
+pred_df <- data.frame(x = iso$CENTRO_LAT,
+                      fit_gam = pred_mod_gam$fit,
+                      se_fit_gam = pred_mod_gam$se.fit)
+pred_df <- pred_df[order(pred_df$x), ]
+
+lines(pred_df$x,
+      pred_df$fit_gam,
+      col = "darkblue")
+lines(pred_df$x,
+      pred_df$fit_gam - pred_df$se_fit_gam,
+      col = "darkblue",
+      lty = 4)
+lines(pred_df$x,
+      pred_df$fit_gam + pred_df$se_fit_gam,
+      col = "darkblue",
       lty = 4)
 
 summary(models_lat[[1]])
@@ -84,6 +107,27 @@ lines(glob_pred_lat$lat,
       col = "red",
       lty = 4)
 
+mod_gam <- mgcv::gam(iso$d13C_MEAN ~ s(iso$CENTRO_LAT))
+pred_mod_gam <- predict(mod_gam,
+                        se.fit = TRUE)
+pred_df <- data.frame(x = iso$CENTRO_LAT,
+                      fit_gam = pred_mod_gam$fit,
+                      se_fit_gam = pred_mod_gam$se.fit)
+pred_df <- pred_df[order(pred_df$x), ]
+
+lines(pred_df$x,
+      pred_df$fit_gam,
+      col = "darkblue")
+lines(pred_df$x,
+      pred_df$fit_gam - pred_df$se_fit_gam,
+      col = "darkblue",
+      lty = 4)
+lines(pred_df$x,
+      pred_df$fit_gam + pred_df$se_fit_gam,
+      col = "darkblue",
+      lty = 4)
+
+
 summary(models_lat[[2]])
 ```
 ## Azote vs Latitude
@@ -105,6 +149,26 @@ lines(glob_pred_lat$lat,
 lines(glob_pred_lat$lat,
       glob_pred_lat$fit_15n + glob_pred_lat$se_fit_15n,
       col = "red",
+      lty = 4)
+
+mod_gam <- mgcv::gam(iso$d15N_MEAN ~ s(iso$CENTRO_LAT))
+pred_mod_gam <- predict(mod_gam,
+                        se.fit = TRUE)
+pred_df <- data.frame(x = iso$CENTRO_LAT,
+                      fit_gam = pred_mod_gam$fit,
+                      se_fit_gam = pred_mod_gam$se.fit)
+pred_df <- pred_df[order(pred_df$x), ]
+
+lines(pred_df$x,
+      pred_df$fit_gam,
+      col = "darkblue")
+lines(pred_df$x,
+      pred_df$fit_gam - pred_df$se_fit_gam,
+      col = "darkblue",
+      lty = 4)
+lines(pred_df$x,
+      pred_df$fit_gam + pred_df$se_fit_gam,
+      col = "darkblue",
       lty = 4)
 
 summary(models_lat[[3]])
@@ -135,6 +199,26 @@ lines(glob_pred_lon$lon,
       col = "red",
       lty = 4)
 
+mod_gam <- mgcv::gam(iso$HG_MEAN ~ s(iso$CENTRO_LON))
+pred_mod_gam <- predict(mod_gam,
+                        se.fit = TRUE)
+pred_df <- data.frame(x = iso$CENTRO_LON,
+                      fit_gam = pred_mod_gam$fit,
+                      se_fit_gam = pred_mod_gam$se.fit)
+pred_df <- pred_df[order(pred_df$x), ]
+
+lines(pred_df$x,
+      pred_df$fit_gam,
+      col = "darkblue")
+lines(pred_df$x,
+      pred_df$fit_gam - pred_df$se_fit_gam,
+      col = "darkblue",
+      lty = 4)
+lines(pred_df$x,
+      pred_df$fit_gam + pred_df$se_fit_gam,
+      col = "darkblue",
+      lty = 4)
+
 summary(models_lon[[1]])
 ```
 
@@ -159,6 +243,26 @@ lines(glob_pred_lon$lon,
       col = "red",
       lty = 4)
 
+mod_gam <- mgcv::gam(iso$d13C_MEAN ~ s(iso$CENTRO_LON))
+pred_mod_gam <- predict(mod_gam,
+                        se.fit = TRUE)
+pred_df <- data.frame(x = iso$CENTRO_LON,
+                      fit_gam = pred_mod_gam$fit,
+                      se_fit_gam = pred_mod_gam$se.fit)
+pred_df <- pred_df[order(pred_df$x), ]
+
+lines(pred_df$x,
+      pred_df$fit_gam,
+      col = "darkblue")
+lines(pred_df$x,
+      pred_df$fit_gam - pred_df$se_fit_gam,
+      col = "darkblue",
+      lty = 4)
+lines(pred_df$x,
+      pred_df$fit_gam + pred_df$se_fit_gam,
+      col = "darkblue",
+      lty = 4)
+
 summary(models_lon[[2]])
 ```
 ## Azote vs Longitudes
@@ -180,6 +284,26 @@ lines(glob_pred_lon$lon,
 lines(glob_pred_lon$lon,
       glob_pred_lon$fit_15n + glob_pred_lon$se_fit_15n,
       col = "red",
+      lty = 4)
+
+mod_gam <- mgcv::gam(iso$d15N_MEAN ~ s(iso$CENTRO_LON))
+pred_mod_gam <- predict(mod_gam,
+                        se.fit = TRUE)
+pred_df <- data.frame(x = iso$CENTRO_LON,
+                      fit_gam = pred_mod_gam$fit,
+                      se_fit_gam = pred_mod_gam$se.fit)
+pred_df <- pred_df[order(pred_df$x), ]
+
+lines(pred_df$x,
+      pred_df$fit_gam,
+      col = "darkblue")
+lines(pred_df$x,
+      pred_df$fit_gam - pred_df$se_fit_gam,
+      col = "darkblue",
+      lty = 4)
+lines(pred_df$x,
+      pred_df$fit_gam + pred_df$se_fit_gam,
+      col = "darkblue",
       lty = 4)
 
 summary(models_lon[[3]])
@@ -208,24 +332,63 @@ La taille des cercles sont corrélés à la taille des kernels 50.
                     y1 = iso$SST_MEAN - iso$SST_SD)
            
            mod <- lm(iso$SST_MEAN ~ iso$CENTRO_LAT)
-          
-           pred_mod <- predict.lm(mod,
-                                  se.fit = TRUE)
-           pred_df <- data.frame(x = iso$CENTRO_LAT,
-                                 fit_sst = pred_mod$fit,
-                                 se_fit_sst = pred_mod$se.fit)
-           pred_df <- pred_df[order(pred_df$x), ]
-           lines(pred_df$x,
+           
+           mod_quadra <- lm(iso$SST_MEAN ~ poly(iso$CENTRO_LAT, 2))
+           
+           mod_gam <- mgcv::gam(iso$SST_MEAN ~ s(iso$CENTRO_LAT))
+
+
+# Visualization
+pred_mod <- predict.lm(mod,
+                    se.fit = TRUE)
+# pred_mod_quadra <- predict.lm(mod_quadra,
+#                               se.fit = TRUE)
+pred_mod_gam <- predict(mod_gam,
+                        se.fit = TRUE)
+pred_df <- data.frame(lat = iso$CENTRO_LAT,
+                      fit_sst = pred_mod$fit,
+                      se_fit_sst = pred_mod$se.fit,
+                      # fit_sst_quadra = pred_mod_quadra$fit,
+                      # se_fit_sst_quadra = pred_mod_quadra$se.fit,
+                      fit_sst_gam = pred_mod_gam$fit,
+                      se_fit_sst_gam = pred_mod_gam$se.fit)
+pred_df <- pred_df[order(pred_df$lat), ]
+####
+           lines(pred_df$lat,
                  pred_df$fit_sst,
                  col = "red")
-           lines(pred_df$x,
+           lines(pred_df$lat,
                  pred_df$fit_sst - pred_df$se_fit_sst,
                  col = "red",
                  lty = 4)
-           lines(pred_df$x,
+           lines(pred_df$lat,
                  pred_df$fit_sst + pred_df$se_fit_sst,
                  col = "red",
-                 lty = 4)      
+                 lty = 4)  
+####
+           # lines(pred_df$lat,
+           #       pred_df$fit_sst_quadra,
+           #       col = "green")
+           # lines(pred_df$lat,
+           #       pred_df$fit_sst_quadra - pred_df$se_fit_sst_quadra,
+           #       col = "green",
+           #       lty = 4)
+           # lines(pred_df$lat,
+           #       pred_df$fit_sst_quadra + pred_df$se_fit_sst_quadra,
+           #       col = "green",
+           #       lty = 4)
+####
+          lines(pred_df$lat,
+                pred_df$fit_sst_gam,
+                col = "darkblue")
+          lines(pred_df$lat,
+                pred_df$fit_sst_gam - pred_df$se_fit_sst_gam,
+                col = "darkblue",
+                lty = 4)
+          lines(pred_df$lat,
+                pred_df$fit_sst_gam + pred_df$se_fit_sst_gam,
+                col = "darkblue",
+                lty = 4)
 
 summary(mod)
 ```
@@ -247,13 +410,24 @@ summary(mod)
                     y1 = iso$SST_MEAN - iso$SST_SD)
            
            mod <- lm(iso$SST_MEAN ~ iso$CENTRO_LON)
-          
-           pred_mod <- predict.lm(mod,
-                                  se.fit = TRUE)
-           pred_df <- data.frame(x = iso$CENTRO_LON,
-                                 fit_sst = pred_mod$fit,
-                                 se_fit_sst = pred_mod$se.fit)
-           pred_df <- pred_df[order(pred_df$x), ]
+           
+           mod_gam <- mgcv::gam(iso$SST_MEAN ~ s(iso$CENTRO_LON))
+
+
+# Visualization
+pred_mod <- predict.lm(mod,
+                    se.fit = TRUE)
+
+pred_mod_gam <- predict(mod_gam,
+                        se.fit = TRUE)
+pred_df <- data.frame(x = iso$CENTRO_LON,
+                      fit_sst = pred_mod$fit,
+                      se_fit_sst = pred_mod$se.fit,
+                      fit_sst_gam = pred_mod_gam$fit,
+                      se_fit_sst_gam = pred_mod_gam$se.fit)
+
+pred_df <- pred_df[order(pred_df$x), ]
+
            lines(pred_df$x,
                  pred_df$fit_sst,
                  col = "red")
@@ -264,7 +438,20 @@ summary(mod)
            lines(pred_df$x,
                  pred_df$fit_sst + pred_df$se_fit_sst,
                  col = "red",
-                 lty = 4)      
+                 lty = 4)
+           
+           
+          lines(pred_df$x,
+                pred_df$fit_sst_gam,
+                col = "darkblue")
+          lines(pred_df$x,
+                pred_df$fit_sst_gam - pred_df$se_fit_sst_gam,
+                col = "darkblue",
+                lty = 4)
+          lines(pred_df$x,
+                pred_df$fit_sst_gam + pred_df$se_fit_sst_gam,
+                col = "darkblue",
+                lty = 4)
 
 summary(mod)
 ```
@@ -286,13 +473,25 @@ summary(mod)
                     y1 = iso$SST_MEAN - iso$SST_SD)
            
            mod <- lm(iso$SST_MEAN ~ iso$HG_MEAN)
-          
-           pred_mod <- predict.lm(mod,
-                                  se.fit = TRUE)
-           pred_df <- data.frame(x = iso$HG_MEAN,
-                                 fit_sst = pred_mod$fit,
-                                 se_fit_sst = pred_mod$se.fit)
-           pred_df <- pred_df[order(pred_df$x), ]
+                      
+           mod_gam <- mgcv::gam(iso$SST_MEAN ~ s(iso$HG_MEAN))
+
+
+# Visualization
+pred_mod <- predict.lm(mod,
+                    se.fit = TRUE)
+
+pred_mod_gam <- predict(mod_gam,
+                        se.fit = TRUE)
+pred_df <- data.frame(x = iso$HG_MEAN,
+                      fit_sst = pred_mod$fit,
+                      se_fit_sst = pred_mod$se.fit,
+                      fit_sst_gam = pred_mod_gam$fit,
+                      se_fit_sst_gam = pred_mod_gam$se.fit)
+
+pred_df <- pred_df[order(pred_df$x), ]
+           
+           
            lines(pred_df$x,
                  pred_df$fit_sst,
                  col = "red")
@@ -303,7 +502,19 @@ summary(mod)
            lines(pred_df$x,
                  pred_df$fit_sst + pred_df$se_fit_sst,
                  col = "red",
-                 lty = 4)      
+                 lty = 4)   
+           
+          lines(pred_df$x,
+                pred_df$fit_sst_gam,
+                col = "darkblue")
+          lines(pred_df$x,
+                pred_df$fit_sst_gam - pred_df$se_fit_sst_gam,
+                col = "darkblue",
+                lty = 4)
+          lines(pred_df$x,
+                pred_df$fit_sst_gam + pred_df$se_fit_sst_gam,
+                col = "darkblue",
+                lty = 4)
 
 summary(mod)
 ```
@@ -325,13 +536,23 @@ summary(mod)
                     y1 = iso$SST_MEAN - iso$SST_SD)
            
            mod <- lm(iso$SST_MEAN ~ iso$d13C_MEAN)
-          
-           pred_mod <- predict.lm(mod,
-                                  se.fit = TRUE)
-           pred_df <- data.frame(x = iso$d13C_MEAN,
-                                 fit_sst = pred_mod$fit,
-                                 se_fit_sst = pred_mod$se.fit)
-           pred_df <- pred_df[order(pred_df$x), ]
+           mod_gam <- mgcv::gam(iso$SST_MEAN ~ s(iso$d13C_MEAN))
+
+
+# Visualization
+pred_mod <- predict.lm(mod,
+                    se.fit = TRUE)
+
+pred_mod_gam <- predict(mod_gam,
+                        se.fit = TRUE)
+pred_df <- data.frame(x = iso$d13C_MEAN,
+                      fit_sst = pred_mod$fit,
+                      se_fit_sst = pred_mod$se.fit,
+                      fit_sst_gam = pred_mod_gam$fit,
+                      se_fit_sst_gam = pred_mod_gam$se.fit)
+
+pred_df <- pred_df[order(pred_df$x), ]
+
            lines(pred_df$x,
                  pred_df$fit_sst,
                  col = "red")
@@ -342,7 +563,19 @@ summary(mod)
            lines(pred_df$x,
                  pred_df$fit_sst + pred_df$se_fit_sst,
                  col = "red",
-                 lty = 4)      
+                 lty = 4)    
+           
+          lines(pred_df$x,
+                pred_df$fit_sst_gam,
+                col = "darkblue")
+          lines(pred_df$x,
+                pred_df$fit_sst_gam - pred_df$se_fit_sst_gam,
+                col = "darkblue",
+                lty = 4)
+          lines(pred_df$x,
+                pred_df$fit_sst_gam + pred_df$se_fit_sst_gam,
+                col = "darkblue",
+                lty = 4)
 
 summary(mod)
 ```
@@ -364,13 +597,23 @@ summary(mod)
                     y1 = iso$SST_MEAN - iso$SST_SD)
            
            mod <- lm(iso$SST_MEAN ~ iso$d15N_MEAN)
-          
-           pred_mod <- predict.lm(mod,
-                                  se.fit = TRUE)
-           pred_df <- data.frame(x = iso$d15N_MEAN,
-                                 fit_sst = pred_mod$fit,
-                                 se_fit_sst = pred_mod$se.fit)
-           pred_df <- pred_df[order(pred_df$x), ]
+           mod_gam <- mgcv::gam(iso$SST_MEAN ~ s(iso$d15N_MEAN))
+
+
+# Visualization
+pred_mod <- predict.lm(mod,
+                    se.fit = TRUE)
+
+pred_mod_gam <- predict(mod_gam,
+                        se.fit = TRUE)
+pred_df <- data.frame(x = iso$d15N_MEAN,
+                      fit_sst = pred_mod$fit,
+                      se_fit_sst = pred_mod$se.fit,
+                      fit_sst_gam = pred_mod_gam$fit,
+                      se_fit_sst_gam = pred_mod_gam$se.fit)
+
+pred_df <- pred_df[order(pred_df$x), ]
+
            lines(pred_df$x,
                  pred_df$fit_sst,
                  col = "red")
@@ -381,7 +624,20 @@ summary(mod)
            lines(pred_df$x,
                  pred_df$fit_sst + pred_df$se_fit_sst,
                  col = "red",
-                 lty = 4)      
+                 lty = 4)    
+           
+          lines(pred_df$x,
+                pred_df$fit_sst_gam,
+                col = "darkblue")
+          lines(pred_df$x,
+                pred_df$fit_sst_gam - pred_df$se_fit_sst_gam,
+                col = "darkblue",
+                lty = 4)
+          lines(pred_df$x,
+                pred_df$fit_sst_gam + pred_df$se_fit_sst_gam,
+                col = "darkblue",
+                lty = 4)
+
 
 summary(mod)
 ```
