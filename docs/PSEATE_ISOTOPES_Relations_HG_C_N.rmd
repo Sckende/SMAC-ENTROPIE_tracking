@@ -25,7 +25,7 @@ if (knitr::is_html_output()) knitr::knit_hooks$set(
 source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
 library(knitr)
 
-iso <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/PNB_ISOTOPES_locs_in_kernels_dates_SST.txt",
+iso <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/PNB_ISOTOPES_locs_in_kernels_dates_SST_degre.txt",
                       sep = "\t",
                       dec = ".",
                       h = TRUE)
@@ -199,7 +199,7 @@ La taille des cercles sont corrélés à la taille des kernels 50.
                 xlim = c(min(iso$CENTRO_LAT), max(iso$CENTRO_LAT)),
                 ylim = c(min(iso$SST_MEAN - iso$SST_SD), max(iso$SST_MEAN + iso$SST_SD)),
                 bty = "n",
-                ylab = "SST (K)",
+                ylab = "SST (°C)",
                 xlab = "Centroide latitude (°)",
                 cex = scales::rescale(as.numeric(iso$N_PIX), to = c(1, 5)))
            segments(x0 = iso$CENTRO_LAT,
@@ -238,7 +238,7 @@ summary(mod)
                 xlim = c(min(iso$CENTRO_LON), max(iso$CENTRO_LON)),
                 ylim = c(min(iso$SST_MEAN - iso$SST_SD), max(iso$SST_MEAN + iso$SST_SD)),
                 bty = "n",
-                ylab = "SST (K)",
+                ylab = "SST (°C)",
                 xlab = "Centroide longitude (°)",
                 cex = scales::rescale(as.numeric(iso$N_PIX), to = c(1, 5)))
            segments(x0 = iso$CENTRO_LON,
@@ -277,7 +277,7 @@ summary(mod)
                 xlim = c(min(iso$HG_MEAN), max(iso$HG_MEAN)),
                 ylim = c(min(iso$SST_MEAN - iso$SST_SD), max(iso$SST_MEAN + iso$SST_SD)),
                 bty = "n",
-                ylab = "SST (K)",
+                ylab = "SST (°C)",
                 xlab = "HG",
                 cex = scales::rescale(as.numeric(iso$N_PIX), to = c(1, 5)))
            segments(x0 = iso$HG_MEAN,
@@ -316,7 +316,7 @@ summary(mod)
                 xlim = c(min(iso$d13C_MEAN), max(iso$d13C_MEAN)),
                 ylim = c(min(iso$SST_MEAN - iso$SST_SD), max(iso$SST_MEAN + iso$SST_SD)),
                 bty = "n",
-                ylab = "SST (K)",
+                ylab = "SST (°C)",
                 xlab = "d13C",
                 cex = scales::rescale(as.numeric(iso$N_PIX), to = c(1, 5)))
            segments(x0 = iso$d13C_MEAN,
@@ -355,7 +355,7 @@ summary(mod)
                 xlim = c(min(iso$d15N_MEAN), max(iso$d15N_MEAN)),
                 ylim = c(min(iso$SST_MEAN - iso$SST_SD), max(iso$SST_MEAN + iso$SST_SD)),
                 bty = "n",
-                ylab = "SST (K)",
+                ylab = "SST (°C)",
                 xlab = "d15N",
                 cex = scales::rescale(as.numeric(iso$N_PIX), to = c(1, 5)))
            segments(x0 = iso$d15N_MEAN,
