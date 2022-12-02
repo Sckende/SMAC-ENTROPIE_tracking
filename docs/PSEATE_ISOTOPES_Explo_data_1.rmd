@@ -24,13 +24,19 @@ if (knitr::is_html_output()) knitr::knit_hooks$set(
 # packages
 source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
 
+synth <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DATA/GitHub_Pages/ISOSCAPE_synthese_par_ind.rds")
+
 ```
 
 # Mise en contexte
   
 ## A développer
   
-
+```{r}
+knitr::kable(synth,
+             caption = "Tab. 1. Synthèse de l'information spatiale par individu. La distance est exprimée en km.",
+             row.names = F)
+```
 # Bilan data brutes  
    
 ```{r setup, include = FALSE}
