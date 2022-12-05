@@ -32,9 +32,9 @@ synth <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/6-PNB_isotopes/DAT
   
 ## A développer
   
-```{r}
+```{r, echo = FALSE}
 knitr::kable(synth,
-             caption = "Tab. 1. Synthèse de l'information spatiale par individu. La distance est exprimée en km.",
+             caption = "Tab. 1. Synthèse de l'information spatiale par individu pour la période migratoire. La distance est exprimée en km.",
              row.names = F)
 ```
 # Bilan data brutes  
