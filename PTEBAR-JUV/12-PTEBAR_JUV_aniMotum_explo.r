@@ -179,11 +179,16 @@ x11(); plot(fmp1, ask = F)
 x11(); plot(fmp11, ask = F)
 x11(); plot(fmp111, ask = F)
 
+##################################
 #### APPLICATION ON ALL DATA ####
+################################
 # Model fitting for quality control of locations is comprised of 3 steps: a data formatting step, a pre-filtering step, and the actual model fitting step. A number of checks are made on the input data during the formatting and pre-filtering steps, including applying the trip::sda filter to identify extreme observations (see ?fit_ssm for details). The pre-filter step is fully automated, although various arguments can be used to modify it’s actions, and called via the fit_ssm function. These are the minimum arguments required: the input data, the model (rw, crw, or mp) and the time.step (in h) to which locations are predicted. Additional control can be exerted over the data formatting and pre-filtering steps, via the id, date, lc, coord, epar and sderr variable name arguments, and via the vmax, ang, distlim, min.dt, and spdf pre-filtering arguments (see ?fit_ssm for details). The defaults for these arguments are quite conservative (for non-flying species), usually leading to relative few observations being flagged to be ignored by the SSM. Additional control over the optimization can also be exerted via the control = ssm_control() argument, see vignette('SSM_fitting') and ?ssm_control for more details.
 # fit_ssm usually returns two sets of estimated locations in the model fit object: fitted values and predicted values. The fitted values occur at the times of the observations to which the SSM was fit (i.e., the observations that passed the pre-filter step). The predicted values occur at the regular time intervals specified by the time.step argument. If time.step = NA, then no predicted values are estimated or returned in the model fit object.
 
 # Users can obtain the fitted or predicted locations as a data.frame by using grab().
+
+source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
+require(aniMotum)
 
 # Remove too short tracks
 # 2017: 166570, 166571, 166573
@@ -193,7 +198,6 @@ argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV
 head(argos)
 dim(argos)
 table(argos$Vessel)
-argos <- argos[argos$Class != "U", ]
 
 ind <- argos[!(argos$Vessel %in% c("166570",
                                    "166571",
@@ -202,84 +206,122 @@ ind <- argos[!(argos$Vessel %in% c("166570",
 inds <- droplevels(ind)
 dim(inds)
 table(inds$Vessel)
+table(inds$Vessel, year(inds$deploy))
 
+inds$Class[inds$Class == "U"] <- 3
+table(inds$Class)
+
+# Formatage pour SSM analyses
 indss <- inds[, c("Vessel", "Date", "Class", "Longitude", "Latitude")]
 names(indss) <- c("id", "date", "lc", "lon", "lat")
 head(indss)
 
 #### move persistence model ####
-fit_mp12 <- fit_ssm(indss,
+fit_mp <- fit_ssm(indss,
                   vmax = 28,
                   model = "mp",
-                  time.step = 12,
+                  time.step = NA, # to obtain only the fitted values
                   control = ssm_control(verbose = 0))
 
-fit_mp12 # "converged" = The converged column indicates whether each model fit converged successfully. / "pdHess" =  The Hessian matrix was positive-definite and could be solved to obtain parameter standard errors./ In some cases, the optimizer will converge but the Hessian matrix is not positive-definite, which typically indicates the optimizer converged on a local minimum. In this case, some standard errors may be calculated but not all. One possible solution is to try specifying a longer time.step or set time.step = NA to turn off predictions and return only fitted values (location estimates at the pre-filtered observation times). If pdHess = FALSE persists then careful inspection of the supplied data is warranted to determine if suspect observations not identified by prefilter are present. 
-summary(fit_mp12)
+fit_mp # "converged" = The converged column indicates whether each model fit converged successfully. / "pdHess" =  The Hessian matrix was positive-definite and could be solved to obtain parameter standard errors./ In some cases, the optimizer will converge but the Hessian matrix is not positive-definite, which typically indicates the optimizer converged on a local minimum. In this case, some standard errors may be calculated but not all. One possible solution is to try specifying a longer time.step or set time.step = NA to turn off predictions and return only fitted values (location estimates at the pre-filtered observation times). If pdHess = FALSE persists then careful inspection of the supplied data is warranted to determine if suspect observations not identified by prefilter are present. 
+summary(fit_mp)
 
-x11(); plot(fit_mp12, type = 1, pages = 1, ncol = 4) # see ?plot.ssm_df
-x11(); plot(fit_mp12, type = 2, pages = 1, ncol = 4)
-x11(); plot(fit_mp12, type = 3, pages = 1, ncol = 4)
+x11(); plot(fit_mp,
+            what = "fitted",
+            type = 1,
+            pages = 1,
+            ncol = 4) # see ?plot.ssm_df
+x11(); plot(fit_mp,
+            type = 2,
+            pages = 1,
+            ncol = 4)
+x11(); plot(fit_mp,
+            type = 3,
+            pages = 1,
+            ncol = 4)
+x11(); map(fit_mp)
 
-fmp_mp12 <- fit_mpm(fit_mp12,
-                     what = "predicted",
-                     model = "mpm",
-                     control = ssm_control(vebose = 0))
-
-x11(); plot(fmp_mp12, type = 3, pages = 1, ncol = 4)
+for(i in fit_mp$id) {
+     ind <- dplyr::filter(fit_mp, id == i)
+     x11()
+     print(map(ind))
+     }
 
 #### Random Walk model ####
-fit_rw12 <- fit_ssm(indss,
-                    vmax = 28,
-                    model = "rw",
-                    time.step = 12,
-                    control = ssm_control(verbose = 0))
+fit_rw <- fit_ssm(indss,
+                  vmax = 28,
+                  model = "rw",
+                  time.step = NA,
+                  control = ssm_control(verbose = 0))
 
-fit_rw12
-summary(fit_rw12)
+fit_rw
+summary(fit_rw)
 
-x11(); plot(fit_rw12, type = 1, pages = 1, ncol = 4)
-x11(); plot(fit_rw12, type = 2, pages = 1, ncol = 4)
+x11(); plot(fit_rw,
+            type = 1,
+            pages = 1,
+            ncol = 4)
+x11(); plot(fit_rw,
+            type = 2,
+            pages = 1,
+            ncol = 4)
+map(fit_rw)
+
+# Separate models for estimating move persistence
+fmp_rw <- fit_mpm(fit_rw,
+                  what = "fitted",
+                  model = "jmpm",
+                  control = ssm_control(vebose = 0))
+
+x11(); plot(fmp_rw,
+            pages = 1,
+            ncol = 4)
+for(i in fmp_rw$id) {
+     ind <- dplyr::filter(fmp_rw, id == i)
+     x11()
+     print(map(ind))
+     }
 
 #### SSM validation ####
 # use patchwork package to arrange plot.osar options
 require(patchwork)
 # calculate & plot residuals
 
-class(fit_rw12)
-for(i in fit_rw12$id) {
-     ind1 <- dplyr::filter(fit_rw12, id == i)
-res.rw <- osar(ind1)
+class(fit_rw)
+
+for(i in fit_rw$id) {
+     ind <- dplyr::filter(fit_rw, id == i)
+     res.rw <- osar(ind)
 # x11()
-png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/Figures/aniMotum_SSM_validation/SSM_rw_time-step12_",
+png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/Figures/aniMotum_SSM_validation/SSM_rw_FITTED_",
               i,
               ".png",
               sep = ""),
-        res = 300,
-        width = 30,
-        height = 30,
-        pointsize = 12,
-        unit = "cm",
-        bg = "transparent")
+    res = 300,
+    width = 30,
+    height = 30,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
 print((plot(res.rw, type = "ts") | plot(res.rw, type = "qq")) / 
   (plot(res.rw, type = "acf") | plot_spacer()))
 dev.off()
 }
 
-for(i in fit_mp12$id) {
-     ind1 <- dplyr::filter(fit_mp12, id == i)
-res.rw <- osar(ind1)
+for(i in fit_mp$id) {
+     ind <- dplyr::filter(fit_mp, id == i)
+     res.rw <- osar(ind)
 # x11()
-png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/Figures/aniMotum_SSM_validation/SSM_mp_time-step12_",
+png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/Figures/aniMotum_SSM_validation/SSM_mp_FITTED_",
               i,
               ".png",
               sep = ""),
-        res = 300,
-        width = 30,
-        height = 30,
-        pointsize = 12,
-        unit = "cm",
-        bg = "transparent")
+    res = 300,
+    width = 30,
+    height = 30,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
 print((plot(res.rw, type = "ts") | plot(res.rw, type = "qq")) / 
   (plot(res.rw, type = "acf") | plot_spacer()))
 dev.off()
