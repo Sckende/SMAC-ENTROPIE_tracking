@@ -55,7 +55,7 @@ argos.s
 extract(r[[1]],
         argos.s[, c("Longitude", "Latitude")])
 
-env.folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R" 
+env.folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R" 
 list.names <- list.files(env.folder)
 length(list.names)
 
