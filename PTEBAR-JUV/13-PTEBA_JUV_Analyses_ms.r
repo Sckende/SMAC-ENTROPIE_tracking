@@ -31,39 +31,39 @@ head(indss)
 #### ---- move persistence model ---- ####
 
 # max 100 km/h
-fit_mp <- fit_ssm(indss,
-                  vmax = 28, # env. 100 km/h
-                  ang = NA,
-                  model = "mp",
-                  time.step = NA, # to obtain only the fitted values
-                  control = ssm_control(verbose = 0))
+# fit_mp <- fit_ssm(indss,
+#                   vmax = 28, # env. 100 km/h
+#                   ang = NA,
+#                   model = "mp",
+#                   time.step = NA, # to obtain only the fitted values
+#                   control = ssm_control(verbose = 0))
 
-fit_mp
-summary(fit_mp)
-data_mp <- grab(fit_mp,
-                what = "fitted")
-x11(); plot(fit_mp, type = 2)
+# fit_mp
+# summary(fit_mp)
+# data_mp <- grab(fit_mp,
+#                 what = "fitted")
+# x11(); plot(fit_mp, type = 2)
 
 #### ---- Production des figures ---- ####
-# ---- inspectios visuelles des modèles
-for(i in fit_mp$id) {
-     ind <- dplyr::filter(fit_mp, id == i)
-     res.rw <- osar(ind)
+# ---- inspections visuelles des modèles
+# for(i in fit_mp$id) {
+#      ind <- dplyr::filter(fit_mp, id == i)
+#      res.rw <- osar(ind)
 # x11()
-png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/Analyses/Figures/SSM_MP_FITTED_",
-              i,
-              ".png",
-              sep = ""),
-    res = 300,
-    width = 30,
-    height = 30,
-    pointsize = 12,
-    unit = "cm",
-    bg = "transparent")
-print((plot(res.rw, type = "ts") | plot(res.rw, type = "qq")) / 
-  (plot(res.rw, type = "acf") | plot_spacer()))
-dev.off()
-}
+# png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/Analyses/Figures/SSM_MP_FITTED_",
+#               i,
+#               ".png",
+#               sep = ""),
+#     res = 300,
+#     width = 30,
+#     height = 30,
+#     pointsize = 12,
+#     unit = "cm",
+#     bg = "transparent")
+# print((plot(res.rw, type = "ts") | plot(res.rw, type = "qq")) / 
+#   (plot(res.rw, type = "acf") | plot_spacer()))
+# dev.off()
+# }
 
 ####
 # max 60 km/h
@@ -78,72 +78,73 @@ fit_mp1
 summary(fit_mp1)
 data_mp1 <- grab(fit_mp1,
                  what = "fitted")
+# saveRDS(data_mp1,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data.rds")
 
 #### ---- Calcul des vitesses à partir de BD à 100km/h max ---- ####
-summary(data_mp)
-class(data_mp)
-x11(); map(fit_mp, what = "fitted")
+# summary(data_mp)
+# class(data_mp)
+# x11(); map(fit_mp, what = "fitted")
 
-# conversion en sf object
-data_mp_sf <- st_as_sf(data_mp,
-                       coords = c("lon", "lat"),
-                       crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
-mapview(data_mp_sf, zcol = "id")
+# # conversion en sf object
+# data_mp_sf <- st_as_sf(data_mp,
+#                        coords = c("lon", "lat"),
+#                        crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+# mapview(data_mp_sf, zcol = "id")
 
-# calcul des vitesses
-data_ls <- split(data_mp_sf,
-                 data_mp_sf$id)
-length(data_ls)
-speed_ls <- lapply(data_ls,
-                   function(x) {
-                       diag <- diag(st_distance(x)[, -1])
-                       delay <- diff(x$date)
-                       vit_m.min <- as.numeric(diag)/as.numeric(delay)
-                       vit_km.h <- vit_m.min * 0.001 * 60
+# # calcul des vitesses
+# data_ls <- split(data_mp_sf,
+#                  data_mp_sf$id)
+# length(data_ls)
+# speed_ls <- lapply(data_ls,
+#                    function(x) {
+#                        diag <- diag(st_distance(x)[, -1])
+#                        delay <- diff(x$date)
+#                        vit_m.min <- as.numeric(diag)/as.numeric(delay)
+#                        vit_km.h <- vit_m.min * 0.001 * 60
                        
-                       df <- data.frame(id = x$id,
-                                        date = x$date,
-                                        dist_m = c(as.numeric(diag), NA),
-                                        delay_min = c(as.numeric(delay), NA),
-                                        speed_km.h = c(vit_km.h, NA))
-                       df
-                       })
+#                        df <- data.frame(id = x$id,
+#                                         date = x$date,
+#                                         dist_m = c(as.numeric(diag), NA),
+#                                         delay_min = c(as.numeric(delay), NA),
+#                                         speed_km.h = c(vit_km.h, NA))
+#                        df
+#                        })
 
-lapply(speed_ls,
-       function(x) {
-           summary(x$delay/60)
-       })
+# lapply(speed_ls,
+#        function(x) {
+#            summary(x$delay/60)
+#        })
 
-lapply(speed_ls,
-       function(x) {
-           x11()
-           barplot(x$speed_km.h[x$delay_min <= 120],
-                   main = unique(x$id))
-       })
+# lapply(speed_ls,
+#        function(x) {
+#            x11()
+#            barplot(x$speed_km.h[x$delay_min <= 120],
+#                    main = unique(x$id))
+#        })
 
-# compilation des données
-speed_df <- do.call("rbind",
-                    speed_ls)
-data_mp_sf2 <- left_join(data_mp_sf,
-                         speed_df,
-                         by = c("id", "date"))
-data_mp_sf2[data_mp_sf2$speed_km.h > 110, ]
+# # compilation des données
+# speed_df <- do.call("rbind",
+#                     speed_ls)
+# data_mp_sf2 <- left_join(data_mp_sf,
+#                          speed_df,
+#                          by = c("id", "date"))
+# data_mp_sf2[data_mp_sf2$speed_km.h > 110, ]
 
 #### ---- Calcul des vitesses à partir de BD à 60km/h max ---- ####
+fit60 <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data.rds")
 # conversion en sf object
-data_mp1 <- grab(fit_mp1,
-                 what = "fitted")
-
-data_mp_sf1 <- st_as_sf(data_mp1,
-                       coords = c("lon", "lat"),
-                       crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
-mapview(data_mp_sf1, zcol = "id")
+id_date_coords <- fit60[, c("id", "date", "lon", "lat")]
+fit60_sf <- st_as_sf(fit60,
+                     coords = c("lon", "lat"),
+                     crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+mapview(fit60_sf, zcol = "id")
 
 # calcul des vitesses
-data_ls1 <- split(data_mp_sf1,
-                 data_mp_sf1$id)
-length(data_ls1)
-speed_ls1 <- lapply(data_ls1,
+sf_ls <- split(fit60_sf,
+               fit60_sf$id)
+length(sf_ls)
+speed_ls <- lapply(sf_ls,
                    function(x) {
                        diag <- diag(st_distance(x)[, -1])
                        delay <- diff(x$date)
@@ -157,25 +158,202 @@ speed_ls1 <- lapply(data_ls1,
                                         speed_km.h = c(vit_km.h, NA))
                        df
                        })
-
-lapply(speed_ls1,
+# inspections numériques & visuelles des vitesses
+lapply(speed_ls,
        function(x) {
-           summary(x$delay/60)
-       })
+           summary(x$delay/60) # delay en heure
+       }) # ==> troisième quartile < 2 h, choix d'utiliser que les valeurs de vitesse avec un delay <= 2h 
 
-lapply(speed_ls1,
+lapply(speed_ls,
        function(x) {
            x11()
-        #    barplot(x$speed_km.h[x$delay_min <= 120],
-        #            main = unique(x$id))
+           par(mfrow = c(1, 2))
+           barplot(x$speed_km.h[x$delay_min <= 120],
+                   main = unique(x$id))
            barplot(x$speed_km.h,
                    main = unique(x$id))
        })
-
 # compilation des données
-speed_df1 <- do.call("rbind",
-                    speed_ls1)
-data_mp_sf1.2 <- left_join(data_mp_sf1,
-                         speed_df1,
-                         by = c("id", "date"))
-max(data_mp_sf1.2$speed_km.h, na.rm = T)
+sp <- do.call("rbind",
+              speed_ls)
+head(sp)
+dim(sp)
+
+fit60_sp <- left_join(fit60,
+                      sp,
+                      by = c("id", "date"))
+head(fit60_sp)
+# Traitement de la vitesse
+fit60_sp$speed_km.h_treat <- fit60_sp$speed_km.h
+fit60_sp$speed_km.h_treat[fit60_sp$delay_min > 120] <- NA 
+
+summary(fit60_sp$speed_km.h)
+summary(fit60_sp$speed_km.h_treat)
+
+
+#### ---- extraction des paramètres environnementaux sous les localisations ajustées ---- ####
+
+# ---- Creation des rasters
+env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R" 
+list_names <- list.files(env_folder)
+length(list_names)
+var <- c( 'SST-', 'CHLO', 'WIND-SPEED', 'WIND-NORTH', 'WIND-EAST')
+stack_var_list <- list()
+
+for(j in 1:length(var)){
+    v <- list_names[str_detect(list_names, var[j])]
+    v_list <- vector()
+
+    for(i in 1:length(v)){
+        r <- stack(paste(env_folder, v[i], sep = '/'))
+        v_list <- c(v_list, r)
+    }
+
+stack_var_list[j] <- stack(v_list)
+names(stack_var_list)[j] <- var[j]
+}
+
+warnings()
+
+names(stack_var_list)
+
+
+sst_stack <- stack_var_list[[1]]
+chlo_stack <- stack_var_list[[2]]
+wind_speed_stack <- stack_var_list[[3]]
+wind_north_stack <- stack_var_list[[4]]
+wind_east_stack <- stack_var_list[[5]]
+
+# ----- > Method : Split the dataframe by date and apply the extraction by group of coordinates #
+#########################################################################################################
+
+###################
+# ---- SST & chlo #
+###################
+length(unique(date(fit60_sp$date)))
+
+fit60_sp$dt <- str_replace_all(as.character(date(fit60_sp$date)),
+                               '-',
+                               '.')
+fit60_list <- split(fit60_sp,
+                    fit60_sp$dt)
+length(fit60_list)
+
+fit60_list2 <- lapply(fit60_list, function(x){
+
+    sst_raster <- sst_stack[[str_which(names(sst_stack), unique(x$dt))]]
+    chlo_raster <- chlo_stack[[str_which(names(chlo_stack), unique(x$dt))]] 
+
+    x$sst <- extract(sst_raster,
+                     as.data.frame(x[, c('lon', 'lat')]))
+    x$chlo <- extract(chlo_raster,
+                      as.data.frame(x[, c('lon', 'lat')]))
+    
+    x
+})
+print("ayéééé")
+
+fit60_2 <- do.call('rbind', fit60_list2)
+mean(fit60_2$sst, na.rm = T)
+summary(fit60_2$sst)
+
+mean(fit60_2$chlo, na.rm = T)
+summary(fit60_2$chlo)
+
+#######################"################
+# ---- For WIND speed & orientation ####
+########################################
+
+# Deletion of duplicated layers in raster
+# ---> wind_east_stack #
+########################
+
+str_length(names(wind_east_stack))
+j <- names(wind_east_stack)[str_length(names(wind_east_stack)) > 20]
+east_wind_deletion <- j[str_detect(j, '.00.2')]
+dim(wind_east_stack)
+wind_east_stack2 <- dropLayer(wind_east_stack,
+                             match(east_wind_deletion,
+                                   names(wind_east_stack)))
+dim(wind_east_stack2)
+names(wind_east_stack2)
+
+# ---> wind_north_stack #
+#########################
+str_length(names(wind_north_stack))
+k <- names(wind_north_stack)[str_length(names(wind_north_stack)) > 20]
+north_wind_deletion <- k[str_detect(k, '.00.2')]
+dim(wind_north_stack)
+wind_north_stack2 <- dropLayer(wind_north_stack,
+                              match(north_wind_deletion, 
+                                    names(wind_north_stack)))
+dim(wind_north_stack2)
+
+# ---> wind_speed_stack #
+#########################
+str_length(names(wind_speed_stack))
+l <- names(wind_speed_stack)[str_length(names(wind_speed_stack)) > 20]
+speed_wind_deletion <- l[str_detect(l, '.00.2')]
+dim(wind_speed_stack)
+wind_speed_stack2 <- dropLayer(wind_speed_stack,
+                              match(speed_wind_deletion,
+                                    names(wind_speed_stack)))
+dim(wind_speed_stack2)
+
+# ----- #
+head(fit60_2, 50)
+fit60_2$minutes <- hour(fit60_2$date)*60 + minute(fit60_2$date)
+
+# raster aux 6h 
+# deb      fin       raster.hour     raster.day
+# 21:01 (1261) -> 03:00 (180)  ==> 00:00           J+1 or J depending on bef/aft midnight
+# 03:01 (181)  -> 09:00 (540)  ==> 06:00            J
+# 09:01 (541)  -> 15:00 (900)  ==> 12:00            J
+# 15:01 (901)  -> 21:00 (1260) ==> 18:00            J
+
+fit60_2$raster_hour[fit60_2$minutes >= 1261 | fit60_2$minutes <= 180] <- "00.00"
+fit60_2$raster_hour[fit60_2$minutes >= 181 & fit60_2$minutes <= 540] <- "06.00"
+fit60_2$raster_hour[fit60_2$minutes >= 541 & fit60_2$minutes <= 900] <- "12.00"
+fit60_2$raster_hour[fit60_2$minutes >= 901 & fit60_2$minutes <= 1260] <- "18.00"
+
+fit60_2$raster_date <- ifelse(fit60_2$minutes >= 1261,
+                             as.character(date(fit60_2$date)+1),
+                             as.character(date(fit60_2$date)))
+
+fit60_2$raster_layer <- paste(str_replace_all(fit60_2$raster_date, '-', '.'),
+                             fit60_2$raster_hour,
+                             sep = '.')
+
+fit60_2_list <- split(fit60_2,
+                      fit60_2$raster_layer)
+length(fit60_2_list)
+
+fl3 <- lapply(fit60_2_list, function(x) {
+# ----- #
+    speed_raster <- wind_speed_stack[[str_which(names(wind_speed_stack),
+                                                unique(x$raster_layer))]]
+    north_raster <- wind_north_stack[[str_which(names(wind_north_stack),
+                                                unique(x$raster_layer))]]
+    east_raster <- wind_east_stack[[str_which(names(wind_east_stack),
+                                              unique(x$raster_layer))]]
+# ----- #
+    x$wind_speed <- extract(speed_raster,
+                            as.data.frame(x[, c("lon", "lat")]))
+    x$wind_north <- extract(north_raster,
+                            as.data.frame(x[, c("lon", "lat")]))
+    x$wind_east <- extract(east_raster,
+                           as.data.frame(x[, c("lon", "lat")]))
+# ----- #
+    print(unique(x$raster_layer))
+# ----- #
+    x
+})
+print("ayééé")
+
+fit60_3 <- do.call("rbind",
+                   fl3)
+dim(fit60_3)
+warnings() #### CHECK FOR WARNINGS HERE #####
+mean(fit60_3$wind_speed, na.rm = T)
+summary(fit60_3$wind_speed)
+names(fit60_3)
