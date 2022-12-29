@@ -152,7 +152,7 @@ abs_wind_sp_2017 <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBA
 # YEAR 2018 ####
 ################
 
-# dirs_2018 <- 180 * atan2(v_2018, u_2018) / pi # atan2 gives direction in radian, then *180/pi allows the conversion in degree from -180 to 180
+# dirs_2018 <- 180 * atan2(v_2018, u_2018) / pi # with u = east and v = north AND atan2 gives direction in radian, then *180/pi allows the conversion in degree from -180 to 180
 # In addition, HERE the atan2 gives the angle with METEOROLOGICAL convention
 # N = 0 = 360, E = 90, S = 180, W = 270
 # dirs_2018
