@@ -28,7 +28,9 @@ indss <- inds[, c("Vessel", "Date", "Class", "Longitude", "Latitude")]
 names(indss) <- c("id", "date", "lc", "lon", "lat")
 head(indss)
 
-#### ---- move persistence model ---- ####
+###################################################
+#### ---- PART 1 - move persistence model ---- ####
+##################################################
 
 # max 100 km/h
 # fit_mp <- fit_ssm(indss,
@@ -190,8 +192,10 @@ fit60_sp$speed_km.h_treat[fit60_sp$delay_min > 120] <- NA
 summary(fit60_sp$speed_km.h)
 summary(fit60_sp$speed_km.h_treat)
 
+#######################################################################
+#### ---- PART 2 - extraction des paramètres environnementaux sous les localisations ajustées ---- ####
+#######################################################################
 
-#### ---- extraction des paramètres environnementaux sous les localisations ajustées ---- ####
 
 # ---- Creation des rasters
 env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R" 
@@ -249,6 +253,9 @@ fit60_list2 <- lapply(fit60_list, function(x){
     x$chlo <- extract(chlo_raster,
                       as.data.frame(x[, c('lon', 'lat')]))
     
+    # ----- #
+    print(unique(x$dt))
+    
     x
 })
 print("ayéééé")
@@ -256,10 +263,13 @@ print("ayéééé")
 fit60_2 <- do.call('rbind', fit60_list2)
 mean(fit60_2$sst, na.rm = T)
 summary(fit60_2$sst)
+fit60_2$sst_deg <- fit60_2$sst - 273.15
+summary(fit60_2$sst_deg)
 
 mean(fit60_2$chlo, na.rm = T)
 summary(fit60_2$chlo)
 
+names(fit60_2)
 #######################"################
 # ---- For WIND speed & orientation ####
 ########################################
@@ -310,7 +320,7 @@ fit60_2$minutes <- hour(fit60_2$date)*60 + minute(fit60_2$date)
 # 03:01 (181)  -> 09:00 (540)  ==> 06:00            J
 # 09:01 (541)  -> 15:00 (900)  ==> 12:00            J
 # 15:01 (901)  -> 21:00 (1260) ==> 18:00            J
-
+fit60_2$raster_hour <- NA
 fit60_2$raster_hour[fit60_2$minutes >= 1261 | fit60_2$minutes <= 180] <- "00.00"
 fit60_2$raster_hour[fit60_2$minutes >= 181 & fit60_2$minutes <= 540] <- "06.00"
 fit60_2$raster_hour[fit60_2$minutes >= 541 & fit60_2$minutes <= 900] <- "12.00"
@@ -357,3 +367,28 @@ warnings() #### CHECK FOR WARNINGS HERE #####
 mean(fit60_3$wind_speed, na.rm = T)
 summary(fit60_3$wind_speed)
 names(fit60_3)
+
+# computation of wind speed & direction
+# abs_wind_sp <- sqrt(u^2 + v^2)
+# wind_dir <- 180 * atan2(v, u) / pi # with u = east and v = north AND atan2 gives direction in radian, then *180/pi allows the conversion in degree from -180 to 180
+# In addition, HERE the atan2 gives the angle with METEOROLOGICAL convention
+# N = 0 = 360, E = 90, S = 180, W = 270
+
+fit60_3$wind_meteo_dir <- 180 * atan2(fit60_3$wind_north, fit60_3$wind_east) / pi
+
+fit60_3$abs_wind_spd <- sqrt(fit60_3$wind_east^2 + fit60_3$wind_north^2)
+
+head(as.data.frame(fit60_3))
+summary(fit60_3$wind_speed * 0.001 * 3600)
+summary(fit60_3$abs_wind_spd * 0.001 * 3600)
+
+# save the database
+# saveRDS(fit60_3,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param.rds")
+
+#################################################################
+#### ---- PART 3 - Direction que prennent les oiseaux  ---- ####
+################################################################
+
+loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param.rds")
+dim(loc)
