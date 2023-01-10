@@ -386,8 +386,57 @@ summary(fit60_3$abs_wind_spd * 0.001 * 3600)
 # saveRDS(fit60_3,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param.rds")
 
+#########################################################
+#### ---- PART X - Kernels avec locs corrigees ---- ####
+########################################################
+
+#### ---- ADULT GLS
+ad_gls <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_2008-2009_clean_from_Audrey.txt",
+                     h = T,
+                     sep = "\t")
+head(ad_gls)
+table(ad_gls$STATUT)
+
+ad_nr <- ad_gls[ad_gls$STATUT == "NR", ]
+
+# spatial object
+xy <- ad_nr[,c('LON', 'LAT')]
+ad_nr_sp <- SpatialPointsDataFrame(coords = xy,
+                                 data = ad_nr,
+                                 proj4string = CRS("+proj=longlat +datum=WGS84"))
+ad_nr_UTM <- spTransform(ad_nr_sp,
+                         CRS('+init=epsg:32743'))
+# kernel computation UTM
+KUD_a <- kernelUD(ad_nr_UTM,
+                  h = 'href')
+KUD_a@h # 201454.8 m
+
+KUDvol_a <- getvolumeUD(KUD_a)
+
+ver90_a <- getverticeshr(KUDvol_a, 90)
+ver50_a <- getverticeshr(KUDvol_a, 50)
+ver25_a <- getverticeshr(KUDvol_a, 25)
+
+mapview(list(ver90_a, ver50_a, ver25_a))
+
+# kernel computation LATLON
+KUD_a <- kernelUD(ad_nr_sp,
+                  h = 'href')
+KUD_a@h # 201454.8 m
+
+KUDvol_a <- getvolumeUD(KUD_a)
+
+ver90_a <- getverticeshr(KUDvol_a, 90)
+ver50_a <- getverticeshr(KUDvol_a, 50)
+ver25_a <- getverticeshr(KUDvol_a, 25)
+
+mapview(list(ver90_a, ver50_a, ver25_a))
+
+# saveRDS(list(ver90_a, ver50_a, ver25_a),
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/MS_DATA/PTEBAR_AD_GLS_kernels.rds")
+
 #################################################################
-#### ---- PART 3 - Direction que prennent les oiseaux  ---- ####
+#### ---- PART X - Direction que prennent les oiseaux  ---- ####
 ################################################################
 
 loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param.rds")
