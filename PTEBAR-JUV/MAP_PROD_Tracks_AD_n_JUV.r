@@ -3,7 +3,25 @@ rm(list = ls())
 source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
 
 # ---- Juvenile tracks ----- #
-juv_argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_wind_dirs_n_abs_speed_2.rds")
+# juv_argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_wind_dirs_n_abs_speed_2.rds")
+
+# ---- Juvenile tracks corrected with aniMotum ----- #
+
+juv_argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param.rds")
+head(juv_argos)
+
+# data manipulations
+juv_argos$depl <- NA
+a_l <- split(juv_argos, juv_argos$id)
+a_ll <- lapply(a_l,
+               function(x){
+                    y_dep <- year(x$date[1])
+                    x$depl <- y_dep
+                    x
+               })
+juv_argos <- do.call("rbind", a_ll)
+names(juv_argos)[1] <- "Vessel"
+names(juv_argos)[c(3, 4)] <- c("Longitude", "Latitude")
 
 length(unique(juv_argos$Vessel))
 
@@ -60,8 +78,8 @@ library(maps)
 library(maptools)
 library(geodata)
 
-lon_min = 21
-lon_max = 130 #defini la fenetre de l'ocean indien ou les petrels peuvent potentiellement s'alimenter
+lon_min = 30
+lon_max = 120 #defini la fenetre de l'ocean indien ou les petrels peuvent potentiellement s'alimenter
 lat_min = -45
 lat_max = 20
 
@@ -78,56 +96,84 @@ plot(ad_sp,
 plot(juv_sp,
      col = "turquoise",
      add = TRUE)
-
-
-
-
-
-
-
-
-
-
-# ---
-IndOcean <- maps::map("world",
-             fill = T,
-             xlim = c(lon_min, lon_max),
-             ylim = c(lat_min, lat_max),
-             col = "grey")
-
-IndOcean_sp <- maptools::map2SpatialPolygons(IndOcean,
-                                             IDs = IndOcean$names,
-                                             proj4string = CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
-x11(); plot(IndOcean)
-levelplot(log_JFM_2018,
-          main = "JFM 2018") +
-layer(c(sp.points(ad_gls_sp[ad_gls_sp$year_period == "JFM", ],
-                      col = rgb(0, 0, 1, alpha = 0.9),
-                      lwd = 2),
-            sp.points(juv_argos_sp[juv_argos_sp$year_period == "JFM" & year(juv_argos_sp$deploy) == 2018, ],
-                      col = "white",
-                      lwd = 2),
-            sp.polygons(IndOcean_sp,
-                        col = "grey",
-                        fill = "white")))
-
-# ---
-mapview(argos_lines, col.regions = "blue")
-
-# ---
+#### map with full tracks ad & juv ####
+# different colors depending on year of deployment and ad vs juv
+# png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/carto_globale_locs_corrigees_aniMotum/ad_juv_tracks.png",
+#     res = 300,
+#     width = 50,
+#     height = 40,
+#     pointsize = 20,
+#     unit = "cm",
+#     bg = "white")
 x11()
-plot(argos_lines,
-     col = "blue", add = T)
+
+plot(w,
+     col = "grey",
+     border = "white",
+     xlim = c(lon_min, lon_max),
+     ylim = c(lat_min, lat_max))
 plot(gls_lines,
-     col = "green",
-     add = TRUE)
+     col = "#b66309",
+     add = TRUE,
+     lwd = 3)
+plot(argos_lines[argos_lines$Vessel %in% c("162070",
+                                           "162072",
+                                           "162073",
+                                           "166561",
+                                           "166563",
+                                           "166564",
+                                           "166565"),],
+     col = "darkgreen",
+     ad = T,
+     lwd = 3) # 2018
+plot(argos_lines[argos_lines$Vessel %in% c("166566",
+                                           "166568",
+                                           "166569",
+                                           "166572"),],
+     add = T,
+     col = "#6ed96e",
+     lwd = 3) # 2017
 
-maps::map("world",
-          fill = TRUE,
-          add = T)
+dev.off()
 
+#### map with full tracks juv & adult kernel ####
+ad_k <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/MS_DATA/PTEBAR_AD_GLS_kernels.rds")
+head(ad_k)
+
+# png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/carto_globale_locs_corrigees_aniMotum/juv_tracks_kern_ad_colorblind.png",
+#     res = 300,
+#     width = 50,
+#     height = 40,
+#     pointsize = 20,
+#     unit = "cm",
+#     bg = "white")
 x11()
-plot(gls_lines)
-maps::map("world",
-          fill = TRUE,
-          add = TRUE)
+
+plot(w,
+     col = "grey",
+     border = "white",
+     xlim = c(lon_min, lon_max),
+     ylim = c(lat_min, lat_max))
+plot(ad_k[[2]],
+     col = "#d55c009d",
+     add = TRUE,
+     lwd = 0.5)
+plot(argos_lines[argos_lines$Vessel %in% c("162070",
+                                           "162072",
+                                           "162073",
+                                           "166561",
+                                           "166563",
+                                           "166564",
+                                           "166565"),],
+     col = "#009e73",
+     ad = T,
+     lwd = 3) # 2018
+plot(argos_lines[argos_lines$Vessel %in% c("166566",
+                                           "166568",
+                                           "166569",
+                                           "166572"),],
+     add = T,
+     col = "#56b4e9",
+     lwd = 3) # 2017
+
+dev.off()
