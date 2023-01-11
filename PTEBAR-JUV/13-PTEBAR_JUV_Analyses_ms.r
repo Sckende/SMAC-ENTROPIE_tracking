@@ -387,7 +387,7 @@ summary(fit60_3$abs_wind_spd * 0.001 * 3600)
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param.rds")
 
 #########################################################
-#### ---- PART X - Kernels avec locs corrigees ---- ####
+#### ---- PART 3 - Kernels avec locs corrigees ---- ####
 ########################################################
 
 #### ---- ADULT GLS
@@ -436,8 +436,88 @@ mapview(list(ver90_a, ver50_a, ver25_a))
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/MS_DATA/PTEBAR_AD_GLS_kernels.rds")
 
 #################################################################
-#### ---- PART X - Direction que prennent les oiseaux  ---- ####
+#### ---- PART 4 - Direction que prennent les oiseaux  ---- ####
 ################################################################
 
 loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param.rds")
 dim(loc)
+class(loc$date)
+
+library(trajr)
+
+l <- split(loc, loc$id)
+
+dir <- lapply(l, function(x){
+    t <- as.data.frame(x)
+    # conversion sp object
+    t_sp <- SpatialPoints(t[, c("lon", "lat")],
+                          proj4string = CRS("+proj=longlat"))
+    # obtention UTM coord
+    t_UTM <- spTransform(t_sp,
+                         CRS("+init=epsg:32743"))
+    # obtention object trajectory
+    coord <- data.frame(x = t_UTM$lon,
+                        y = t_UTM$lat,
+                        date = as.numeric(t$date))
+    trj <- TrajFromCoords(coord,
+                          timeCol = "date",
+                          spatialUnits = "m")
+    # obtention des angles
+    rad <- TrajAngles(trj,
+                      compass.direction = 0)
+    deg <- rad*180/pi
+    
+    x$dir_bird_deg <- c(deg, NA)
+    x$x_trj <- trj$x
+    x$y_trj <- trj$y
+    x
+})
+
+dir2 <- do.call("rbind", dir)
+
+# save the database
+# saveRDS(dir2,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_bird_dir.rds")
+
+#################################################################
+#### ---- PART 5 - Difference entre l'orientation des oiseaux et celui du vent  ---- ####
+################################################################
+loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_bird_dir.rds")
+names(loc)
+head(loc$wind_meteo_dir)
+# --------------- #
+# test <- loc[1:10, c("wind_north", "wind_east", "wind_meteo_dir", "dir_bird_deg")]
+test <- loc
+
+test$dir_bird_deg0_360 <- ifelse(test$dir_bird_deg >= 0,
+                                 test$dir_bird_deg,
+                                 360 + test$dir_bird_deg)
+
+test$wind_meteo_dir0_360 <- ifelse(test$wind_meteo_dir >= 0,
+                                 test$wind_meteo_dir,
+                                 360 + test$wind_meteo_dir)
+
+test$diff_ang <- (test$dir_bird_deg0_360 - test$wind_meteo_dir0_360) %% 360
+
+summary(test$diff_ang)
+hist(test$diff_ang, breaks = 36)
+hist(test$diff_ang[lubridate::month(test$date) == 4], breaks = 36)
+hist(test$diff_ang[lubridate::month(test$date) == 5], breaks = 36)
+hist(test$diff_ang[lubridate::month(test$date) == 6], breaks = 36)
+hist(test$diff_ang[lubridate::month(test$date) == 7], breaks = 36)
+hist(test$diff_ang[lubridate::month(test$date) == 8], breaks = 36)
+hist(test$diff_ang[lubridate::month(test$date) == 9], breaks = 36)
+hist(test$diff_ang[lubridate::month(test$date) == 10], breaks = 36)
+hist(test$diff_ang[lubridate::month(test$date) == 11], breaks = 36)
+
+
+
+
+
+
+
+
+x11(); plot(x = -7, y = 3.5, xlim = c(-10, 0), ylim = c(0, 10), asp = 1); abline(h = 3.5, v = -7); abline(v = 0)
+
+summary(loc$wind_meteo_dir)
+summary(loc$dir_bird_deg)
