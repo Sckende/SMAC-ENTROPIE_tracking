@@ -16,13 +16,13 @@ source('C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/
 # Loading data ####
 # -------------- #
 # ____Pinet data
-gls_p <- read.table('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Tous_trajets_20082009.txt',
+gls_p <- read.table('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/AUDREY/Tous_trajets_20082009.txt',
                     sep = '\t',
                     h = T)
 head(gls_p)
 
 # ____Audrey data
-gls_a <- read.table('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/LOC_TousTrajets_BP_RUN_ALL_YEARS_PHENO_OK_40S.txt',
+gls_a <- read.table('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/AUDREY/LOC_TousTrajets_BP_RUN_ALL_YEARS_PHENO_OK_40S.txt',
                     sep = '\t',
                     h = T)[, 1:5]
 head(gls_a)
@@ -164,9 +164,7 @@ mapview(gls_a_UTM, zcol = 'depl.numb', burst = T) +
   mapview(gls_p_UTM)
 
 gls_a_HIV <- gls_a_UTM[gls_a_UTM$PHENO == 'HIVERNAGE',]
-mapview(gls_a_HIV,
-        zcol = 'depl.numb',
-        burst = T)
+mapview(gls_a_HIV)
 
 # Retrieve the status (HIVERNAGE vs. REPRO) for Pinet data ####
 # From the beginning of April to the end of August
