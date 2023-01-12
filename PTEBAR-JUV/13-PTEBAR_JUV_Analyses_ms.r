@@ -486,38 +486,106 @@ loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/D
 names(loc)
 head(loc$wind_meteo_dir)
 # --------------- #
-# test <- loc[1:10, c("wind_north", "wind_east", "wind_meteo_dir", "dir_bird_deg")]
-test <- loc
+loc$dir_bird_deg0_360 <- ifelse(loc$dir_bird_deg >= 0,
+                                loc$dir_bird_deg,
+                                360 + loc$dir_bird_deg)
 
-test$dir_bird_deg0_360 <- ifelse(test$dir_bird_deg >= 0,
-                                 test$dir_bird_deg,
-                                 360 + test$dir_bird_deg)
+loc$wind_meteo_dir0_360 <- ifelse(loc$wind_meteo_dir >= 0,
+                                  loc$wind_meteo_dir,
+                                  360 + loc$wind_meteo_dir)
 
-test$wind_meteo_dir0_360 <- ifelse(test$wind_meteo_dir >= 0,
-                                 test$wind_meteo_dir,
-                                 360 + test$wind_meteo_dir)
+loc$diff_wind_bird <- (loc$dir_bird_deg0_360 - loc$wind_meteo_dir0_360) %% 360
 
-test$diff_ang <- (test$dir_bird_deg0_360 - test$wind_meteo_dir0_360) %% 360
+summary(loc$diff_wind_bird) # **** WARNING **** Données circulaires 
 
-summary(test$diff_ang)
-hist(test$diff_ang, breaks = 36)
-hist(test$diff_ang[lubridate::month(test$date) == 4], breaks = 36)
-hist(test$diff_ang[lubridate::month(test$date) == 5], breaks = 36)
-hist(test$diff_ang[lubridate::month(test$date) == 6], breaks = 36)
-hist(test$diff_ang[lubridate::month(test$date) == 7], breaks = 36)
-hist(test$diff_ang[lubridate::month(test$date) == 8], breaks = 36)
-hist(test$diff_ang[lubridate::month(test$date) == 9], breaks = 36)
-hist(test$diff_ang[lubridate::month(test$date) == 10], breaks = 36)
-hist(test$diff_ang[lubridate::month(test$date) == 11], breaks = 36)
+# visualisation
+x11()
+hist(loc$diff_wind_bird, breaks = 36)
+hist(loc$diff_wind_bird[lubridate::month(loc$date) == 4], breaks = 36)
+hist(loc$diff_wind_bird[lubridate::month(loc$date) == 5], breaks = 36)
+hist(loc$diff_wind_bird[lubridate::month(loc$date) == 6], breaks = 36)
+hist(loc$diff_wind_bird[lubridate::month(loc$date) == 7], breaks = 36)
+hist(loc$diff_wind_bird[lubridate::month(loc$date) == 8], breaks = 36)
+hist(loc$diff_wind_bird[lubridate::month(loc$date) == 9], breaks = 36)
+hist(loc$diff_wind_bird[lubridate::month(loc$date) == 10], breaks = 36)
+hist(loc$diff_wind_bird[lubridate::month(loc$date) == 11], breaks = 36)
+
+x11()
+plot(loc$diff_wind_bird[month(loc$date) == 4])
+
+hist(loc$wind_meteo_dir0_360[lubridate::month(loc$date) == 4],
+     breaks = 36,
+     col = "#e6891f82",
+     freq = F)
+lines(density(loc$wind_meteo_dir0_360[lubridate::month(loc$date) == 4]),
+      lwd = 2,
+      col = "sienna3")
+hist(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4],
+     breaks = 36,
+     freq = F,
+     col = "#0baea0aa",
+     add = T)
+lines(density(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4]),
+      lwd = 2,
+      col = "#076864")
+
+# ----- #
+loc$group <- NA
+loc$group[loc$id %in% c("162070",
+                          "162072",
+                          "162073",
+                          "166561",
+                          "166563")] <- "2018-Nord"
+loc$group[loc$id %in% c("166564",
+                          "166565")] <- "2018-Sud"
+loc$group[loc$id %in% c("166566",
+                          "166568",
+                          "166569",
+                          "166572")] <- "2017"
+table(loc$group, useNA = "always")
 
 
+loc_group <- split(loc, loc$group)
+
+lapply(loc_group, function(x){
+    x11()
+    hist(x$diff_wind_bird[month(x$date) == 4],
+         col = "#2812c8ae",
+         breaks = 36,
+         freq = F,
+         main = paste("diff angle bird-wind", unique(x$group), sep = " "),
+         xlab = "Angle (°)")
+    lines(density(x$diff_wind_bird[month(x$date) == 4]),
+         col = "#041c38",
+         lwd = 2)
+    
+    x11()
+    hist(x$wind_meteo_dir0_360[lubridate::month(x$date) == 4],
+         breaks = 36,
+         col = "#e6891f82",
+         freq = F,
+         main = paste("angle bird-wind", unique(x$group), sep = " "),
+         xlab = "Angle (°)")
+    lines(density(x$wind_meteo_dir0_360[lubridate::month(x$date) == 4]),
+          lwd = 2,
+          col = "sienna3")
+    
+    hist(x$dir_bird_deg0_360[lubridate::month(x$date) == 4],
+         breaks = 36,
+         freq = F,
+         col = "#0baea0aa",
+         add = T)
+    lines(density(x$dir_bird_deg0_360[lubridate::month(x$date) == 4]),
+          lwd = 2,
+          col = "#076864")
+    legend("topright",
+           legend = c("wind orientation", "bird orientation"),
+           fill = c("#e6891f82", "#0baea0aa"),
+           border = c("#e6891f82", "#0baea0aa"),
+           bty = "n")
+})
 
 
-
-
-
-
-x11(); plot(x = -7, y = 3.5, xlim = c(-10, 0), ylim = c(0, 10), asp = 1); abline(h = 3.5, v = -7); abline(v = 0)
-
-summary(loc$wind_meteo_dir)
-summary(loc$dir_bird_deg)
+# save the database
+# saveRDS(loc,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir.rds")
