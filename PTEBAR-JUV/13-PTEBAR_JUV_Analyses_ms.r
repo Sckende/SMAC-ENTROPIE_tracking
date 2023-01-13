@@ -589,3 +589,314 @@ lapply(loc_group, function(x){
 # save the database
 # saveRDS(loc,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir.rds")
+
+####################################################################
+#### ---- PART 6 - Zoom Ouest OI lors départ des oiseaux  ---- ####
+################################################################### 
+loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir.rds")
+summary(loc)
+
+loc$week_num <- lubridate::isoweek(loc$date)
+table(loc$week_num)
+
+# bird restriction - group 2018_Nord
+dep_2018N <- loc[loc$group == "2018-Nord", ]
+unique(dep_2018N$id)
+
+l1 <- split(dep_2018N, dep_2018N$week_num)
+speed_week_ls <- lapply(l1,
+                     function(x) {
+                         wk <- unique(x$week_num)
+                         bd_spd <- mean(x$speed_km.h_treat,
+                                        na.rm = T) # vitesse pour délai < 120 min
+                         bd_spd_sd <- sd(x$speed_km.h_treat,
+                                        na.rm = T) 
+                         df <- data.frame(wk = wk,
+                                          bd_spd = bd_spd,
+                                          bd_spd_sd = bd_spd_sd)
+                         df
+                     })
+
+speed_week <- do.call("rbind",
+                      speed_week_ls)
+x11()
+plot(speed_week$wk[-1],
+     speed_week$bd_spd[-1],
+     typ = "b",
+     xlab = "week number",
+     ylab = "mean speed of birds (km/h)")
+
+summary(lm(bd_spd ~ wk, data = speed_week))
+
+# bird restriction - group 2018_Nord WITH NO TIME RESTRICTION
+loc_2018N <- loc[loc$group == "2018-Nord", ]
+
+l2 <- split(loc_2018N, loc_2018N$week_num)
+speed_week_ls2 <- lapply(l2,
+                     function(x) {
+                         wk <- unique(x$week_num)
+                         bd_spd <- mean(x$speed_km.h_treat,
+                                        na.rm = T) # vitesse pour délai < 120 min
+                         bd_spd_sd <- sd(x$speed_km.h_treat,
+                                        na.rm = T) 
+                         df <- data.frame(wk = wk,
+                                          bd_spd = bd_spd,
+                                          bd_spd_sd = bd_spd_sd)
+                         df
+                     })
+
+speed_week2 <- do.call("rbind",
+                      speed_week_ls2)
+x11()
+plot(speed_week2$wk[3:38],
+     speed_week2$bd_spd[3:38],
+     typ = "b",
+     xlab = "week number",
+     ylab = "mean speed of birds (km/h)")
+
+summary(lm(bd_spd ~ wk, data = speed_week2))
+
+
+# Wind roses
+library(openair)
+x11()
+windRose(mydata = dep_2018N,
+         wd = "dir_bird_deg0_360",
+         ws = "speed_km.h_treat",
+         type = "week_num",
+        #  breaks = c(0, 2, 5, 8, 11, 17), # for m/s
+        breaks = c(0, 15, 20, 25, 30, 35, 40, 50),
+         auto.text = F,
+         paddle = F,
+         annotate = F,
+         grid.line = 5,
+        #  key.footer = "WSP (m/s)", # for m/s
+        key.footer = "bird speed (km/h)",
+         key.position = "bottom",
+         par.settings = list(axis.line = list(col = "lightgray")),
+          col = viridis(5, option = "D", direction = -1))
+
+x11()
+windRose(mydata = dep_2018N,
+         wd = "wind_meteo_dir0_360",
+         ws = "wind_speed",
+         type = "week_num",
+        #  breaks = c(0, 2, 5, 8, 11, 17), # for m/s
+        breaks = c(0, 15, 20, 25, 30, 35, 40, 50),
+         auto.text = F,
+         paddle = F,
+         annotate = F,
+         grid.line = 5,
+        #  key.footer = "WSP (m/s)", # for m/s
+        key.footer = "bird speed (km/h)",
+         key.position = "bottom",
+         par.settings = list(axis.line = list(col = "lightgray")),
+          col = viridis(5, option = "D", direction = -1))
+
+# ---- #
+env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018" 
+
+# East wind 2018 #
+windE2018_names <- list.files(env_folder, full.names = T)[str_detect(list.files(env_folder), "eastward_wind-2018")]
+windE2018 <- terra::rast(windE2018_names)
+time(windE2018)[duplicated(time(windE2018))]
+wE2018 <- windE2018[[!duplicated(time(windE2018))]]
+time(wE2018)[duplicated(time(wE2018))]
+
+# North wind 2018 #
+windN2018_names <- list.files(env_folder, full.names = T)[str_detect(list.files(env_folder), "northward_wind-2018")]
+windN2018 <- terra::rast(windN2018_names)
+time(windN2018)[duplicated(time(windN2018))]
+wN2018 <- windN2018[[!duplicated(time(windN2018))]]
+time(wN2018)[duplicated(time(wN2018))]
+
+# Speed wind 2018 #
+windS2018_names <- list.files(env_folder, full.names = T)[str_detect(list.files(env_folder), "wind_speed-2018")]
+windS2018 <- terra::rast(windS2018_names)
+time(windS2018)[duplicated(time(windS2018))]
+wS2018 <- windS2018[[!duplicated(time(windS2018))]]
+time(wS2018)[duplicated(time(wS2018))]
+
+# Bird group 2018 N #
+# From S14 to S22
+dep_2018N <- as.data.frame((loc[loc$group == "2018-Nord" & loc$week_num %in% 14:22, ])
+summary(dep_2018N); dim(dep_2018N)
+unique(dep_2018N$id)
+unique(dep_2018N$week_num)
+col_pt <- c("#ebed7f", "#a0ed7f", "#7fedde", "#7fa9ed", "#ed7fe4")
+col_tck <- c("#e8e9b2f", "#c8edb8", "#d0f3ee", "#c3d5f1", "#eecaeb")
+
+dep_2018N$col_pt <- left_join(dep_2018N,
+                              data.frame(id = unique(dep_2018N$id),
+                                         col_pt = col_pt),
+                              by = "id")
+dep_2018N$col_tck <- left_join(dep_2018N,
+                              data.frame(id = unique(dep_2018N$id),
+                                         col_tck = col_tck),
+                              by = "id")
+
+wk_ls <- split(dep_2018N, dep_2018N$week_num)
+
+pt_ls <- lapply(wk_ls,
+                function(x){
+                    SpatialPointsDataFrame(coords = x[, c("lon", "lat")],
+                                           data = x,
+                                           proj4string = CRS("+init=epsg:4326"))
+                })
+
+tck_ls <- lapply(wk_ls,
+                 function(x){
+                     argos_sp <- SpatialPointsDataFrame(coords = x[, c("lon", "lat")],
+                                           data = x,
+                                           proj4string = CRS("+init=epsg:4326"))
+                     argos_sp_list <- split(argos_sp, argos_sp$id)
+                     track <- lapply(argos_sp_list,
+                                     function(x) {
+                                         Lines(list(Line(coordinates(x))),
+                                               x$id[1L])
+                                         })
+                     lines <- SpatialLines(track)
+                     data <- data.frame(id = unique(argos_sp$id),
+                                        wk = unique(x$week_num))
+                     data <- left_join(data,
+                                       data.frame(id = unique(dep_2018N$id),
+                                                  col_tck = col_tck),
+                                       by = "id")
+                     rownames(data) <- data$id
+                     argos_lines <- SpatialLinesDataFrame(lines, data)
+                     })
+
+
+
+# ---- #
+nlev <- 100
+my_at <- seq(from = 0,
+             to = 20,
+             length.out = nlev+1)
+my_cols <- viridis_pal(begin = 1,
+                       end = 0,
+                       option = "A")(nlev)
+
+for (i in 10:21){
+    print(i)
+# BIRD #
+bird_pt <- pt_ls[[as.character(i)]]
+
+bird_tck <- tck_ls[[as.character(i)]]
+
+
+# WIND #
+extend <- extent(40, 60, -25, 0) # xmin, xmax, ymin, ymax
+
+e <- crop(mean(wE2018[[isoweek(time(wE2018)) == i]]),
+          extend)
+n <- crop(mean(wN2018[[isoweek(time(wN2018)) == i]]),
+          extend)
+s <- crop(mean(wS2018[[isoweek(time(wS2018)) == i]]),
+          extend)
+
+# ---- #
+# x11()
+png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_week_",
+    i,
+    ".png",
+    sep = ""),
+    res = 300,
+    width = 30,
+    height = 40,
+    pointsize = 4,
+    units = "cm",
+    bg = "white")
+
+print(rasterVis::vectorplot(raster::stack(raster(e), raster(n)),
+               isField = 'dXY',
+               units = "degrees",
+               narrows = 600,
+               lwd.arrows = 2,
+               aspX = 0.1,
+               region = raster(s),
+               at = my_at,
+               col.regions = my_cols,
+               colorkey = list(labels = list(cex = 1.5),
+                               title = list("wind speed (km/h)",
+                                            cex = 2,
+                                            vjust = 0)),
+               main = list(label = paste("week # ", i, " 2018", sep = ""),
+                           cex = 3),
+               xlab = list(label = "Longitude", 
+                           cex = 2),
+               ylab = list(label = "Latitude",
+                           cex = 2),
+               scales = list(x = list(cex = 1.5),
+                             y = list(cex = 1.5))))
+
+# ----- #
+# x11()
+png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_bird_group_2018N_week_",
+    i,
+    ".png",
+    sep = ""),
+    res = 300,
+    width = 30,
+    height = 40,
+    pointsize = 4,
+    units = "cm",
+    bg = "white")
+
+print(rasterVis::vectorplot(raster::stack(raster(e), raster(n)),
+               isField = 'dXY',
+               units = "degrees",
+               narrows = 600,
+               lwd.arrows = 2,
+               aspX = 0.1,
+               region = raster(s),
+               at = my_at,
+               col.regions = my_cols,
+               colorkey = list(labels = list(cex = 1.5),
+                               title = list("wind speed (km/h)",
+                                            cex = 2,
+                                            vjust = 0)),
+               main = list(label = paste("week # ", i, " 2018", sep = ""),
+                           cex = 3),
+               xlab = list(label = "Longitude",
+                           cex = 2),
+               ylab = list(label = "Latitude",
+                           cex = 2),
+               scales = list(x = list(cex = 1.5),
+                             y = list(cex = 1.5))) +
+layer(c(sp.points(bird_pt,
+          col = bird_pt$col_pt$col_pt,
+          cex = 2,
+          lwd = 2)
+       ))
+)
+
+
+# ----- #
+# x11()
+png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_week_",
+    i,
+    "_angles_for_raster.png",
+    sep = ""),
+    res = 300,
+    width = 20,
+    height = 15,
+    pointsize = 12,
+    units = "cm",
+    bg = "white")
+par(mfrow = c(1, 2))
+ang <- 180 * atan2(n, e) / pi
+hist(ang,
+     breaks = 36,
+     main = paste("week # ", i, " 2018", sep = ""),
+     xlab = "wind orientation (-180°/180°)")
+ang_360 <- ifelse(values(ang) >= 0,
+                  values(ang),
+                  360 + values(ang))
+hist(ang_360,
+     breaks = 36,
+     main = paste("week # ", i, " 2018", sep = ""),
+     xlab = "wind orientation (0°/360°)")
+graphics.off()
+}
+### METTRE LES TRACKS ET REGLER LES BUGS DES COLOR POINTS ####
