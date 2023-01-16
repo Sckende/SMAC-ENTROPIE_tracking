@@ -719,21 +719,21 @@ time(wS2018)[duplicated(time(wS2018))]
 
 # Bird group 2018 N #
 # From S14 to S22
-dep_2018N <- as.data.frame((loc[loc$group == "2018-Nord" & loc$week_num %in% 14:22, ])
+dep_2018N <- as.data.frame((loc[loc$group == "2018-Nord" & loc$week_num %in% 14:22, ]))
 summary(dep_2018N); dim(dep_2018N)
 unique(dep_2018N$id)
 unique(dep_2018N$week_num)
 col_pt <- c("#ebed7f", "#a0ed7f", "#7fedde", "#7fa9ed", "#ed7fe4")
-col_tck <- c("#e8e9b2f", "#c8edb8", "#d0f3ee", "#c3d5f1", "#eecaeb")
+col_tck <- c("#eeefb6d2", "#c8edb8", "#d0f3ee", "#c3d5f1", "#eecaeb")
 
-dep_2018N$col_pt <- left_join(dep_2018N,
-                              data.frame(id = unique(dep_2018N$id),
-                                         col_pt = col_pt),
-                              by = "id")
-dep_2018N$col_tck <- left_join(dep_2018N,
-                              data.frame(id = unique(dep_2018N$id),
-                                         col_tck = col_tck),
-                              by = "id")
+# dep_2018N$col_pt <- left_join(dep_2018N,
+#                               data.frame(id = unique(dep_2018N$id),
+#                                          col_pt = col_pt),
+#                               by = "id")
+# dep_2018N$col_tck <- left_join(dep_2018N,
+#                               data.frame(id = unique(dep_2018N$id),
+#                                          col_tck = col_tck),
+#                               by = "id")
 
 wk_ls <- split(dep_2018N, dep_2018N$week_num)
 
@@ -766,7 +766,7 @@ tck_ls <- lapply(wk_ls,
                      argos_lines <- SpatialLinesDataFrame(lines, data)
                      })
 
-
+#########################
 
 # ---- #
 nlev <- 100
@@ -777,13 +777,31 @@ my_cols <- viridis_pal(begin = 1,
                        end = 0,
                        option = "A")(nlev)
 
-for (i in 10:21){
+# ---- HUGE LOOP ---- #
+wind_caracteristic <- data.frame(wk_num = NA,
+                                 wd_spd_mean = NA,
+                                 wd_spd_sd = NA)
+for (i in 10:22){
     print(i)
 # BIRD #
 bird_pt <- pt_ls[[as.character(i)]]
 
-bird_tck <- tck_ls[[as.character(i)]]
-
+# track
+if (i >= 14) {
+t <- as.data.frame(dep_2018N[dep_2018N$week_num %in% 10:i,])
+t_sp <- SpatialPointsDataFrame(coords = t[, c("lon", "lat")],
+                                           data = t,
+                                           proj4string = CRS("+init=epsg:4326"))
+tt <- split(t_sp, t_sp$id)
+track <- lapply(tt,
+                function(x) {
+                    Lines(list(Line(coordinates(x))),
+                          x$id[1L])
+                    })
+tt_lines <- SpatialLines(track)
+} else {
+    tt_lines <- NULL
+}
 
 # WIND #
 extend <- extent(40, 60, -25, 0) # xmin, xmax, ymin, ymax
@@ -794,6 +812,11 @@ n <- crop(mean(wN2018[[isoweek(time(wN2018)) == i]]),
           extend)
 s <- crop(mean(wS2018[[isoweek(time(wS2018)) == i]]),
           extend)
+
+wd <- c(i,
+        mean(values(s), na.rm = T),
+        sd(values(s), na.rm = T))
+wind_caracteristic <- rbind(wind_caracteristic, wd)
 
 # ---- #
 # x11()
@@ -864,13 +887,18 @@ print(rasterVis::vectorplot(raster::stack(raster(e), raster(n)),
                            cex = 2),
                scales = list(x = list(cex = 1.5),
                              y = list(cex = 1.5))) +
-layer(c(sp.points(bird_pt,
-          col = bird_pt$col_pt$col_pt,
-          cex = 2,
-          lwd = 2)
-       ))
+layer(c(sp.points(pt_ls[[as.character(i)]],
+          col = pt_ls[[as.character(i)]]$col_pt$col_pt,
+          cex = 3,
+          lwd = 3),
+        sp.lines(tt_lines,
+                 col = col_tck,
+                 lwd = 3),
+        sp.polygons(ne_countries(),
+                    col = "#e3d0d0",
+                    fill = "#e3d0d0"))
 )
-
+)
 
 # ----- #
 # x11()
@@ -899,4 +927,153 @@ hist(ang_360,
      xlab = "wind orientation (0°/360°)")
 graphics.off()
 }
-### METTRE LES TRACKS ET REGLER LES BUGS DES COLOR POINTS ####
+
+
+x11()
+plot(wind_caracteristic$wk_num,
+     wind_caracteristic$wd_spd_mean,
+     xlab = "week number 2018",
+     ylab = "Mean wind speed (m/s)",
+     type = "b",
+     bty = "n")
+text(x = 12.5,
+     y = 7.2,
+     "wind inversion")
+arrows(x0 = 12.5,
+       y0 = 4.5,
+       x1 = 12.5,
+       y1 = 7,
+       code = 1)
+
+# calcul de la distance parcourue relative par semaine
+
+dep_2018N_sf_latlon <- st_as_sf(dep_2018N,
+                         coords = c("lon", "lat"),
+                         crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+mapview(dep_2018N_sf_latlon)
+
+dep_2018N_sf_UTM <- st_transform(dep_2018N_sf_latlon,
+                                 crs = 32743)
+mapview(dep_2018N_sf_UTM)
+
+# distance
+k <- split(dep_2018N_sf_UTM,
+           list(dep_2018N_sf_UTM$week_num,
+                dep_2018N_sf_UTM$id))
+
+k_list <- lapply(k,
+                 function(x) {
+                     wk <- unique(x$week_num)
+                     id <- unique(x$id)
+                     dista <- as.numeric(st_distance(x[1,],
+                                          x[dim(x)[1], ]))
+                     
+                     data.frame(id = id,
+                                wk_num = wk,
+                                dist_m = dista)
+                 })
+
+# ******* A REFAIRE MAIS EN PARTANT DU DERNIER POINT DE LA SEMAINE D AVANT ************ ################
+
+dist_wk_bd <- data.frame()
+
+for(i in 1:length(k)){
+    
+    wk <- unique(k[[i]]$week_num)
+    id <- unique(k[[i]]$id)
+    
+
+    
+    if(wk > 14){
+            pres <- k[[i]]
+            past <- k[[i-1]]
+        dista <- st_distance(pres[dim(pres)[1], ],
+                             past[dim(past)[1],])
+        bd_speed_mean  <- mean(k[[i]]$speed_km.h_treat, na.rm = T)
+        bd_speed_sd  <- sd(k[[i]]$speed_km.h_treat, na.rm = T)
+        
+    } else {
+        dista <- NA
+        bd_speed_mean <- NA
+        bd_speed_sd <- NA
+    }
+    
+    dist_wk_bd <- rbind(dist_wk_bd,
+                        c(id, wk, as.numeric(dista), bd_speed_mean, bd_speed_sd))
+}
+
+
+names(dist_wk_bd) <- c("id", "week_num", "dist_m", "bd_spd_mean_km.h", "bd_spd_sd")
+dist_wk_bd <- apply(dist_wk_bd,
+                    2,
+                    as.numeric)
+summary(dist_wk_bd)
+
+# mean dist per week
+dist_wk <- aggregate(dist_m ~ week_num,
+                    data = dist_wk_bd,
+                    mean,
+                    na.rm = T)
+
+# mean speed of bird per week
+spd_brd_wk <- aggregate(bd_spd_mean_km.h ~ week_num,
+                    data = dist_wk_bd,
+                    sum,
+                    na.rm = T)
+
+x11()
+plot(dist_wk$week_num,
+     dist_wk$dist_m/1000,
+     type = "h",
+     xlab = "",
+     ylab = "Travelled distance/week (km)",
+     xlim = c(10, 22),
+     bty = "n",
+     lwd = 5,
+     col ="#138473")
+par(new = T)
+plot(wind_caracteristic$wk_num,
+     wind_caracteristic$wd_spd_mean,
+     xlab = "week number 2018",
+     ylab = "",
+     type = "b",
+     bty = "n",
+     xlim = c(10, 22),
+     yaxt = "n",
+     xaxt = "n",
+     lwd = 3,
+     col = "#e66916")
+axis(side = 4,
+     lwd = 1,
+     las = 2,
+     cex.axis = 1)
+text(x = 12.5,
+     y = 7.2,
+     "wind inversion")
+arrows(x0 = 12.5,
+       y0 = 4.5,
+       x1 = 12.5,
+       y1 = 7,
+       code = 1)
+# par(new = T)
+# plot(spd_brd_wk$week_num,
+#      spd_brd_wk$bd_spd_mean_km.h,
+#      xlab = "",
+#      ylab = "",
+#      type = "b",
+#      bty = "n",
+#      xlim = c(10, 22),
+#      yaxt = "n",
+#      xaxt = "n",
+#      lwd = 3,
+#      col = "#16e6ca") # pas tres parlant
+
+
+
+# distance oiseaux vs. vitesse vents
+plot(wind_caracteristic$wd_spd_mean[wind_caracteristic$wk_num %in% 15:22],
+     dist_wk$dist_m/1000)
+
+bd_dist <- dist_wk$dist_m/1000
+wd_spd <- wind_caracteristic$wd_spd_mean[wind_caracteristic$wk_num %in% 15:22]
+summary(lm(bd_dist ~ wd_spd))
