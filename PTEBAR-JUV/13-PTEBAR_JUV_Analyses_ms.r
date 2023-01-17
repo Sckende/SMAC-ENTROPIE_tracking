@@ -724,16 +724,17 @@ summary(dep_2018N); dim(dep_2018N)
 unique(dep_2018N$id)
 unique(dep_2018N$week_num)
 col_pt <- c("#ebed7f", "#a0ed7f", "#7fedde", "#7fa9ed", "#ed7fe4")
+col_pt_df <- data.frame(id = unique(dep_2018N$id),
+                        col_pt = col_pt)
 col_tck <- c("#eeefb6d2", "#c8edb8", "#d0f3ee", "#c3d5f1", "#eecaeb")
 
-# dep_2018N$col_pt <- left_join(dep_2018N,
-#                               data.frame(id = unique(dep_2018N$id),
-#                                          col_pt = col_pt),
-#                               by = "id")
-# dep_2018N$col_tck <- left_join(dep_2018N,
-#                               data.frame(id = unique(dep_2018N$id),
-#                                          col_tck = col_tck),
-#                               by = "id")
+dep_2018N <- left_join(dep_2018N,
+                       col_pt_df,
+                       by = "id")
+dep_2018N <- left_join(dep_2018N,
+                       data.frame(id = unique(dep_2018N$id),
+                                  col_tck = col_tck),
+                       by = "id")
 
 wk_ls <- split(dep_2018N, dep_2018N$week_num)
 
@@ -851,20 +852,23 @@ print(rasterVis::vectorplot(raster::stack(raster(e), raster(n)),
                ylab = list(label = "Latitude",
                            cex = 2),
                scales = list(x = list(cex = 1.5),
-                             y = list(cex = 1.5))))
+                             y = list(cex = 1.5))) +
+      layer(sp.polygons(ne_countries(),
+                    col = "#e3d0d0",
+                    fill = "#e3d0d0")))
 
 # ----- #
 # x11()
-png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_bird_group_2018N_week_",
-    i,
-    ".png",
-    sep = ""),
-    res = 300,
-    width = 30,
-    height = 40,
-    pointsize = 4,
-    units = "cm",
-    bg = "white")
+# png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_bird_group_2018N_week_",
+#     i,
+#     ".png",
+#     sep = ""),
+#     res = 300,
+#     width = 30,
+#     height = 40,
+#     pointsize = 4,
+#     units = "cm",
+#     bg = "white")
 
 print(rasterVis::vectorplot(raster::stack(raster(e), raster(n)),
                isField = 'dXY',
@@ -888,7 +892,7 @@ print(rasterVis::vectorplot(raster::stack(raster(e), raster(n)),
                scales = list(x = list(cex = 1.5),
                              y = list(cex = 1.5))) +
 layer(c(sp.points(pt_ls[[as.character(i)]],
-          col = pt_ls[[as.character(i)]]$col_pt$col_pt,
+          col = pt_ls[[as.character(i)]]$col_pt,
           cex = 3,
           lwd = 3),
         sp.lines(tt_lines,
@@ -914,17 +918,27 @@ png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figure
     bg = "white")
 par(mfrow = c(1, 2))
 ang <- 180 * atan2(n, e) / pi
-hist(ang,
-     breaks = 36,
-     main = paste("week # ", i, " 2018", sep = ""),
-     xlab = "wind orientation (-180°/180°)")
 ang_360 <- ifelse(values(ang) >= 0,
                   values(ang),
                   360 + values(ang))
 hist(ang_360,
      breaks = 36,
      main = paste("week # ", i, " 2018", sep = ""),
-     xlab = "wind orientation (0°/360°)")
+     xlab = "wind orientation (0°/360°)",
+     freq = F)
+lines(density(ang_360, na.rm = T),
+      lwd = 2,
+      col = "#0882ed")
+if(i > 14) {
+hist(pt_ls[[as.character(i)]]$dir_bird_deg0_360,
+     breaks = 36,
+     main = paste("week # ", i, " 2018", sep = ""),
+     xlab = "bird orientation (0°/360°)",
+     freq = F)
+
+lines(density(pt_ls[[as.character(i)]]$dir_bird_deg0_360, na.rm = T),
+      lwd = 2,
+      col = "#0882ed")}
 graphics.off()
 }
 
@@ -973,7 +987,7 @@ k_list <- lapply(k,
                                 dist_m = dista)
                  })
 
-# ******* A REFAIRE MAIS EN PARTANT DU DERNIER POINT DE LA SEMAINE D AVANT ************ ################
+################
 
 dist_wk_bd <- data.frame()
 
@@ -1010,20 +1024,57 @@ dist_wk_bd <- apply(dist_wk_bd,
 summary(dist_wk_bd)
 
 # mean dist per week
-dist_wk <- aggregate(dist_m ~ week_num,
-                    data = dist_wk_bd,
-                    mean,
-                    na.rm = T)
+dist_mean_wk <- aggregate(dist_m ~ week_num,
+                          data = dist_wk_bd,
+                          mean,
+                          na.rm = T)
 
+# cumul dist per week
+dist_cum_wk <- aggregate(dist_m ~ week_num,
+                         data = dist_wk_bd,
+                         sum,
+                         na.rm = T)
+
+# VISU
+x11();
+plot(dist_mean_wk$week_num,
+     dist_mean_wk$dist_m,
+     type = "b",
+     asp = )
+par(new = T)
+plot(dist_cum_wk$week_num,
+     dist_cum_wk$dist_m,
+     type = "b",
+     col = "grey")
 # mean speed of bird per week
-spd_brd_wk <- aggregate(bd_spd_mean_km.h ~ week_num,
-                    data = dist_wk_bd,
-                    sum,
-                    na.rm = T)
+spd_brd_mean_wk <- aggregate(bd_spd_mean_km.h ~ week_num,
+                             data = dist_wk_bd,
+                             mean,
+                             na.rm = T)
 
+
+# cumul speed of bird per week
+spd_brd_cum_wk <- aggregate(bd_spd_mean_km.h ~ week_num,
+                            data = dist_wk_bd,
+                            sum,
+                            na.rm = T)
+
+# VISU
+x11();
+plot(spd_brd_mean_wk$week_num,
+     spd_brd_mean_wk$bd_spd_mean_km.h,
+     type = "b")
+par(new = T)
+plot(spd_brd_cum_wk$week_num,
+     spd_brd_cum_wk$bd_spd_mean_km.h,
+     type = "b",
+     col = "grey")
+
+
+# ---- #
 x11()
-plot(dist_wk$week_num,
-     dist_wk$dist_m/1000,
+plot(dist_mean_wk$week_num,
+     dist_mean_wk$dist_m/1000,
      type = "h",
      xlab = "",
      ylab = "Travelled distance/week (km)",
@@ -1032,6 +1083,18 @@ plot(dist_wk$week_num,
      lwd = 5,
      col ="#138473")
 par(new = T)
+plot(dist_cum_wk$week_num,
+     dist_cum_wk$dist_m/1000,
+     xlab = "week number 2018",
+     ylab = "",
+     type = "b",
+     bty = "n",
+     xlim = c(10, 22),
+     yaxt = "n",
+     xaxt = "n",
+     lwd = 3,
+     col = "#e66916")
+
 plot(wind_caracteristic$wk_num,
      wind_caracteristic$wd_spd_mean,
      xlab = "week number 2018",
@@ -1077,3 +1140,7 @@ plot(wind_caracteristic$wd_spd_mean[wind_caracteristic$wk_num %in% 15:22],
 bd_dist <- dist_wk$dist_m/1000
 wd_spd <- wind_caracteristic$wd_spd_mean[wind_caracteristic$wk_num %in% 15:22]
 summary(lm(bd_dist ~ wd_spd))
+
+
+
+#### FAIRE LA MEME CHOSE MAIS AVEC DES CROPS DE RASTERS AUTOUR DES LOCS PAR SEMAINE ####
