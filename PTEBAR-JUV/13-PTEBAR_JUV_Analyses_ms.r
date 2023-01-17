@@ -1144,3 +1144,40 @@ summary(lm(bd_dist ~ wd_spd))
 
 
 #### FAIRE LA MEME CHOSE MAIS AVEC DES CROPS DE RASTERS AUTOUR DES LOCS PAR SEMAINE ####
+dep <- dep_2018N_sf_latlon[dep_2018N_sf_latlon$week_num != 14,]
+
+ll <- split(dep,
+            list(dep$id,
+                 dep$week_num))
+length(ll)
+names(ll)
+
+dfff <- data.frame(id = NULL,
+                   week = NULL,
+                   spd_mn = NULL,
+                   spd_sd = NULL)
+
+for(i in 1:length(ll)){
+
+    test <- terra::crop(s,
+                        ll[[i]],
+                        snap = "out")
+    x11()
+    plot(test,
+         main = paste("ID",
+                      unique(ll[[i]]$id),
+                      " - WEEK",
+                      unique(ll[[i]]$week_num),
+                      sep = ""))
+    plot(st_geometry(ll[[i]]),
+         add = T)
+    
+    print(mean(values(test), na.rm = T))
+    dfff <- rbind(dfff,
+                  c(unique(ll[[i]]$id),
+                    unique(ll[[i]]$week_num),
+                    mean(values(test), na.rm = T),
+                    sd(values(test), na.rm = T)))
+}
+
+#### A REFAIRE MAIS AVEC EXTRACT AVEC UNE ZONE TAMPON ####
