@@ -820,17 +820,17 @@ wd <- c(i,
 wind_caracteristic <- rbind(wind_caracteristic, wd)
 
 # ---- #
-# x11()
-png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_week_",
-    i,
-    ".png",
-    sep = ""),
-    res = 300,
-    width = 30,
-    height = 40,
-    pointsize = 4,
-    units = "cm",
-    bg = "white")
+x11()
+# png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_week_",
+#     i,
+#     ".png",
+#     sep = ""),
+#     res = 300,
+#     width = 30,
+#     height = 40,
+#     pointsize = 4,
+#     units = "cm",
+#     bg = "white")
 
 print(rasterVis::vectorplot(raster::stack(raster(e), raster(n)),
                isField = 'dXY',
@@ -858,7 +858,7 @@ print(rasterVis::vectorplot(raster::stack(raster(e), raster(n)),
                     fill = "#e3d0d0")))
 
 # ----- #
-# x11()
+x11()
 # png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_bird_group_2018N_week_",
 #     i,
 #     ".png",
@@ -905,7 +905,7 @@ layer(c(sp.points(pt_ls[[as.character(i)]],
 )
 
 # ----- #
-# x11()
+x11()
 png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_week_",
     i,
     "_angles_for_raster.png",
@@ -925,7 +925,8 @@ hist(ang_360,
      breaks = 36,
      main = paste("week # ", i, " 2018", sep = ""),
      xlab = "wind orientation (0°/360°)",
-     freq = F)
+     freq = F,
+     xlim = c(0, 360))
 lines(density(ang_360, na.rm = T),
       lwd = 2,
       col = "#0882ed")
@@ -934,7 +935,8 @@ hist(pt_ls[[as.character(i)]]$dir_bird_deg0_360,
      breaks = 36,
      main = paste("week # ", i, " 2018", sep = ""),
      xlab = "bird orientation (0°/360°)",
-     freq = F)
+     freq = F,
+     xlim = c(0, 360))
 
 lines(density(pt_ls[[as.character(i)]]$dir_bird_deg0_360, na.rm = T),
       lwd = 2,
@@ -1181,3 +1183,32 @@ for(i in 1:length(ll)){
 }
 
 #### A REFAIRE MAIS AVEC EXTRACT AVEC UNE ZONE TAMPON ####
+# EXAMPLE 
+pts <- ll[[20]]
+plot(st_geometry(pts))
+
+x11(); par(mfrow = c(3, 4))
+for(i in 1:12){
+     test <- ll[[20]][i, ]
+     testUTM <- st_transform(test,
+                             crs = 32743)
+     test1 <- st_buffer(testUTM,
+                        dist = 50000) # 50 km
+test1latlon <- st_transform(test1,
+                            crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+cr <- terra::crop(s,
+                  test1latlon,
+                  snap = "out")
+plot(cr)
+plot(st_geometry(test), add = T)
+plot(st_geometry(test1latlon), add = T)
+df <- terra::extract(s,
+                     test1latlon,
+                     exact = T) # on the way !!!!
+
+print(sum(df$mean*df$fraction)/sum(df$fraction)) # moyenne des valeurs de pixels ponderee par la surface reouverte par le polygone
+
+}
+
+# sur toutes les localisations 
+################ ***** MAIS FAUT IL LE FAIRE LORS DE L EXTRACTION DES VALEURS AUX 6 HEURES PRES ***** #########################
