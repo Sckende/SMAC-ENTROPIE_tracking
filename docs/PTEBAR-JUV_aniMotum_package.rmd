@@ -1,0 +1,179 @@
+---
+title: "PTEBAR - aniMotum"
+subtitle: "Data treatment & visualization"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+---
+  
+```{r, include = F}
+if (knitr::is_html_output()) knitr::knit_hooks$set(
+  plot = function(x, options) {
+    cap  <- options$fig.cap  # figure caption
+    tags <- htmltools::tags
+    as.character(tags$figure(
+      tags$img(src = x, alt = cap),
+      tags$figcaption(cap)
+    ))
+  }
+)
+
+# packages
+require(knitr)
+require(mapview)
+require(sf)
+require(viridis)
+```
+
+
+```{r, include = F}
+dt_arg <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_aniMotum_fitted_predicted_locs.rds")
+points <- do.call("rbind", dt_arg)
+pts_sf <- st_as_sf(points,
+                   coords = c("lon", "lat"),
+                   crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+dim(pts_sf)
+
+PTT <- unique(points$id)
+cols <- viridis(6)
+
+tracks <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_Spatial_tracks_ARGOS.rds")
+```
+
+# 162070  
+
+```{r, echo = F}
+
+mapview(split(pts_sf[pts_sf$id == PTT[1], ],
+              pts_sf$values[pts_sf$id == PTT[1]]),
+        col.regions = cols,
+        homebutton = F) + mapview(tracks[tracks$PTT == PTT[1],],
+                                      color = "darkgrey",
+                                      layer.name = "original track",
+        homebutton = F)
+```
+
+# 162072  
+
+```{r, echo = F}
+
+mapview(split(pts_sf[pts_sf$id == PTT[2], ],
+              pts_sf$values[pts_sf$id == PTT[2]]),
+        col.regions = cols,
+        homebutton = F) + mapview(tracks[tracks$PTT == PTT[2],],
+                                      color = "darkgrey",
+                                      layer.name = "original track",
+        homebutton = F)
+```
+# 162073  
+
+```{r, echo = F}
+
+mapview(split(pts_sf[pts_sf$id == PTT[3], ],
+              pts_sf$values[pts_sf$id == PTT[3]]),
+        col.regions = cols,
+        homebutton = F) + mapview(tracks[tracks$PTT == PTT[3],],
+                                      color = "darkgrey",
+                                      layer.name = "original track",
+        homebutton = F)
+```
+# 166561  
+
+```{r, echo = F}
+
+mapview(split(pts_sf[pts_sf$id == PTT[4], ],
+              pts_sf$values[pts_sf$id == PTT[4]]),
+        col.regions = cols,
+        homebutton = F) + mapview(tracks[tracks$PTT == PTT[4],],
+                                      color = "darkgrey",
+                                      layer.name = "original track",
+        homebutton = F)
+```
+# 166563  
+
+```{r, echo = F}
+
+mapview(split(pts_sf[pts_sf$id == PTT[5], ],
+              pts_sf$values[pts_sf$id == PTT[5]]),
+        col.regions = cols,
+        homebutton = F) + mapview(tracks[tracks$PTT == PTT[5],],
+                                      color = "darkgrey",
+                                      layer.name = "original track",
+        homebutton = F)
+```
+# 166564  
+
+```{r, echo = F}
+
+mapview(split(pts_sf[pts_sf$id == PTT[6], ],
+              pts_sf$values[pts_sf$id == PTT[6]]),
+        col.regions = cols,
+        homebutton = F) + mapview(tracks[tracks$PTT == PTT[6],],
+                                      color = "darkgrey",
+                                      layer.name = "original track",
+        homebutton = F)
+```
+# 166565  
+
+```{r, echo = F}
+
+mapview(split(pts_sf[pts_sf$id == PTT[7], ],
+              pts_sf$values[pts_sf$id == PTT[7]]),
+        col.regions = cols,
+        homebutton = F) + mapview(tracks[tracks$PTT == PTT[7],],
+                                      color = "darkgrey",
+                                      layer.name = "original track",
+        homebutton = F)
+```
+# 166566  
+
+```{r, echo = F}
+
+mapview(split(pts_sf[pts_sf$id == PTT[8], ],
+              pts_sf$values[pts_sf$id == PTT[8]]),
+        col.regions = cols,
+        homebutton = F) + mapview(tracks[tracks$PTT == PTT[8],],
+                                      color = "darkgrey",
+                                      layer.name = "original track",
+        homebutton = F)
+```
+# 166568  
+
+```{r, echo = F}
+
+mapview(split(pts_sf[pts_sf$id == PTT[9], ],
+              pts_sf$values[pts_sf$id == PTT[9]]),
+        col.regions = cols,
+        homebutton = F) + mapview(tracks[tracks$PTT == PTT[9],],
+                                      color = "darkgrey",
+                                      layer.name = "original track",
+        homebutton = F)
+```
+# 166569  
+
+```{r, echo = F}
+
+mapview(split(pts_sf[pts_sf$id == PTT[10], ],
+              pts_sf$values[pts_sf$id == PTT[10]]),
+        col.regions = cols,
+        homebutton = F) + mapview(tracks[tracks$PTT == PTT[10],],
+                                      color = "darkgrey",
+                                      layer.name = "original track",
+        homebutton = F)
+```
+# 166572  
+
+```{r, echo = F}
+
+mapview(split(pts_sf[pts_sf$id == PTT[11], ],
+              pts_sf$values[pts_sf$id == PTT[11]]),
+        col.regions = cols,
+        homebutton = F) + mapview(tracks[tracks$PTT == PTT[11],],
+                                      color = "darkgrey",
+                                      layer.name = "original track",
+        homebutton = F)
+```
+
+
