@@ -78,11 +78,128 @@ fit_mp1 <- fit_ssm(indss,
 
 fit_mp1
 summary(fit_mp1)
-data_mp1 <- grab(fit_mp1,
-                 what = "fitted")
+data_mp1 <- as.data.frame(grab(fit_mp1,
+                               what = "fitted"))
+data_mp1$values <- "fitted"
+
+x11(); plot(data_mp1$lon[data_mp1$id == 166568],
+            data_mp1$lat[data_mp1$id == 166568],
+            type = "b",
+            asp = 1)
 # saveRDS(data_mp1,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data.rds")
 
+####
+# max 60 km/h with reconstruction path (time step = c(1, 3, 6, 12, 24) hours)
+# ==> time step = 24
+fit_pred24 <- fit_ssm(indss,
+                      vmax = 17, # gannet speed = 61 km/h
+                      ang = NA,
+                      model = "mp",
+                      time.step = 24, # predicted values at each 24h
+                      control = ssm_control(verbose = 0))
+data_pred24 <- as.data.frame(grab(fit_pred24,
+                                  what = "predicted"))
+data_pred24$values <- "predicted-24h"
+
+# ==> time step = 12
+fit_pred12 <- fit_ssm(indss,
+                      vmax = 17, # gannet speed = 61 km/h
+                      ang = NA,
+                      model = "mp",
+                      time.step = 12, # predicted values at each 12h
+                      control = ssm_control(verbose = 0))
+data_pred12 <- as.data.frame(grab(fit_pred12,
+                                  what = "predicted"))
+data_pred12$values <- "predicted-12h"
+
+# ==> time step = 6
+fit_pred6 <- fit_ssm(indss,
+                     vmax = 17, # gannet speed = 61 km/h
+                     ang = NA,
+                     model = "mp",
+                     time.step = 6, # predicted values at each 6h
+                     control = ssm_control(verbose = 0))
+data_pred6 <- as.data.frame(grab(fit_pred6,
+                                 what = "predicted"))
+data_pred6$values <- "predicted-6h"
+
+# ==> time step = 3
+fit_pred3 <- fit_ssm(indss,
+                     vmax = 17, # gannet speed = 61 km/h
+                     ang = NA,
+                     model = "mp",
+                     time.step = 3, # predicted values at each 3h
+                     control = ssm_control(verbose = 0))
+data_pred3 <- as.data.frame(grab(fit_pred3,
+                                 what = "predicted"))
+data_pred3$values <- "predicted-3h"
+
+# ==> time step = 1
+fit_pred1 <- fit_ssm(indss,
+                     vmax = 17, # gannet speed = 61 km/h
+                     ang = NA,
+                     model = "mp",
+                     time.step = 1, # predicted values at each 1h
+                     control = ssm_control(verbose = 0))
+data_pred1 <- as.data.frame(grab(fit_pred1,
+                                 what = "predicted"))
+data_pred1$values <- "predicted-1h"
+
+# visualisation
+cols <- viridis(6)
+for (i in unique(data_mp1$id)) {
+     
+x11()
+plot(data_pred1$lon[data_pred1$id == i],
+     data_pred1$lat[data_pred1$id == i],
+     type = "b",
+     col = cols[1],
+     asp = 1,
+     main = i) # predicted data with 1h time step
+lines(data_pred3$lon[data_pred3$id == i],
+     data_pred3$lat[data_pred3$id == i],
+     type = "b",
+     col = cols[2],
+     asp = 1) # predicted data with 3h time step
+lines(data_pred6$lon[data_pred6$id == i],
+     data_pred6$lat[data_pred6$id == i],
+     type = "b",
+     col = cols[3],
+     asp = 1) # predicted data with 6h time step
+lines(data_pred12$lon[data_pred12$id == i],
+     data_pred12$lat[data_pred12$id == i],
+     type = "b",
+     col = cols[4],
+     asp = 1) # predicted data with 12h time step
+lines(data_pred24$lon[data_pred24$id == i],
+     data_pred24$lat[data_pred24$id == i],
+     type = "b",
+     col = cols[5],
+     asp = 1) # predicted data with 24h time step
+lines(data_mp1$lon[data_mp1$id == i],
+     data_mp1$lat[data_mp1$id == i],
+     type = "b",
+     col = cols[6],
+     asp = 1) # fitted data with the samle time step of original data
+
+legend("bottomright",
+       legend = c("fitted",
+                  "predicted - 24h",
+                  "predicted - 12h",
+                  "predicted - 6h",
+                  "predicted - 3h",
+                  "predicted - 1h"),
+       pch = 1,
+       col = rev(cols))
+}
+# saveRDS(list(data_mp1,
+#              data_pred24,
+#              data_pred12,
+#              data_pred6,
+#              data_pred3,
+#              data_pred1),
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_aniMotum_fitted_predicted_locs.rds")
 #### ---- Calcul des vitesses à partir de BD à 100km/h max ---- ####
 # summary(data_mp)
 # class(data_mp)
@@ -353,6 +470,8 @@ fl3 <- lapply(fit60_2_list, function(x) {
                             as.data.frame(x[, c("lon", "lat")]))
     x$wind_east <- extract(east_raster,
                            as.data.frame(x[, c("lon", "lat")]))
+# ----- #
+# extraction over several pixel
 # ----- #
     print(unique(x$raster_layer))
 # ----- #
@@ -1212,3 +1331,11 @@ print(sum(df$mean*df$fraction)/sum(df$fraction)) # moyenne des valeurs de pixels
 
 # sur toutes les localisations 
 ################ ***** MAIS FAUT IL LE FAIRE LORS DE L EXTRACTION DES VALEURS AUX 6 HEURES PRES ***** #########################
+
+x11()
+plot(data_mp1$lon[data_mp1$id == 162073],
+     data_mp1$lat[data_mp1$id == 162073],
+     type = "b")
+lines(data_mp2$lon[data_mp2$id == 162073],
+     data_mp2$lat[data_mp2$id == 162073],
+     col = "grey")
