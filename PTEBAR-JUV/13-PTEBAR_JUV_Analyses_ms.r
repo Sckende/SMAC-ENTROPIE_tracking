@@ -717,10 +717,17 @@ summary(loc)
 
 loc$week_num <- lubridate::isoweek(loc$date)
 table(loc$week_num)
+# ------------------------------------------ #
+#### bird restriction - group 2018_Nord ####
+# ------------------------------------------ #
 
-# bird restriction - group 2018_Nord
+
 dep_2018N <- loc[loc$group == "2018-Nord", ]
 unique(dep_2018N$id)
+
+# vitesse moyenne des oiseaux par semaine
+# ---------------------------------------
+# moyenne calculée à partir des vitesses obtenues dans un delai de moins de 2 h
 
 l1 <- split(dep_2018N, dep_2018N$week_num)
 speed_week_ls <- lapply(l1,
@@ -737,44 +744,15 @@ speed_week_ls <- lapply(l1,
                      })
 
 speed_week <- do.call("rbind",
-                      speed_week_ls)
+                      speed_week_ls) # vitesse moyenne de tous les oiseaux de 2018N par semaine
 x11()
 plot(speed_week$wk[-1],
      speed_week$bd_spd[-1],
      typ = "b",
      xlab = "week number",
-     ylab = "mean speed of birds (km/h)")
+     ylab = "mean speed of birds 2018 N(km/h)")
 
 summary(lm(bd_spd ~ wk, data = speed_week))
-
-# bird restriction - group 2018_Nord WITH NO TIME RESTRICTION
-loc_2018N <- loc[loc$group == "2018-Nord", ]
-
-l2 <- split(loc_2018N, loc_2018N$week_num)
-speed_week_ls2 <- lapply(l2,
-                     function(x) {
-                         wk <- unique(x$week_num)
-                         bd_spd <- mean(x$speed_km.h_treat,
-                                        na.rm = T) # vitesse pour délai < 120 min
-                         bd_spd_sd <- sd(x$speed_km.h_treat,
-                                        na.rm = T) 
-                         df <- data.frame(wk = wk,
-                                          bd_spd = bd_spd,
-                                          bd_spd_sd = bd_spd_sd)
-                         df
-                     })
-
-speed_week2 <- do.call("rbind",
-                      speed_week_ls2)
-x11()
-plot(speed_week2$wk[3:38],
-     speed_week2$bd_spd[3:38],
-     typ = "b",
-     xlab = "week number",
-     ylab = "mean speed of birds (km/h)")
-
-summary(lm(bd_spd ~ wk, data = speed_week2))
-
 
 # Wind roses
 library(openair)
@@ -812,7 +790,9 @@ windRose(mydata = dep_2018N,
          par.settings = list(axis.line = list(col = "lightgray")),
           col = viridis(5, option = "D", direction = -1))
 
-# ---- #
+
+# Wind extraction
+# -------------- #
 env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018" 
 
 # East wind 2018 #
@@ -1025,16 +1005,16 @@ layer(c(sp.points(pt_ls[[as.character(i)]],
 
 # ----- #
 x11()
-png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_week_",
-    i,
-    "_angles_for_raster.png",
-    sep = ""),
-    res = 300,
-    width = 20,
-    height = 15,
-    pointsize = 12,
-    units = "cm",
-    bg = "white")
+# png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_week_",
+#     i,
+#     "_angles_for_raster.png",
+#     sep = ""),
+#     res = 300,
+#     width = 20,
+#     height = 15,
+#     pointsize = 12,
+#     units = "cm",
+#     bg = "white")
 par(mfrow = c(1, 2))
 ang <- 180 * atan2(n, e) / pi
 ang_360 <- ifelse(values(ang) >= 0,
@@ -1063,7 +1043,8 @@ lines(density(pt_ls[[as.character(i)]]$dir_bird_deg0_360, na.rm = T),
 graphics.off()
 }
 
-
+# Evolution de la vitesse moyenne des vents dans la zone de Mada de S10 à S22
+# Ajout de la vitesse moyenne des oiseaux 2018N sur la même période (speed_week)
 x11()
 plot(wind_caracteristic$wk_num,
      wind_caracteristic$wd_spd_mean,
@@ -1079,6 +1060,15 @@ arrows(x0 = 12.5,
        x1 = 12.5,
        y1 = 7,
        code = 1)
+par(new = T)
+plot(speed_week$wk[speed_week$wk %in% 15:22],
+     speed_week$bd_spd[speed_week$wk %in% 15:22],
+     type = "b",
+     xlab = "",
+     ylab = "",
+     xlim = c(10, 22),
+     bty = "n",
+     col = "darkorange")
 
 # calcul de la distance parcourue relative par semaine
 
@@ -1109,6 +1099,9 @@ k_list <- lapply(k,
                  })
 
 ################
+# distance parcourue par les oiseaux par semaine
+# en partant du dernier point de la semaine précédente
+# et recalcul de la vitesse en partant de cette distance
 
 dist_wk_bd <- data.frame()
 
@@ -1143,6 +1136,7 @@ dist_wk_bd <- apply(dist_wk_bd,
                     2,
                     as.numeric)
 summary(dist_wk_bd)
+dist_wk_bd <- as.data.frame(dist_wk_bd)
 
 # mean dist per week
 dist_mean_wk <- aggregate(dist_m ~ week_num,
@@ -1155,8 +1149,32 @@ dist_cum_wk <- aggregate(dist_m ~ week_num,
                          data = dist_wk_bd,
                          sum,
                          na.rm = T)
+# mean speed of bird per week
+spd_brd_mean_wk <- aggregate(bd_spd_mean_km.h ~ week_num,
+                             data = dist_wk_bd,
+                             mean,
+                             na.rm = T)
 
 # VISU
+# 1 - comparaison des deux calculs de vitesse
+# ---------------------------------------------
+plot(speed_week$wk[speed_week$wk %in% 15:22],
+     speed_week$bd_spd[speed_week$wk %in% 15:22],
+     type = "b",
+     xlab = "Week number 2018",
+     ylab = "Mean speed bird - computation 1", # original data
+     xlim = c(15, 22),
+     ylim = c(5, 23),
+     bty = "n",
+     col = "darkorange")
+# arrows(x0 = speed_week$wk[speed_week$wk %in% 15:22],
+#        y0 = speed_week$bd_spd[speed_week$wk %in% 15:22],
+#        x1 = speed_week$wk[speed_week$wk %in% 15:22],
+#        y1 = speed_week$bd_spd[speed_week$wk %in% 15:22] + speed_week$bd_spd_sd[speed_week$wk %in% 15:22],
+#        col = "darkorange",
+#        code = 0)
+lines(spd_brd_mean_wk$week_num,
+      spd_brd_mean_wk$bd_spd_mean_km.h) # calcul de vitesse par semaine avec l'objet dist_wk_bd
 x11();
 plot(dist_mean_wk$week_num,
      dist_mean_wk$dist_m,
@@ -1167,55 +1185,35 @@ plot(dist_cum_wk$week_num,
      dist_cum_wk$dist_m,
      type = "b",
      col = "grey")
-# mean speed of bird per week
-spd_brd_mean_wk <- aggregate(bd_spd_mean_km.h ~ week_num,
-                             data = dist_wk_bd,
-                             mean,
-                             na.rm = T)
 
+# 2 - overlap distance parcourue, vitesse moyenne et vitesse du vent dans la zone
+# -------------------------------------------------------------------------------
 
-# cumul speed of bird per week
-spd_brd_cum_wk <- aggregate(bd_spd_mean_km.h ~ week_num,
-                            data = dist_wk_bd,
-                            sum,
-                            na.rm = T)
-
-# VISU
-x11();
-plot(spd_brd_mean_wk$week_num,
-     spd_brd_mean_wk$bd_spd_mean_km.h,
-     type = "b")
-par(new = T)
-plot(spd_brd_cum_wk$week_num,
-     spd_brd_cum_wk$bd_spd_mean_km.h,
-     type = "b",
-     col = "grey")
-
-
-# ---- #
+# VISU - distance parcourue en fn vitesse du vent
+# ------------------------------------
 x11()
+par(mar = c(4.1, 4.4, 4.1, 4.4))
+
 plot(dist_mean_wk$week_num,
      dist_mean_wk$dist_m/1000,
      type = "h",
      xlab = "",
-     ylab = "Travelled distance/week (km)",
+     ylab = "",
+     yaxt = "n",
+     xaxt = "n",
      xlim = c(10, 22),
      bty = "n",
      lwd = 5,
-     col ="#138473")
+     col ="#68decc")
+axis(side = 4,
+     lwd = 1,
+     las = 2,
+     cex.axis = 1)
+mtext("Mean travelled distance (km)",
+      side = 4,
+      line = 3,
+      col = "#68decc")
 par(new = T)
-plot(dist_cum_wk$week_num,
-     dist_cum_wk$dist_m/1000,
-     xlab = "week number 2018",
-     ylab = "",
-     type = "b",
-     bty = "n",
-     xlim = c(10, 22),
-     yaxt = "n",
-     xaxt = "n",
-     lwd = 3,
-     col = "#e66916")
-
 plot(wind_caracteristic$wk_num,
      wind_caracteristic$wd_spd_mean,
      xlab = "week number 2018",
@@ -1223,42 +1221,78 @@ plot(wind_caracteristic$wk_num,
      type = "b",
      bty = "n",
      xlim = c(10, 22),
+     ylim = c(3.5, 14),
+     lwd = 3,
+     col = "#2b9aa6")
+mtext("Mean wind speed (km/h)",
+      side = 2,
+      line = 3,
+      col = "#2b9aa6")
+text(x = 12.5,
+     y = 12,
+     "wind inversion")
+arrows(x0 = 12.5,
+       y0 = 5,
+       x1 = 12.5,
+       y1 = 11,
+       code = 1)
+
+# VISU - vitesse des oiseaux en fn du vent
+# --------------------------------------
+x11()
+par(mar = c(4.1, 4.4, 4.1, 4.4))
+
+plot(spd_brd_mean_wk$week_num,
+     spd_brd_mean_wk$bd_spd_mean_km.h,
+     xlab = "week number 2018",
+     ylab = "",
+     type = "b",
+     bty = "n",
+     xlim = c(10, 22),
+     ylim = c(3.5, 14),
      yaxt = "n",
      xaxt = "n",
      lwd = 3,
-     col = "#e66916")
+     col = "#68decc")
 axis(side = 4,
      lwd = 1,
      las = 2,
      cex.axis = 1)
+mtext("Mean speed of birds (km/h)",
+      side = 4,
+      line = 3,
+      col = "#68decc")
+
+par(new = T)
+plot(wind_caracteristic$wk_num,
+     wind_caracteristic$wd_spd_mean,
+     type = "b",
+     xlab = "",
+     ylab = "",
+     xlim = c(10, 22),
+     ylim = c(3.5, 14),
+     bty = "n",
+     lwd = 3,
+     col = "#2b9aa6")
+mtext("Mean wind speed (km/h)",
+      side = 2,
+      line = 3,
+      col = "#2b9aa6")
 text(x = 12.5,
-     y = 7.2,
+     y = 12,
      "wind inversion")
 arrows(x0 = 12.5,
-       y0 = 4.5,
+       y0 = 5,
        x1 = 12.5,
-       y1 = 7,
+       y1 = 11,
        code = 1)
-# par(new = T)
-# plot(spd_brd_wk$week_num,
-#      spd_brd_wk$bd_spd_mean_km.h,
-#      xlab = "",
-#      ylab = "",
-#      type = "b",
-#      bty = "n",
-#      xlim = c(10, 22),
-#      yaxt = "n",
-#      xaxt = "n",
-#      lwd = 3,
-#      col = "#16e6ca") # pas tres parlant
-
-
 
 # distance oiseaux vs. vitesse vents
-plot(wind_caracteristic$wd_spd_mean[wind_caracteristic$wk_num %in% 15:22],
-     dist_wk$dist_m/1000)
+plot(wind_caracteristic$wd_spd_mean[wind_caracteristic$wk_num %in% 14:22],
+     dist_wk_bd$dist_m[dist_wk_bd$id == "162070"]/1000,
+     type = "b")
 
-bd_dist <- dist_wk$dist_m/1000
+bd_dist <- dist_wk_bd$dist_m/1000
 wd_spd <- wind_caracteristic$wd_spd_mean[wind_caracteristic$wk_num %in% 15:22]
 summary(lm(bd_dist ~ wd_spd))
 
@@ -1339,3 +1373,538 @@ plot(data_mp1$lon[data_mp1$id == 162073],
 lines(data_mp2$lon[data_mp2$id == 162073],
      data_mp2$lat[data_mp2$id == 162073],
      col = "grey")
+
+# ------------------------------------------ #
+#### bird restriction - group 2018_SUD ####
+# ------------------------------------------ #
+
+
+dep_2018S <- loc[loc$group == "2018-Sud", ]
+unique(dep_2018S$id)
+
+# vitesse moyenne des oiseaux par semaine
+# ---------------------------------------
+# moyenne calculée à partir des vitesses obtenues dans un delai de moins de 2 h
+
+l1 <- split(dep_2018S, dep_2018S$week_num)
+speed_week_ls <- lapply(l1,
+                     function(x) {
+                         wk <- unique(x$week_num)
+                         bd_spd <- mean(x$speed_km.h_treat,
+                                        na.rm = T) # vitesse pour délai < 120 min
+                         bd_spd_sd <- sd(x$speed_km.h_treat,
+                                        na.rm = T) 
+                         df <- data.frame(wk = wk,
+                                          bd_spd = bd_spd,
+                                          bd_spd_sd = bd_spd_sd)
+                         df
+                     })
+
+speed_week_2018S <- do.call("rbind",
+                      speed_week_ls) # vitesse moyenne de tous les oiseaux de 2018N par semaine
+x11()
+plot(speed_week_2018S$wk[-1],
+     speed_week_2018S$bd_spd[-1],
+     typ = "b",
+     xlab = "week number",
+     ylab = "mean speed of birds 2018 S(km/h)")
+
+summary(lm(bd_spd ~ wk, data = speed_week_2018S))
+
+# Wind extraction
+# -------------- #
+env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018" 
+
+# East wind 2018 #
+windE2018_names <- list.files(env_folder, full.names = T)[str_detect(list.files(env_folder), "eastward_wind-2018")]
+windE2018 <- terra::rast(windE2018_names)
+time(windE2018)[duplicated(time(windE2018))]
+wE2018 <- windE2018[[!duplicated(time(windE2018))]]
+time(wE2018)[duplicated(time(wE2018))]
+
+# North wind 2018 #
+windN2018_names <- list.files(env_folder, full.names = T)[str_detect(list.files(env_folder), "northward_wind-2018")]
+windN2018 <- terra::rast(windN2018_names)
+time(windN2018)[duplicated(time(windN2018))]
+wN2018 <- windN2018[[!duplicated(time(windN2018))]]
+time(wN2018)[duplicated(time(wN2018))]
+
+# Speed wind 2018 #
+windS2018_names <- list.files(env_folder, full.names = T)[str_detect(list.files(env_folder), "wind_speed-2018")]
+windS2018 <- terra::rast(windS2018_names)
+time(windS2018)[duplicated(time(windS2018))]
+wS2018 <- windS2018[[!duplicated(time(windS2018))]]
+time(wS2018)[duplicated(time(wS2018))]
+
+# Bird group 2018 S #
+# From S14 to S22
+dep_2018S <- as.data.frame((loc[loc$group == "2018-Sud" & loc$week_num %in% 14:22, ]))
+summary(dep_2018S); dim(dep_2018S)
+unique(dep_2018S$id)
+unique(dep_2018S$week_num)
+col_pt <- c("#ebed7f", "#7fedde")
+col_pt_df <- data.frame(id = unique(dep_2018S$id),
+                        col_pt = col_pt)
+col_tck <- c("#eeefb6d2", "#d0f3ee")
+
+dep_2018S <- left_join(dep_2018S,
+                       col_pt_df,
+                       by = "id")
+dep_2018S <- left_join(dep_2018S,
+                       data.frame(id = unique(dep_2018S$id),
+                                  col_tck = col_tck),
+                       by = "id")
+
+wk_ls <- split(dep_2018S, dep_2018S$week_num)
+
+pt_ls <- lapply(wk_ls,
+                function(x){
+                    SpatialPointsDataFrame(coords = x[, c("lon", "lat")],
+                                           data = x,
+                                           proj4string = CRS("+init=epsg:4326"))
+                })
+
+tck_ls <- lapply(wk_ls,
+                 function(x){
+                     argos_sp <- SpatialPointsDataFrame(coords = x[, c("lon", "lat")],
+                                           data = x,
+                                           proj4string = CRS("+init=epsg:4326"))
+                     argos_sp_list <- split(argos_sp, argos_sp$id)
+                     track <- lapply(argos_sp_list,
+                                     function(x) {
+                                         Lines(list(Line(coordinates(x))),
+                                               x$id[1L])
+                                         })
+                     lines <- SpatialLines(track)
+                     data <- data.frame(id = unique(argos_sp$id),
+                                        wk = unique(x$week_num))
+                     data <- left_join(data,
+                                       data.frame(id = unique(dep_2018S$id),
+                                                  col_tck = col_tck),
+                                       by = "id")
+                     rownames(data) <- data$id
+                     argos_lines <- SpatialLinesDataFrame(lines, data)
+                     })
+
+#########################
+
+# ---- #
+nlev <- 100
+my_at <- seq(from = 0,
+             to = 20,
+             length.out = nlev+1)
+my_cols <- viridis_pal(begin = 1,
+                       end = 0,
+                       option = "A")(nlev)
+
+# ---- HUGE LOOP ---- #
+wind_caracteristic_2018S <- data.frame(wk_num = NA,
+                                 wd_spd_mean = NA,
+                                 wd_spd_sd = NA)
+for (i in 10:22){
+    print(i)
+# BIRD #
+bird_pt <- pt_ls[[as.character(i)]]
+
+# track
+if (i >= 14) {
+t <- as.data.frame(dep_2018S[dep_2018S$week_num %in% 10:i,])
+t_sp <- SpatialPointsDataFrame(coords = t[, c("lon", "lat")],
+                                           data = t,
+                                           proj4string = CRS("+init=epsg:4326"))
+tt <- split(t_sp, t_sp$id)
+track <- lapply(tt,
+                function(x) {
+                    Lines(list(Line(coordinates(x))),
+                          x$id[1L])
+                    })
+tt_lines <- SpatialLines(track)
+} else {
+    tt_lines <- NULL
+}
+
+# WIND #
+extend <- extent(50, 80, -35, 0) # xmin, xmax, ymin, ymax
+
+e <- crop(mean(wE2018[[isoweek(time(wE2018)) == i]]),
+          extend)
+n <- crop(mean(wN2018[[isoweek(time(wN2018)) == i]]),
+          extend)
+s <- crop(mean(wS2018[[isoweek(time(wS2018)) == i]]),
+          extend)
+
+wd <- c(i,
+        mean(values(s), na.rm = T),
+        sd(values(s), na.rm = T))
+wind_caracteristic_2018S <- rbind(wind_caracteristic_2018S, wd)
+
+# ---- #
+# x11()
+png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/GROUP_2018S/RUN-MADA_wind_2018_week_",
+    i,
+    ".png",
+    sep = ""),
+    res = 300,
+    width = 30,
+    height = 40,
+    pointsize = 4,
+    units = "cm",
+    bg = "white")
+
+print(rasterVis::vectorplot(raster::stack(raster(e), raster(n)),
+               isField = 'dXY',
+               units = "degrees",
+               narrows = 600,
+               lwd.arrows = 2,
+               aspX = 0.1,
+               region = raster(s),
+               at = my_at,
+               col.regions = my_cols,
+               colorkey = list(labels = list(cex = 1.5),
+                               title = list("wind speed (km/h)",
+                                            cex = 2,
+                                            vjust = 0)),
+               main = list(label = paste("week # ", i, " 2018", sep = ""),
+                           cex = 3),
+               xlab = list(label = "Longitude", 
+                           cex = 2),
+               ylab = list(label = "Latitude",
+                           cex = 2),
+               scales = list(x = list(cex = 1.5),
+                             y = list(cex = 1.5))) +
+      layer(sp.polygons(ne_countries(),
+                    col = "#e3d0d0",
+                    fill = "#e3d0d0")))
+
+# ----- #
+# x11()
+png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/GROUP_2018S/RUN-MADA_wind_2018_week_",
+    i,
+    ".png",
+    sep = ""),
+    res = 300,
+    width = 30,
+    height = 40,
+    pointsize = 4,
+    units = "cm",
+    bg = "white")
+
+print(rasterVis::vectorplot(raster::stack(raster(e), raster(n)),
+               isField = 'dXY',
+               units = "degrees",
+               narrows = 600,
+               lwd.arrows = 2,
+               aspX = 0.1,
+               region = raster(s),
+               at = my_at,
+               col.regions = my_cols,
+               colorkey = list(labels = list(cex = 1.5),
+                               title = list("wind speed (km/h)",
+                                            cex = 2,
+                                            vjust = 0)),
+               main = list(label = paste("week # ", i, " 2018", sep = ""),
+                           cex = 3),
+               xlab = list(label = "Longitude",
+                           cex = 2),
+               ylab = list(label = "Latitude",
+                           cex = 2),
+               scales = list(x = list(cex = 1.5),
+                             y = list(cex = 1.5))) +
+layer(c(sp.points(pt_ls[[as.character(i)]],
+          col = pt_ls[[as.character(i)]]$col_pt,
+          cex = 3,
+          lwd = 3),
+        sp.lines(tt_lines,
+                 col = col_tck,
+                 lwd = 3),
+        sp.polygons(ne_countries(),
+                    col = "#e3d0d0",
+                    fill = "#e3d0d0"))
+)
+)
+
+# ----- #
+# x11()
+png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/GROUP_2018S/RUN-MADA_wind_2018_week_",
+    i,
+    "_angles_for_raster.png",
+    sep = ""),
+    res = 300,
+    width = 20,
+    height = 15,
+    pointsize = 12,
+    units = "cm",
+    bg = "white")
+par(mfrow = c(1, 2))
+ang <- 180 * atan2(n, e) / pi
+ang_360 <- ifelse(values(ang) >= 0,
+                  values(ang),
+                  360 + values(ang))
+hist(ang_360,
+     breaks = 36,
+     main = paste("week # ", i, " 2018", sep = ""),
+     xlab = "wind orientation (0°/360°)",
+     freq = F,
+     xlim = c(0, 360))
+lines(density(ang_360, na.rm = T),
+      lwd = 2,
+      col = "#0882ed")
+if(i > 14) {
+hist(pt_ls[[as.character(i)]]$dir_bird_deg0_360,
+     breaks = 36,
+     main = paste("week # ", i, " 2018", sep = ""),
+     xlab = "bird orientation (0°/360°) - 2018 S",
+     freq = F,
+     xlim = c(0, 360))
+
+lines(density(pt_ls[[as.character(i)]]$dir_bird_deg0_360, na.rm = T),
+      lwd = 2,
+      col = "#0882ed")}
+graphics.off()
+}
+
+# Evolution de la vitesse moyenne des vents dans la zone
+# Ajout de la vitesse moyenne des oiseaux 2018S sur la même période (speed_week)
+x11()
+plot(wind_caracteristic_2018S$wk_num,
+     wind_caracteristic_2018S$wd_spd_mean,
+     xlab = "week number 2018",
+     ylab = "Mean wind speed (m/s)",
+     type = "b",
+     bty = "n")
+text(x = 12.5,
+     y = 8,
+     "wind inversion")
+arrows(x0 = 12.5,
+       y0 = 6.25,
+       x1 = 12.5,
+       y1 = 7.75,
+       code = 1)
+par(new = T)
+plot(speed_week_2018S$wk[speed_week_2018S$wk %in% 15:22],
+     speed_week_2018S$bd_spd[speed_week_2018S$wk %in% 15:22],
+     type = "b",
+     xlab = "",
+     ylab = "",
+     xlim = c(10, 22),
+     bty = "n",
+     col = "darkorange")
+
+# calcul de la distance parcourue relative par semaine
+
+dep_2018S_sf_latlon <- st_as_sf(dep_2018S,
+                         coords = c("lon", "lat"),
+                         crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+mapview(dep_2018S_sf_latlon)
+
+dep_2018S_sf_UTM <- st_transform(dep_2018S_sf_latlon,
+                                 crs = 32743)
+mapview(dep_2018S_sf_UTM)
+
+# distance
+dep_2018S_sf_UTM$spl <- paste(dep_2018S_sf_UTM$id, dep_2018S_sf_UTM$week_num)
+k <- split(dep_2018S_sf_UTM,
+           dep_2018S_sf_UTM$spl)
+
+k_list <- lapply(k,
+                 function(x) {
+                     wk <- unique(x$week_num)
+                     id <- unique(x$id)
+                     dista <- as.numeric(st_distance(x[1,],
+                                          x[dim(x)[1], ]))
+                     
+                     data.frame(id = id,
+                                wk_num = wk,
+                                dist_m = dista)
+                 })
+
+################
+# distance parcourue par les oiseaux par semaine
+# en partant du dernier point de la semaine précédente
+# et recalcul de la vitesse en partant de cette distance
+
+dist_wk_bd <- data.frame()
+
+for(i in 1:length(k)){
+     
+     print(i)
+    
+    wk <- unique(k[[i]]$week_num)
+    id <- unique(k[[i]]$id)
+    
+
+    
+    if(wk > 14){
+            pres <- k[[i]]
+            past <- k[[i-1]]
+        dista <- st_distance(pres[dim(pres)[1], ],
+                             past[dim(past)[1],])
+        bd_speed_mean  <- mean(k[[i]]$speed_km.h_treat, na.rm = T)
+        bd_speed_sd  <- sd(k[[i]]$speed_km.h_treat, na.rm = T)
+        
+    } else {
+        dista <- NA
+        bd_speed_mean <- NA
+        bd_speed_sd <- NA
+    }
+    
+    dist_wk_bd <- rbind(dist_wk_bd,
+                        c(id, wk, as.numeric(dista), bd_speed_mean, bd_speed_sd))
+}
+
+
+names(dist_wk_bd) <- c("id", "week_num", "dist_m", "bd_spd_mean_km.h", "bd_spd_sd")
+dist_wk_bd <- apply(dist_wk_bd,
+                    2,
+                    as.numeric)
+summary(dist_wk_bd)
+dist_wk_bd <- as.data.frame(dist_wk_bd)
+
+# mean dist per week
+dist_mean_wk <- aggregate(dist_m ~ week_num,
+                          data = dist_wk_bd,
+                          mean,
+                          na.rm = T)
+
+# cumul dist per week
+dist_cum_wk <- aggregate(dist_m ~ week_num,
+                         data = dist_wk_bd,
+                         sum,
+                         na.rm = T)
+# mean speed of bird per week
+spd_brd_mean_wk <- aggregate(bd_spd_mean_km.h ~ week_num,
+                             data = dist_wk_bd,
+                             mean,
+                             na.rm = T)
+
+# VISU
+# 1 - comparaison des deux calculs de vitesse
+# ---------------------------------------------
+plot(speed_week_2018S$wk[speed_week_2018S$wk %in% 15:22],
+     speed_week_2018S$bd_spd[speed_week_2018S$wk %in% 15:22],
+     type = "b",
+     xlab = "Week number 2018",
+     ylab = "Mean speed bird 2018S- computation 1", # original data
+     xlim = c(15, 22),
+     ylim = c(5, 23),
+     bty = "n",
+     col = "darkorange")
+# arrows(x0 = speed_week$wk[speed_week$wk %in% 15:22],
+#        y0 = speed_week$bd_spd[speed_week$wk %in% 15:22],
+#        x1 = speed_week$wk[speed_week$wk %in% 15:22],
+#        y1 = speed_week$bd_spd[speed_week$wk %in% 15:22] + speed_week$bd_spd_sd[speed_week$wk %in% 15:22],
+#        col = "darkorange",
+#        code = 0)
+lines(spd_brd_mean_wk$week_num,
+      spd_brd_mean_wk$bd_spd_mean_km.h) # calcul de vitesse par semaine avec l'objet dist_wk_bd
+x11();
+plot(dist_mean_wk$week_num,
+     dist_mean_wk$dist_m,
+     type = "b",
+     asp = )
+par(new = T)
+plot(dist_cum_wk$week_num,
+     dist_cum_wk$dist_m,
+     type = "b",
+     col = "grey")
+
+# 2 - overlap distance parcourue, vitesse moyenne et vitesse du vent dans la zone
+# -------------------------------------------------------------------------------
+
+# VISU - distance parcourue en fn vitesse du vent
+# ------------------------------------
+x11()
+par(mar = c(4.1, 4.4, 4.1, 4.4))
+
+plot(dist_mean_wk$week_num,
+     dist_mean_wk$dist_m/1000,
+     type = "h",
+     xlab = "",
+     ylab = "",
+     yaxt = "n",
+     xaxt = "n",
+     xlim = c(10, 22),
+     bty = "n",
+     lwd = 5,
+     col ="#68decc")
+axis(side = 4,
+     lwd = 1,
+     las = 2,
+     cex.axis = 1)
+mtext("Mean travelled distance 2018S (km)",
+      side = 4,
+      line = 3,
+      col = "#68decc")
+par(new = T)
+plot(wind_caracteristic_2018S$wk_num,
+     wind_caracteristic_2018S$wd_spd_mean,
+     xlab = "week number 2018",
+     ylab = "",
+     type = "b",
+     bty = "n",
+     xlim = c(10, 22),
+     ylim = c(3.5, 14),
+     lwd = 3,
+     col = "#2b9aa6")
+mtext("Mean wind speed (km/h)",
+      side = 2,
+      line = 3,
+      col = "#2b9aa6")
+text(x = 12.5,
+     y = 12,
+     "wind inversion")
+arrows(x0 = 12.5,
+       y0 = 7,
+       x1 = 12.5,
+       y1 = 11,
+       code = 1)
+
+# VISU - vitesse des oiseaux en fn du vent
+# --------------------------------------
+x11()
+par(mar = c(4.1, 4.4, 4.1, 4.4))
+
+plot(spd_brd_mean_wk$week_num,
+     spd_brd_mean_wk$bd_spd_mean_km.h,
+     xlab = "week number 2018",
+     ylab = "",
+     type = "b",
+     bty = "n",
+     xlim = c(10, 22),
+     ylim = c(3.5, 20),
+     yaxt = "n",
+     xaxt = "n",
+     lwd = 3,
+     col = "#68decc")
+axis(side = 4,
+     lwd = 1,
+     las = 2,
+     cex.axis = 1)
+mtext("Mean speed of birds (km/h)",
+      side = 4,
+      line = 3,
+      col = "#68decc")
+
+par(new = T)
+plot(wind_caracteristic_2018S$wk_num,
+     wind_caracteristic_2018S$wd_spd_mean,
+     type = "b",
+     xlab = "",
+     ylab = "",
+     xlim = c(10, 22),
+     ylim = c(3.5, 14),
+     bty = "n",
+     lwd = 3,
+     col = "#2b9aa6")
+mtext("Mean wind speed (km/h)",
+      side = 2,
+      line = 3,
+      col = "#2b9aa6")
+text(x = 12.5,
+     y = 12,
+     "wind inversion")
+arrows(x0 = 12.5,
+       y0 = 7,
+       x1 = 12.5,
+       y1 = 11,
+       code = 1)
