@@ -1029,6 +1029,17 @@ hist(ang_360,
 lines(density(ang_360, na.rm = T),
       lwd = 2,
       col = "#0882ed")
+
+# circular mean for wind
+ang_circ <- circular(ang_360,
+                     type = "angles",
+                     units = "degrees",
+                     modulo = "2pi")
+print(mean.circular(ang_circ,
+                    na.rm = T))
+
+
+
 if(i > 14) {
 hist(pt_ls[[as.character(i)]]$dir_bird_deg0_360,
      breaks = 36,
@@ -1040,7 +1051,7 @@ hist(pt_ls[[as.character(i)]]$dir_bird_deg0_360,
 lines(density(pt_ls[[as.character(i)]]$dir_bird_deg0_360, na.rm = T),
       lwd = 2,
       col = "#0882ed")}
-graphics.off()
+# graphics.off()
 }
 
 # Evolution de la vitesse moyenne des vents dans la zone de Mada de S10 à S22
@@ -1908,3 +1919,11 @@ arrows(x0 = 12.5,
        x1 = 12.5,
        y1 = 11,
        code = 1)
+
+
+ang_circ <- circular(dep_2018N$dir_bird_deg0_360,
+                     type = "angles",
+                     units = "degrees",
+                     modulo = "2pi")
+mean.circular(ang_circ,
+              na.rm =T)
