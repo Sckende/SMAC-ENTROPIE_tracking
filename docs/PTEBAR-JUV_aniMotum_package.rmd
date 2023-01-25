@@ -26,7 +26,7 @@ require(mapview)
 require(sf)
 require(viridis)
 ```
-
+Ici sont présentés les valeurs fittées et prédites (time.step == c(1, 3, 6, 12, 24) h) issues d'un SSM "move persistence", avec une vitesse maximale de 60 km/h (vitesse remplacée par 110 km/h dans les prochains modèles).
 
 ```{r, include = F}
 dt_arg <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_aniMotum_fitted_predicted_locs.rds")
