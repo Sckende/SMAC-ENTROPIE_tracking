@@ -200,6 +200,7 @@ legend("bottomright",
 #              data_pred3,
 #              data_pred1),
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_aniMotum_fitted_predicted_locs.rds")
+
 #### ---- Calcul des vitesses à partir de BD à 100km/h max ---- ####
 # summary(data_mp)
 # class(data_mp)
