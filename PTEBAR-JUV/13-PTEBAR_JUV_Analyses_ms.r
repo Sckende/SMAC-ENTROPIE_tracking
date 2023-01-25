@@ -11,10 +11,11 @@ head(argos)
 dim(argos)
 table(argos$Vessel)
 
+#### ---- Data filter ---- ####
 ind <- argos[!(argos$Vessel %in% c("166570",
                                    "166571",
                                    "166573",
-                                   "162071")), ]
+                                   "162071")), ] # deletion of too short tracks
 inds <- droplevels(ind)
 dim(inds)
 table(inds$Vessel)
@@ -32,40 +33,42 @@ head(indss)
 #### ---- PART 1 - move persistence model ---- ####
 ##################################################
 
-# max 100 km/h
-# fit_mp <- fit_ssm(indss,
-#                   vmax = 28, # env. 100 km/h
-#                   ang = NA,
-#                   model = "mp",
-#                   time.step = NA, # to obtain only the fitted values
-#                   control = ssm_control(verbose = 0))
+# max 110 km/h based on GPS data of ADULT PTEBAR
+fit_mp <- fit_ssm(indss,
+                  vmax = 30.5, # env. 110 km/h
+                  ang = NA,
+                  model = "mp",
+                  time.step = NA, # to obtain only the fitted values
+                  control = ssm_control(verbose = 0))
 
-# fit_mp
-# summary(fit_mp)
-# data_mp <- grab(fit_mp,
-#                 what = "fitted")
-# x11(); plot(fit_mp, type = 2)
+fit_mp
+summary(fit_mp)
+data_mp <- grab(fit_mp,
+                what = "fitted")
+summary(data_mp)
+x11(); plot(fit_mp, type = 2)
 
+####################### REPRENDRE ICI #################################
 #### ---- Production des figures ---- ####
 # ---- inspections visuelles des modèles
-# for(i in fit_mp$id) {
-#      ind <- dplyr::filter(fit_mp, id == i)
-#      res.rw <- osar(ind)
-# x11()
-# png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/Analyses/Figures/SSM_MP_FITTED_",
-#               i,
-#               ".png",
-#               sep = ""),
-#     res = 300,
-#     width = 30,
-#     height = 30,
-#     pointsize = 12,
-#     unit = "cm",
-#     bg = "transparent")
-# print((plot(res.rw, type = "ts") | plot(res.rw, type = "qq")) / 
-#   (plot(res.rw, type = "acf") | plot_spacer()))
-# dev.off()
-# }
+for(i in fit_mp$id) {
+     ind <- dplyr::filter(fit_mp, id == i)
+     res.rw <- osar(ind)
+x11()
+png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/Analyses/Figures/SSM_MP_FITTED_110max_",
+              i,
+              ".png",
+              sep = ""),
+    res = 300,
+    width = 30,
+    height = 30,
+    pointsize = 12,
+    unit = "cm",
+    bg = "transparent")
+print((plot(res.rw, type = "ts") | plot(res.rw, type = "qq")) / 
+  (plot(res.rw, type = "acf") | plot_spacer()))
+dev.off()
+}
 
 ####
 # max 60 km/h
@@ -87,7 +90,7 @@ x11(); plot(data_mp1$lon[data_mp1$id == 166568],
             type = "b",
             asp = 1)
 # saveRDS(data_mp1,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data.rds")
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_110max.rds")
 
 ####
 # max 60 km/h with reconstruction path (time step = c(1, 3, 6, 12, 24) hours)
