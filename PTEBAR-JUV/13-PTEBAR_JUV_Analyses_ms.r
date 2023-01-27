@@ -369,7 +369,7 @@ summary(data_mp$speed_km.h_treat)
 #######################################################################
 #### ---- PART 2 - extraction des paramètres environnementaux sous les localisations ajustées ---- ####
 #######################################################################
-
+# WARNING - UTILISER PACKAGE TERRA ET SF EN PRIORITE ****
 
 # ---- Creation des rasters
 env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R" 
@@ -422,12 +422,12 @@ mp_list2 <- lapply(mp_list, function(x){
     sst_raster <- sst_stack[[str_which(names(sst_stack), unique(x$dt))]]
     chlo_raster <- chlo_stack[[str_which(names(chlo_stack), unique(x$dt))]] 
 
-    x$sst <- extract(sst_raster,
+    x$sst_loc <- extract(sst_raster,
                      as.data.frame(x[, c('lon', 'lat')]))
-    x$chlo <- extract(chlo_raster,
+    x$chlo_loc <- extract(chlo_raster,
                       as.data.frame(x[, c('lon', 'lat')]))
     
-    # ----- #
+   # ----- #
     print(unique(x$dt))
     
     x
@@ -447,14 +447,47 @@ summary(mp_2$chlo)
 
 names(mp_2)
 
-#######################"################
+#######################################
 # ---- For WIND speed & orientation ####
 ########################################
 
 # Deletion of duplicated layers in raster
 # ---> wind_east_stack #
 ########################
+# ---> REPRENDRE ICI POUR LE BUG DE rast() CONVERSION VERS SPATRASTER (terra)
+########################
+# speed
+list_names <- list.files(env_folder, full.names = TRUE)
+speed_wind_names <- list_names[str_detect(list_names, "WIND-SPEED")]
 
+wind_spd <- terra::rast(speed_wind_names)
+name_time <- as.character(time(wind_spd))
+duplicated(name_time)
+duplicated(time(wind_spd))
+
+wind_spd2 <- wind_spd[[!duplicated(time(wind_spd))]]
+
+# EAST COMPONENT
+east_wind_names <- list_names[str_detect(list_names, "WIND-EAST")]
+
+wind_east <- terra::rast(east_wind_names)
+name_time2 <- as.character(time(wind_east))
+duplicated(name_time2)
+duplicated(time(wind_east))
+
+wind_east2 <- wind_east[[!duplicated(time(wind_east))]]
+
+# NORTH COMPONENT
+north_wind_names <- list_names[str_detect(list_names, "WIND-NORTH")]
+
+wind_north <- terra::rast(north_wind_names)
+name_time3 <- as.character(time(wind_north))
+duplicated(name_time3)
+duplicated(time(wind_north))
+
+wind_north2 <- wind_north[[!duplicated(time(wind_north))]]
+################ REPRENDRE ICI ######################################
+###########################
 str_length(names(wind_east_stack))
 j <- names(wind_east_stack)[str_length(names(wind_east_stack)) > 20]
 east_wind_deletion <- j[str_detect(j, '.00.2')]
@@ -524,15 +557,52 @@ fl3 <- lapply(mp_2_list, function(x) {
     east_raster <- wind_east_stack[[str_which(names(wind_east_stack),
                                               unique(x$raster_layer))]]
 # ----- #
-    x$wind_speed <- extract(speed_raster,
+    x$wind_speed_loc <- extract(speed_raster,
                             as.data.frame(x[, c("lon", "lat")]))
-    x$wind_north <- extract(north_raster,
+    x$wind_north_loc <- extract(north_raster,
                             as.data.frame(x[, c("lon", "lat")]))
-    x$wind_east <- extract(east_raster,
+    x$wind_east_loc <- extract(east_raster,
                            as.data.frame(x[, c("lon", "lat")]))
 # ----- #
 # extraction over several pixel
 # ----- #
+ # ---- zone tampon de 200km autour des locs ---- #
+    latlon_sf <- st_as_sf(x,
+                          coords = c("lon", "lat"),
+                          crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+    utm_sf <- st_transform(latlon_sf,
+                           crs = 32743) # conversion pour ajout zone tampon en m
+    tamp <- st_buffer(utm_sf,
+                      dist = 200000) # ajout zone tampon de 200 km (200 000 m)
+    latlon_buff <- st_transform(tamp,
+                              crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0") # reconversion en latlon pour extraire du raster, lui aussi en latlon
+    
+    # ---- raster cropping
+    cr <- terra::crop(speed_raster,
+                      latlon_buff,
+                      snap = "out")
+plot(cr)
+plot(st_geometry(st_transform(utm_sf, crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")), add = T)
+plot(st_geometry(latlon_buff), add = T)
+
+# ---- values extraction
+speed_tamp <- terra::extract(speed_raster),
+                             latlon_buff,
+                             exact = T) 
+north_tamp <- terra::extract(north_raster,
+                             latlon_buff,
+                             exact = T)
+east_tamp <- terra::extract(east_raster,
+                             latlon_buff,
+                             exact = T) # *************HERE !!!
+
+x$wind_speed_200km <- sum(speed_tamp$mean*speed_tamp$fraction)/sum(speed_tamp$fraction)
+x$wind_north_200km <- sum(north_tamp$mean*north_tamp$fraction)/sum(north_tamp$fraction)
+x$wind_east_200km <- sum(east_tamp$mean*east_tamp$fraction)/sum(east_tamp$fraction)
+
+
+
+# ---- #
     print(unique(x$raster_layer))
 # ----- #
     x
@@ -568,8 +638,6 @@ summary(mp_3$abs_wind_spd * 0.001 * 3600)
 #########################################################
 #### ---- PART 3 - Kernels avec locs corrigees ---- ####
 ########################################################
-
-#################### REPRENDRE ICI !!!! ###########################
 
 #### ---- ADULT GLS
 ad_gls <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_2008-2009_clean_from_Audrey.txt",
@@ -620,7 +688,7 @@ mapview(list(ver90_a, ver50_a, ver25_a))
 #### ---- PART 4 - Direction que prennent les oiseaux  ---- ####
 ################################################################
 
-loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param.rds")
+loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_110max.rds")
 dim(loc)
 class(loc$date)
 
@@ -656,14 +724,14 @@ dir <- lapply(l, function(x){
 
 dir2 <- do.call("rbind", dir)
 
-# save the database
+# ---- save the database
 # saveRDS(dir2,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_bird_dir.rds")
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_bird_dir_110max.rds")
 
 #################################################################
 #### ---- PART 5 - Difference entre l'orientation des oiseaux et celui du vent  ---- ####
 ################################################################
-loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_bird_dir.rds")
+loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_bird_dir_110max.rds")
 names(loc)
 head(loc$wind_meteo_dir)
 # --------------- #
@@ -679,7 +747,7 @@ loc$diff_wind_bird <- (loc$dir_bird_deg0_360 - loc$wind_meteo_dir0_360) %% 360
 
 summary(loc$diff_wind_bird) # **** WARNING **** Données circulaires 
 
-# visualisation
+# ---- visualisation
 x11()
 hist(loc$diff_wind_bird, breaks = 36)
 hist(loc$diff_wind_bird[lubridate::month(loc$date) == 4], breaks = 36)
@@ -691,9 +759,7 @@ hist(loc$diff_wind_bird[lubridate::month(loc$date) == 9], breaks = 36)
 hist(loc$diff_wind_bird[lubridate::month(loc$date) == 10], breaks = 36)
 hist(loc$diff_wind_bird[lubridate::month(loc$date) == 11], breaks = 36)
 
-x11()
-plot(loc$diff_wind_bird[month(loc$date) == 4])
-
+# ---- Wind orientation distribution
 hist(loc$wind_meteo_dir0_360[lubridate::month(loc$date) == 4],
      breaks = 36,
      col = "#e6891f82",
@@ -701,6 +767,17 @@ hist(loc$wind_meteo_dir0_360[lubridate::month(loc$date) == 4],
 lines(density(loc$wind_meteo_dir0_360[lubridate::month(loc$date) == 4]),
       lwd = 2,
       col = "sienna3")
+circular::mean.circular(loc$wind_meteo_dir0_360[lubridate::month(loc$date) == 4])
+
+# ---- circular mean 
+library(circular)
+ang_circ <- circular(loc$wind_meteo_dir0_360[lubridate::month(loc$date) == 4],
+                     type = "angles",
+                     units = "degrees",
+                     modulo = "2pi")
+mean.circular(ang_circ, na.rm = T) # 168.436°
+
+# ---- Bird orientation distribution
 hist(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4],
      breaks = 36,
      freq = F,
@@ -710,7 +787,14 @@ lines(density(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4]),
       lwd = 2,
       col = "#076864")
 
-# ----- #
+# ---- circular mean
+ang_circ <- circular(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4],
+                     type = "angles",
+                     units = "degrees",
+                     modulo = "2pi")
+mean.circular(ang_circ, na.rm = T) # 102.6694°
+
+# ----- Creation of group of bird per year and track type
 loc$group <- NA
 loc$group[loc$id %in% c("162070",
                           "162072",
@@ -725,27 +809,65 @@ loc$group[loc$id %in% c("166566",
                           "166572")] <- "2017"
 table(loc$group, useNA = "always")
 
+# ---- Bird orientation distribution for 2018-Nord
+x11()
+hist(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4 & loc$group == "2018-Nord"],
+     breaks = 36,
+     freq = F,
+     col = "#0baea0aa")
+lines(density(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4 & loc$group == "2018-Nord"]),
+      lwd = 2,
+      col = "#076864")
 
+# ---- circular mean
+ang_circ <- circular(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4  & loc$group == "2018-Nord"],
+                     type = "angles",
+                     units = "degrees",
+                     modulo = "2pi")
+mean.circular(ang_circ, na.rm = T) # 116.4137°
+
+# ---- 
 loc_group <- split(loc, loc$group)
 
 lapply(loc_group, function(x){
     x11()
+#     png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/DIFF_bird_wind_",
+#               unique(x$group),
+#               ".png",
+#               sep = ""),
+#         res = 300,
+#         width = 15,
+#         height = 20,
+#         pointsize = 12,
+#         units = "cm",
+#         bg = "white")
+    
     hist(x$diff_wind_bird[month(x$date) == 4],
          col = "#2812c8ae",
          breaks = 36,
          freq = F,
-         main = paste("diff angle bird-wind", unique(x$group), sep = " "),
+         main = paste("diff angle bird-wind APRIL", unique(x$group), sep = " "),
          xlab = "Angle (°)")
     lines(density(x$diff_wind_bird[month(x$date) == 4]),
          col = "#041c38",
          lwd = 2)
     
     x11()
+#     png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/ORIENTATION_bird_wind_",
+#               unique(x$group),
+#               ".png",
+#               sep = ""),
+#         res = 300,
+#         width = 15,
+#         height = 20,
+#         pointsize = 12,
+#         units = "cm",
+#         bg = "white")
     hist(x$wind_meteo_dir0_360[lubridate::month(x$date) == 4],
          breaks = 36,
          col = "#e6891f82",
          freq = F,
-         main = paste("angle bird-wind", unique(x$group), sep = " "),
+         main = paste("angle bird-wind APRIL", unique(x$group), sep = " "),
          xlab = "Angle (°)")
     lines(density(x$wind_meteo_dir0_360[lubridate::month(x$date) == 4]),
           lwd = 2,
@@ -764,26 +886,27 @@ lapply(loc_group, function(x){
            fill = c("#e6891f82", "#0baea0aa"),
            border = c("#e6891f82", "#0baea0aa"),
            bty = "n")
+    
+    graphics.off()
 })
 
 
-# save the database
+# ---- save the database
 # saveRDS(loc,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir.rds")
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
 
 ####################################################################
 #### ---- PART 6 - Zoom Ouest OI lors départ des oiseaux  ---- ####
 ################################################################### 
-loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir.rds")
+loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
 summary(loc)
 
 loc$week_num <- lubridate::isoweek(loc$date)
 table(loc$week_num)
+
 # ------------------------------------------ #
 #### bird restriction - group 2018_Nord ####
 # ------------------------------------------ #
-
-
 dep_2018N <- loc[loc$group == "2018-Nord", ]
 unique(dep_2018N$id)
 
@@ -814,12 +937,12 @@ plot(speed_week$wk[-1],
      xlab = "week number",
      ylab = "mean speed of birds 2018 N(km/h)")
 
-summary(lm(bd_spd ~ wk, data = speed_week))
+# summary(lm(bd_spd ~ wk, data = speed_week))
 
-# Wind roses
+# ---- Wind roses
 library(openair)
 x11()
-windRose(mydata = dep_2018N,
+windRose(mydata = dep_2018N[month(dep_2018N$date) == 4,],
          wd = "dir_bird_deg0_360",
          ws = "speed_km.h_treat",
          type = "week_num",
@@ -836,7 +959,7 @@ windRose(mydata = dep_2018N,
           col = viridis(5, option = "D", direction = -1))
 
 x11()
-windRose(mydata = dep_2018N,
+windRose(mydata = dep_2018N[month(dep_2018N$date) == 4, ],
          wd = "wind_meteo_dir0_360",
          ws = "wind_speed",
          type = "week_num",
@@ -851,12 +974,13 @@ windRose(mydata = dep_2018N,
          key.position = "bottom",
          par.settings = list(axis.line = list(col = "lightgray")),
           col = viridis(5, option = "D", direction = -1))
+# ----> probleme d'orientation sur les graphiques
 
-
-# Wind extraction
-# -------------- #
+# ---- Wind extraction dans la zone OI visee
+# -------------------------------------------- #
 env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018" 
 
+# ---- deletion of duplicated rasters
 # East wind 2018 #
 windE2018_names <- list.files(env_folder, full.names = T)[str_detect(list.files(env_folder), "eastward_wind-2018")]
 windE2018 <- terra::rast(windE2018_names)
@@ -1019,17 +1143,17 @@ print(rasterVis::vectorplot(raster::stack(raster(e), raster(n)),
                     fill = "#e3d0d0")))
 
 # ----- #
-x11()
-# png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_bird_group_2018N_week_",
-#     i,
-#     ".png",
-#     sep = ""),
-#     res = 300,
-#     width = 30,
-#     height = 40,
-#     pointsize = 4,
-#     units = "cm",
-#     bg = "white")
+# x11()
+png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_bird_group_2018N_week_110max_",
+    i,
+    ".png",
+    sep = ""),
+    res = 300,
+    width = 30,
+    height = 40,
+    pointsize = 4,
+    units = "cm",
+    bg = "white")
 
 print(rasterVis::vectorplot(raster::stack(raster(e), raster(n)),
                isField = 'dXY',
@@ -1066,17 +1190,17 @@ layer(c(sp.points(pt_ls[[as.character(i)]],
 )
 
 # ----- #
-x11()
-# png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_2018_week_",
-#     i,
-#     "_angles_for_raster.png",
-#     sep = ""),
-#     res = 300,
-#     width = 20,
-#     height = 15,
-#     pointsize = 12,
-#     units = "cm",
-#     bg = "white")
+# x11()
+png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/wind_shift_RUN-MADA/RUN-MADA_wind_n_birds_2018_week_110max_",
+    i,
+    "_angles_for_raster.png",
+    sep = ""),
+    res = 300,
+    width = 20,
+    height = 15,
+    pointsize = 12,
+    units = "cm",
+    bg = "white")
 par(mfrow = c(1, 2))
 ang <- 180 * atan2(n, e) / pi
 ang_360 <- ifelse(values(ang) >= 0,
@@ -1116,8 +1240,8 @@ lines(density(pt_ls[[as.character(i)]]$dir_bird_deg0_360, na.rm = T),
 # graphics.off()
 }
 
-# Evolution de la vitesse moyenne des vents dans la zone de Mada de S10 à S22
-# Ajout de la vitesse moyenne des oiseaux 2018N sur la même période (speed_week)
+# ---- Evolution de la vitesse moyenne des vents dans la zone de Mada de S10 à S22
+# ---- Ajout de la vitesse moyenne des oiseaux 2018N sur la même période (speed_week)
 x11()
 plot(wind_caracteristic$wk_num,
      wind_caracteristic$wd_spd_mean,
@@ -1143,7 +1267,7 @@ plot(speed_week$wk[speed_week$wk %in% 15:22],
      bty = "n",
      col = "darkorange")
 
-# calcul de la distance parcourue relative par semaine
+# ---- calcul de la distance parcourue relative par semaine
 
 dep_2018N_sf_latlon <- st_as_sf(dep_2018N,
                          coords = c("lon", "lat"),
@@ -1172,7 +1296,7 @@ k_list <- lapply(k,
                  })
 
 ################
-# distance parcourue par les oiseaux par semaine
+# ---- distance parcourue par les oiseaux par semaine
 # en partant du dernier point de la semaine précédente
 # et recalcul de la vitesse en partant de cette distance
 
@@ -1211,24 +1335,24 @@ dist_wk_bd <- apply(dist_wk_bd,
 summary(dist_wk_bd)
 dist_wk_bd <- as.data.frame(dist_wk_bd)
 
-# mean dist per week
+# ---- mean dist per week
 dist_mean_wk <- aggregate(dist_m ~ week_num,
                           data = dist_wk_bd,
                           mean,
                           na.rm = T)
 
-# cumul dist per week
+# ---- cumul dist per week
 dist_cum_wk <- aggregate(dist_m ~ week_num,
                          data = dist_wk_bd,
                          sum,
                          na.rm = T)
-# mean speed of bird per week
+# ---- mean speed of bird per week
 spd_brd_mean_wk <- aggregate(bd_spd_mean_km.h ~ week_num,
                              data = dist_wk_bd,
                              mean,
                              na.rm = T)
 
-# VISU
+# ---- VISU
 # 1 - comparaison des deux calculs de vitesse
 # ---------------------------------------------
 plot(speed_week$wk[speed_week$wk %in% 15:22],
@@ -1360,53 +1484,76 @@ arrows(x0 = 12.5,
        y1 = 11,
        code = 1)
 
-# distance oiseaux vs. vitesse vents
+# ---- distance oiseaux vs. vitesse vents
 plot(wind_caracteristic$wd_spd_mean[wind_caracteristic$wk_num %in% 14:22],
      dist_wk_bd$dist_m[dist_wk_bd$id == "162070"]/1000,
      type = "b")
 
-bd_dist <- dist_wk_bd$dist_m/1000
-wd_spd <- wind_caracteristic$wd_spd_mean[wind_caracteristic$wk_num %in% 15:22]
-summary(lm(bd_dist ~ wd_spd))
+#### FAIRE LA MEME CHOSE MAIS AVEC DES CROPS DE RASTERS AUTOUR DES LOCS PAR SEMAINE (from 15 to 22) ####
+# Zone tampon de 200km et moyenne PONDEREE (si pixel non entier) des pixels couverts par cette zone
+dep <- dep_2018N_sf_latlon[dep_2018N_sf_latlon$week_num != 14, ]
+table(dep$week_num)
 
 
+# necessite de moyenner les rasters en fonction 
 
-#### FAIRE LA MEME CHOSE MAIS AVEC DES CROPS DE RASTERS AUTOUR DES LOCS PAR SEMAINE ####
-dep <- dep_2018N_sf_latlon[dep_2018N_sf_latlon$week_num != 14,]
+for(i in 1:length(dep$id)) {
+     test <- dep[i, ]
+     testUTM <- st_transform(test,
+                             crs = 32743) # conversion pour ajout zone tampon en m
+     test1 <- st_buffer(testUTM,
+                        dist = 200000) # ajout zone tampon de 200 km (200 000 m)
+     test1latlon <- st_transform(test1,
+                                 crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0") # reconversion en latlon pour extraire du raster, lui aussi en latlon
+     cr <- terra::crop(s, # raster vitesse mais dois coincider avec le point - numero de week
+                       test1latlon,
+                       snap = "out")
+plot(cr)
+plot(st_geometry(test), add = T)
+plot(st_geometry(test1latlon), add = T)
+df <- terra::extract(s,
+                     test1latlon,
+                     exact = T) # on the way !!!!
 
-ll <- split(dep,
-            list(dep$id,
-                 dep$week_num))
-length(ll)
-names(ll)
+m_pond <- sum(df$mean*df$fraction)/sum(df$fraction)
+print() # moyenne des valeurs de pixels ponderee par la surface reouverte par le polygone
 
-dfff <- data.frame(id = NULL,
-                   week = NULL,
-                   spd_mn = NULL,
-                   spd_sd = NULL)
-
-for(i in 1:length(ll)){
-
-    test <- terra::crop(s,
-                        ll[[i]],
-                        snap = "out")
-    x11()
-    plot(test,
-         main = paste("ID",
-                      unique(ll[[i]]$id),
-                      " - WEEK",
-                      unique(ll[[i]]$week_num),
-                      sep = ""))
-    plot(st_geometry(ll[[i]]),
-         add = T)
-    
-    print(mean(values(test), na.rm = T))
-    dfff <- rbind(dfff,
-                  c(unique(ll[[i]]$id),
-                    unique(ll[[i]]$week_num),
-                    mean(values(test), na.rm = T),
-                    sd(values(test), na.rm = T)))
 }
+
+
+# ll <- split(dep,
+#             list(dep$id,
+#                  dep$week_num))
+# length(ll)
+# names(ll)
+
+# dfff <- data.frame(id = NULL,
+#                    week = NULL,
+#                    spd_mn = NULL,
+#                    spd_sd = NULL)
+
+# for(i in 1:length(ll)){
+
+#     test <- terra::crop(s,
+#                         ll[[i]],
+#                         snap = "out")
+#     x11()
+#     plot(test,
+#          main = paste("ID",
+#                       unique(ll[[i]]$id),
+#                       " - WEEK",
+#                       unique(ll[[i]]$week_num),
+#                       sep = ""))
+#     plot(st_geometry(ll[[i]]),
+#          add = T)
+    
+#     print(mean(values(test), na.rm = T))
+#     dfff <- rbind(dfff,
+#                   c(unique(ll[[i]]$id),
+#                     unique(ll[[i]]$week_num),
+#                     mean(values(test), na.rm = T),
+#                     sd(values(test), na.rm = T)))
+# }
 
 #### A REFAIRE MAIS AVEC EXTRACT AVEC UNE ZONE TAMPON ####
 # EXAMPLE 
@@ -1419,7 +1566,7 @@ for(i in 1:12){
      testUTM <- st_transform(test,
                              crs = 32743)
      test1 <- st_buffer(testUTM,
-                        dist = 50000) # 50 km
+                        dist = 200000) # 200 km
 test1latlon <- st_transform(test1,
                             crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
 cr <- terra::crop(s,
@@ -1447,9 +1594,48 @@ lines(data_mp2$lon[data_mp2$id == 162073],
      data_mp2$lat[data_mp2$id == 162073],
      col = "grey")
 
-# ------------------------------------------ #
-#### bird restriction - group 2018_SUD ####
-# ------------------------------------------ #
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# -------------------------------------------------- #
+#### **** bird restriction - group 2018_SUD **** ####
+# ------------------------------------------------- #
 
 
 dep_2018S <- loc[loc$group == "2018-Sud", ]
