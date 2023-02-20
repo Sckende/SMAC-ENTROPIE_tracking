@@ -37,6 +37,8 @@ head(indss)
 ###################################################
 #### ---- PART 1 - move persistence model ---- ####
 ##################################################
+# tri des donnees GPS base sur l'erreur associee aux localisations et une valeur seuil de vitesse
+# obtention de donnees "fittees" (re-estimation de chaque loc au pas de temps initial) pour utilisation dans analyses
 
 # max 110 km/h based on GPS data of ADULT PTEBAR
 fit_mp <- fit_ssm(indss,
@@ -53,10 +55,10 @@ data_mp <- as.data.frame(grab(fit_mp,
 summary(data_mp)
 class(data_mp)
 
-#### ---- PART 1 - Production des figures ---- ####
-# ----------------------------------------------- #
+#### ---- PART 1 - Exploration des sorties de SSM ---- ####
+# ------------------------------------------------------- #
 
-# ---- Tracks corrigées
+# ---- Vsualisation des tracks corrigées et leurs corrections
 check <- 0
 for(i in fit_mp$id) {
      # png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/Analyses/Figures/SSM_MP_speed_110kmh_tracks/SSM_MP_FITTED_110max_tracks_",
@@ -113,7 +115,7 @@ dev.off()
 # saveRDS(data_mp,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_MP_110max.rds")
 
-####
+##### ---- EXPLORATION ZONE - START ---- #####
 # max 60 km/h
 # fit_mp1 <- fit_ssm(indss,
 #                   vmax = 17, # gannet speed = 61 km/h
@@ -247,8 +249,10 @@ dev.off()
 #              data_pred3,
 #              data_pred1),
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_aniMotum_fitted_predicted_locs.rds")
+##### ---- EXPLORATION ZONE - END ---- #####
 
-#### ---- PART 1 -  Calcul des vitesses à partir de BD à 110km/h max ---- ####
+
+#### ---- PART 2 -  Calcul des vitesses à partir de BD à 110km/h max ---- ####
 # -------------------------------------------------------------------------- #
 data_mp <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_MP_110max.rds")
 summary(data_mp)
@@ -284,8 +288,9 @@ speed_ls <- lapply(data_ls,
 # ---- summary of delay
 lapply(speed_ls,
        function(x) {
-           summary(x$delay/60)
-       }) # ==> troisième quartile < 2 h, choix d'utiliser que les valeurs de vitesse avec un delay <= 2h 
+           summary(x$delay/60) # delay in hour
+       }) # ==> troisième quartile < 2 h, choix d'utiliser que les valeurs de vitesse avec un delay <= 120 min 
+
 
 # ---- distribution of speed with a delay < 120 min
 lapply(speed_ls,
@@ -293,7 +298,7 @@ lapply(speed_ls,
            x11()
            barplot(x$speed_km.h[x$delay_min <= 120],
                    main = unique(x$id))
-       })
+       }) # WARNING - reste encore deux valeurs très élevée de vitesse
 
 # ---- data compilation
 speed_df <- do.call("rbind",
@@ -302,7 +307,10 @@ speed_df <- do.call("rbind",
 data_mp <- left_join(data_mp,
                      speed_df,
                      by = c("id", "date"))
-length(data_mp$speed_km.h[data_mp$speed_km.h > 110])
+length(data_mp$speed_km.h[data_mp$speed_km.h > 110 & !is.na(data_mp$speed_km.h)])
+data_mp$speed_km.h[data_mp$speed_km.h > 110 & !is.na(data_mp$speed_km.h)]
+data_mp[data_mp$speed_km.h > 110 & !is.na(data_mp$speed_km.h), ]
+
 length(data_mp$delay_min[data_mp$delay_min > 120])
 
 # ---- Speed treatment - deletion of delay > 120 min
@@ -312,6 +320,14 @@ data_mp$speed_km.h_treat[data_mp$delay_min > 120] <- NA
 summary(data_mp$speed_km.h)
 summary(data_mp$speed_km.h_treat)
 
+x11();barplot(data_mp$speed_km.h_treat)
+
+# ---- Retrait de l'outlier - speed_km.h_treat = 159.349
+data_mp$speed_km.h_treat[data_mp$speed_km.h_treat > 159] <- NA
+summary(data_mp$speed_km.h_treat)
+x11();barplot(data_mp$speed_km.h_treat)
+
+##### ---- EXPLORATION ZONE - START ---- #####
 #### ---- Calcul des vitesses à partir de BD à 60km/h max ---- ####
 # fit60 <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data.rds")
 # # conversion en sf object
@@ -364,10 +380,10 @@ summary(data_mp$speed_km.h_treat)
 #                       sp,
 #                       by = c("id", "date"))
 # head(fit60_sp)
-
+##### ---- EXPLORATION ZONE - END ---- #####
 
 #######################################################################
-#### ---- PART 2 - extraction des paramètres environnementaux sous les localisations ajustées ---- ####
+#### ---- PART 3 - extraction des paramètres environnementaux sous les localisations ajustées ---- ####
 #######################################################################
 # WARNING - UTILISER PACKAGE TERRA ET SF EN PRIORITE ****
 
@@ -383,24 +399,50 @@ for(j in 1:length(var)){
     v_list <- vector()
 
     for(i in 1:length(v)){
-        r <- stack(paste(env_folder, v[i], sep = '/'))
+         r <- terra::rast(paste(env_folder, v[i], sep = "/")) # utilisation de TERRA PCKG en priorite
+     #    r <- stack(paste(env_folder, v[i], sep = '/'))
         v_list <- c(v_list, r)
     }
 
-stack_var_list[j] <- stack(v_list)
+# stack_var_list[j] <- stack(v_list)
+stack_var_list[j] <- terra::rast(v_list)
 names(stack_var_list)[j] <- var[j]
 }
 
+length(stack_var_list)
 warnings()
 
 names(stack_var_list)
 
 
 sst_stack <- stack_var_list[[1]]
+table(duplicated(time(sst_stack)))
+
 chlo_stack <- stack_var_list[[2]]
+table(duplicated(time(chlo_stack)))
+
 wind_speed_stack <- stack_var_list[[3]]
+table(duplicated(time(wind_speed_stack)))
+wind_speed_stack <- wind_speed_stack[[!duplicated(time(wind_speed_stack))]]
+time(wind_speed_stack)[order(time(wind_speed_stack))] 
+
 wind_north_stack <- stack_var_list[[4]]
+table(duplicated(time(wind_north_stack)))
+wind_north_stack <- wind_north_stack[[!duplicated(time(wind_north_stack))]]
+time(wind_north_stack)[order(time(wind_north_stack))] 
+
 wind_east_stack <- stack_var_list[[5]]
+table(duplicated(time(wind_east_stack)))
+wind_east_stack <- wind_east_stack[[!duplicated(time(wind_east_stack))]]
+time(wind_east_stack)[order(time(wind_east_stack))] 
+
+
+# RANGE TEMPOREL SST: 01-04-2017 12:00 -> 31-01-2019 12:00 - 489 layers
+#                chlo: 01-01-2017 -> 31-01-2019 - 761 layers
+#                wind_speed: 01-04-2017 -> 01-02-2019 - 1988 layers
+#                wind_north: 01-04-2017 -> 01-02-2019 - 1988 layers
+#                wind_east: 01-04-2017 -> 01-02-2019 - 1988 layers
+# WARNING - range discontinu
 
 # ----- > Method : Split the dataframe by date and apply the extraction by group of coordinates #
 #########################################################################################################
@@ -409,23 +451,34 @@ wind_east_stack <- stack_var_list[[5]]
 # ---- SST & chlo #
 ###################
 length(unique(date(data_mp$date)))
+class(data_mp$date)
+class(time(sst_stack))
 
-data_mp$dt <- str_replace_all(as.character(date(data_mp$date)),
-                              '-',
-                              '.')
+# data_mp$dt <- str_replace_all(as.character(date(data_mp$date)),
+#                               '-',
+#                               '.')
+data_mp$dt <- as.character(date(data_mp$date))
+
 mp_list <- split(data_mp,
                  data_mp$dt)
 length(mp_list)
 
 mp_list2 <- lapply(mp_list, function(x){
 
-    sst_raster <- sst_stack[[str_which(names(sst_stack), unique(x$dt))]]
-    chlo_raster <- chlo_stack[[str_which(names(chlo_stack), unique(x$dt))]] 
+#     sst_raster <- sst_stack[[str_which(names(sst_stack), unique(x$dt))]]
+    sst_raster <- sst_stack[[str_which(as.character(time(sst_stack)),
+                                       unique(x$dt))]]
+#     chlo_raster <- chlo_stack[[str_which(names(chlo_stack), unique(x$dt))]] 
+    chlo_raster <- chlo_stack[[str_which(as.character(time(chlo_stack)),
+                                         unique(x$dt))]]
 
-    x$sst_loc <- extract(sst_raster,
-                     as.data.frame(x[, c('lon', 'lat')]))
-    x$chlo_loc <- extract(chlo_raster,
-                      as.data.frame(x[, c('lon', 'lat')]))
+    sst_extr <- terra::extract(sst_raster,
+                     terra::vect(x[, c('lon', 'lat')]))
+    chlo_extr <- terra::extract(chlo_raster,
+                      terra::vect(x[, c('lon', 'lat')]))
+    
+    x$sst_loc <- sst_extr[, 2]
+    x$chlo_loc <- chlo_extr[, 2]
     
    # ----- #
     print(unique(x$dt))
@@ -434,95 +487,23 @@ mp_list2 <- lapply(mp_list, function(x){
 })
 print("ayéééé")
 
-# ---- From Kelvin to Degree conversion of temperature
+# ---- From Kelvin to Degree conversion of temperature & temperature explo
 mp_2 <- do.call('rbind', mp_list2)
-mean(mp_2$sst, na.rm = T)
-summary(mp_2$sst)
-mp_2$sst_deg <- mp_2$sst - 273.15
-summary(mp_2$sst_deg)
+mean(mp_2$sst_loc, na.rm = T)
+summary(mp_2$sst_loc)
+mp_2$sst_loc_deg <- mp_2$sst_loc - 273.15
+summary(mp_2$sst_loc_deg)
 
 # ---- chlo explo
-mean(mp_2$chlo, na.rm = T)
-summary(mp_2$chlo)
-
-names(mp_2)
+mean(mp_2$chlo_loc, na.rm = T)
+summary(mp_2$chlo_loc)
 
 #######################################
 # ---- For WIND speed & orientation ####
 ########################################
 
-# Deletion of duplicated layers in raster
-# ---> wind_east_stack #
-########################
-# ---> REPRENDRE ICI POUR LE BUG DE rast() CONVERSION VERS SPATRASTER (terra)
-########################
-# speed
-list_names <- list.files(env_folder, full.names = TRUE)
-speed_wind_names <- list_names[str_detect(list_names, "WIND-SPEED")]
-
-wind_spd <- terra::rast(speed_wind_names)
-name_time <- as.character(time(wind_spd))
-duplicated(name_time)
-duplicated(time(wind_spd))
-
-wind_spd2 <- wind_spd[[!duplicated(time(wind_spd))]]
-
-# EAST COMPONENT
-east_wind_names <- list_names[str_detect(list_names, "WIND-EAST")]
-
-wind_east <- terra::rast(east_wind_names)
-name_time2 <- as.character(time(wind_east))
-duplicated(name_time2)
-duplicated(time(wind_east))
-
-wind_east2 <- wind_east[[!duplicated(time(wind_east))]]
-
-# NORTH COMPONENT
-north_wind_names <- list_names[str_detect(list_names, "WIND-NORTH")]
-
-wind_north <- terra::rast(north_wind_names)
-name_time3 <- as.character(time(wind_north))
-duplicated(name_time3)
-duplicated(time(wind_north))
-
-wind_north2 <- wind_north[[!duplicated(time(wind_north))]]
-################ REPRENDRE ICI ######################################
-###########################
-str_length(names(wind_east_stack))
-j <- names(wind_east_stack)[str_length(names(wind_east_stack)) > 20]
-east_wind_deletion <- j[str_detect(j, '.00.2')]
-dim(wind_east_stack)
-wind_east_stack2 <- dropLayer(wind_east_stack,
-                             match(east_wind_deletion,
-                                   names(wind_east_stack)))
-dim(wind_east_stack2)
-names(wind_east_stack2)
-
-# ---> wind_north_stack #
-#########################
-str_length(names(wind_north_stack))
-k <- names(wind_north_stack)[str_length(names(wind_north_stack)) > 20]
-north_wind_deletion <- k[str_detect(k, '.00.2')]
-dim(wind_north_stack)
-wind_north_stack2 <- dropLayer(wind_north_stack,
-                              match(north_wind_deletion, 
-                                    names(wind_north_stack)))
-dim(wind_north_stack2)
-
-# ---> wind_speed_stack #
-#########################
-str_length(names(wind_speed_stack))
-l <- names(wind_speed_stack)[str_length(names(wind_speed_stack)) > 20]
-speed_wind_deletion <- l[str_detect(l, '.00.2')]
-dim(wind_speed_stack)
-wind_speed_stack2 <- dropLayer(wind_speed_stack,
-                              match(speed_wind_deletion,
-                                    names(wind_speed_stack)))
-dim(wind_speed_stack2)
-
-# ----- #
 head(mp_2, 50)
-mp_2$minutes <- hour(mp_2$date)*60 + minute(mp_2$date)
+mp_2$time_loc_min <- hour(mp_2$date)*60 + minute(mp_2$date)
 
 # raster aux 6h 
 # deb      fin       raster.hour     raster.day
@@ -530,39 +511,48 @@ mp_2$minutes <- hour(mp_2$date)*60 + minute(mp_2$date)
 # 03:01 (181)  -> 09:00 (540)  ==> 06:00            J
 # 09:01 (541)  -> 15:00 (900)  ==> 12:00            J
 # 15:01 (901)  -> 21:00 (1260) ==> 18:00            J
-mp_2$raster_hour <- NA
-mp_2$raster_hour[mp_2$minutes >= 1261 | mp_2$minutes <= 180] <- "00.00"
-mp_2$raster_hour[mp_2$minutes >= 181 & mp_2$minutes <= 540] <- "06.00"
-mp_2$raster_hour[mp_2$minutes >= 541 & mp_2$minutes <= 900] <- "12.00"
-mp_2$raster_hour[mp_2$minutes >= 901 & mp_2$minutes <= 1260] <- "18.00"
+mp_2$loc_raster_hour <- NA
+mp_2$loc_raster_hour[mp_2$time_loc_min >= 1261 | mp_2$time_loc_min <= 180] <- "00:00:00"
+mp_2$loc_raster_hour[mp_2$time_loc_min >= 181 & mp_2$time_loc_min <= 540] <- "06:00:00"
+mp_2$loc_raster_hour[mp_2$time_loc_min >= 541 & mp_2$time_loc_min <= 900] <- "12:00:00"
+mp_2$loc_raster_hour[mp_2$time_loc_min >= 901 & mp_2$time_loc_min <= 1260] <- "18:00:00"
 
-mp_2$raster_date <- ifelse(mp_2$minutes >= 1261,
+mp_2$loc_raster_date <- ifelse(mp_2$time_loc_min >= 1261,
                            as.character(date(mp_2$date)+1),
                            as.character(date(mp_2$date)))
 
-mp_2$raster_layer <- paste(str_replace_all(mp_2$raster_date, '-', '.'),
-                           mp_2$raster_hour,
-                           sep = '.')
+mp_2$loc_raster_layer <- paste(mp_2$loc_raster_date,
+                               mp_2$loc_raster_hour,
+                               sep = ' ')
+
 
 mp_2_list <- split(mp_2,
-                   mp_2$raster_layer)
+                   mp_2$loc_raster_layer)
 length(mp_2_list)
 
+
 fl3 <- lapply(mp_2_list, function(x) {
-# ----- #
-    speed_raster <- wind_speed_stack[[str_which(names(wind_speed_stack),
-                                                unique(x$raster_layer))]]
-    north_raster <- wind_north_stack[[str_which(names(wind_north_stack),
-                                                unique(x$raster_layer))]]
-    east_raster <- wind_east_stack[[str_which(names(wind_east_stack),
-                                              unique(x$raster_layer))]]
-# ----- #
-    x$wind_speed_loc <- extract(speed_raster,
-                            as.data.frame(x[, c("lon", "lat")]))
-    x$wind_north_loc <- extract(north_raster,
-                            as.data.frame(x[, c("lon", "lat")]))
-    x$wind_east_loc <- extract(east_raster,
-                           as.data.frame(x[, c("lon", "lat")]))
+# ----- extraction at location #
+    speed_raster <- wind_speed_stack[[str_which(as.character(time(wind_speed_stack)),
+                                       unique(x$loc_raster_layer))]]
+    
+    north_raster <- wind_north_stack[[str_which(as.character(time(wind_north_stack)),
+                                       unique(x$loc_raster_layer))]]
+    
+    east_raster <- wind_east_stack[[str_which(as.character(time(wind_east_stack)),
+                                       unique(x$loc_raster_layer))]]
+# ----- fusion with df #
+    wind_speed_extr <- terra::extract(speed_raster,
+                            terra::vect(x[, c("lon", "lat")]))
+    wind_north_extr <- terra::extract(north_raster,
+                            terra::vect(x[, c("lon", "lat")]))
+    wind_east_extr <- terra::extract(east_raster,
+                           terra::vect(x[, c("lon", "lat")]))
+    
+    # ----- #
+    x$wind_speed_loc <- wind_speed_extr[, 2]
+    x$wind_north_loc <- wind_north_extr[, 2]
+    x$wind_east_loc <- wind_east_extr[, 2]
 # ----- #
 # extraction over several pixel
 # ----- #
@@ -577,33 +567,34 @@ fl3 <- lapply(mp_2_list, function(x) {
     latlon_buff <- st_transform(tamp,
                               crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0") # reconversion en latlon pour extraire du raster, lui aussi en latlon
     
-    # ---- raster cropping
-    cr <- terra::crop(speed_raster,
-                      latlon_buff,
-                      snap = "out")
-plot(cr)
-plot(st_geometry(st_transform(utm_sf, crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")), add = T)
-plot(st_geometry(latlon_buff), add = T)
+# ---- raster cropping & masking only for vizualisation
+#     cr <- terra::crop(speed_raster,
+#                       latlon_buff,
+#                       snap = "out")
+# plot(cr)
+# plot(st_geometry(st_transform(utm_sf, crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")), add = T)
+# plot(st_geometry(latlon_buff), add = T)
+# plot(terra::mask(cr, latlon_buff))
 
-# ---- values extraction
-speed_tamp <- terra::extract(speed_raster),
-                             latlon_buff,
-                             exact = T) 
-north_tamp <- terra::extract(north_raster,
-                             latlon_buff,
-                             exact = T)
-east_tamp <- terra::extract(east_raster,
-                             latlon_buff,
-                             exact = T) # *************HERE !!!
+# ---- values extraction - ICI independant de crop() & mask()
+speed_zone_tamp <- terra::extract(speed_raster,
+                                  latlon_buff,
+                                  exact = T) # exact = True donne la portion du pixel recouvert
+north_zone_tamp <- terra::extract(north_raster,
+                                  latlon_buff,
+                                  exact = T)
+east_zone_tamp <- terra::extract(east_raster,
+                                 latlon_buff,
+                                 exact = T)
 
-x$wind_speed_200km <- sum(speed_tamp$mean*speed_tamp$fraction)/sum(speed_tamp$fraction)
-x$wind_north_200km <- sum(north_tamp$mean*north_tamp$fraction)/sum(north_tamp$fraction)
-x$wind_east_200km <- sum(east_tamp$mean*east_tamp$fraction)/sum(east_tamp$fraction)
+x$wind_speed_200km <- sum(speed_zone_tamp$wind_speed_43*speed_zone_tamp$fraction)/sum(speed_zone_tamp$fraction)
+x$wind_north_200km <- sum(north_zone_tamp$northward_wind_43*north_zone_tamp$fraction)/sum(north_zone_tamp$fraction)
+x$wind_east_200km <- sum(east_zone_tamp$eastward_wind_43*east_zone_tamp$fraction)/sum(east_zone_tamp$fraction)
 
 
 
 # ---- #
-    print(unique(x$raster_layer))
+    print(unique(x$loc_raster_layer))
 # ----- #
     x
 })
@@ -612,31 +603,42 @@ print("ayééé")
 mp_3 <- do.call("rbind",
                 fl3)
 dim(mp_3)
-warnings() #### CHECK FOR WARNINGS HERE #####
-mean(mp_3$wind_speed, na.rm = T)
-summary(mp_3$wind_speed)
-names(mp_3)
+mean(mp_3$wind_speed_loc, na.rm = T)
+summary(mp_3$wind_speed_loc, na.rm = T)
 
-# computation of wind speed & direction
+mean(mp_3$wind_speed_200km, na.rm = T)
+summary(mp_3$wind_speed_200km, na.rm = T)
+
+
+# ----- computation of wind speed & direction #
 # abs_wind_sp <- sqrt(u^2 + v^2)
 # wind_dir <- 180 * atan2(v, u) / pi # with u = east and v = north AND atan2 gives direction in radian, then *180/pi allows the conversion in degree from -180 to 180
 # In addition, HERE the atan2 gives the angle with METEOROLOGICAL convention
 # N = 0 = 360, E = 90, S = 180, W = 270
 
-mp_3$wind_meteo_dir <- 180 * atan2(mp_3$wind_north, mp_3$wind_east) / pi
+# for locs
+mp_3$wind_meteo_dir_loc <- 180 * atan2(mp_3$wind_north_loc, mp_3$wind_east_loc) / pi
+mp_3$abs_wind_spd_loc <- sqrt(mp_3$wind_east_loc^2 + mp_3$wind_north_loc^2)
 
-mp_3$abs_wind_spd <- sqrt(mp_3$wind_east^2 + mp_3$wind_north^2)
+# for zone tampon
+mp_3$wind_meteo_dir_200km <- 180 * atan2(mp_3$wind_north_200km, mp_3$wind_east_200km) / pi
+mp_3$abs_wind_spd_200km <- sqrt(mp_3$wind_east_200km^2 + mp_3$wind_north_200km^2)
 
 head(mp_3)
-summary(mp_3$wind_speed * 0.001 * 3600)
-summary(mp_3$abs_wind_spd * 0.001 * 3600)
+tail(mp_3)
+summary(mp_3$wind_speed_loc * 0.001 * 3600)
+summary(mp_3$wind_speed_200km * 0.001 * 3600)
+
+summary(mp_3$abs_wind_spd_loc * 0.001 * 3600)
+summary(mp_3$abs_wind_spd_200km * 0.001 * 3600)
+
 
 # save the database
 # saveRDS(mp_3,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_110max.rds")
 
 #########################################################
-#### ---- PART 3 - Kernels avec locs corrigees ---- ####
+#### ---- PART 4 - Kernels avec locs corrigees ---- ####
 ########################################################
 
 #### ---- ADULT GLS
@@ -685,7 +687,7 @@ mapview(list(ver90_a, ver50_a, ver25_a))
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/MS_DATA/PTEBAR_AD_GLS_kernels.rds")
 
 #################################################################
-#### ---- PART 4 - Direction que prennent les oiseaux  ---- ####
+#### ---- PART 5 - Direction que prennent les oiseaux  ---- ####
 ################################################################
 
 loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_110max.rds")
@@ -729,7 +731,7 @@ dir2 <- do.call("rbind", dir)
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_bird_dir_110max.rds")
 
 #################################################################
-#### ---- PART 5 - Difference entre l'orientation des oiseaux et celui du vent  ---- ####
+#### ---- PART 6 - Difference entre l'orientation des oiseaux et celui du vent  ---- ####
 ################################################################
 loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_bird_dir_110max.rds")
 names(loc)
@@ -739,43 +741,72 @@ loc$dir_bird_deg0_360 <- ifelse(loc$dir_bird_deg >= 0,
                                 loc$dir_bird_deg,
                                 360 + loc$dir_bird_deg)
 
-loc$wind_meteo_dir0_360 <- ifelse(loc$wind_meteo_dir >= 0,
-                                  loc$wind_meteo_dir,
-                                  360 + loc$wind_meteo_dir)
+loc$wind_meteo_dir0_360_loc <- ifelse(loc$wind_meteo_dir_loc >= 0,
+                                  loc$wind_meteo_dir_loc,
+                                  360 + loc$wind_meteo_dir_loc)
 
-loc$diff_wind_bird <- (loc$dir_bird_deg0_360 - loc$wind_meteo_dir0_360) %% 360
+loc$wind_meteo_dir0_360_200km <- ifelse(loc$wind_meteo_dir_200km >= 0,
+                                  loc$wind_meteo_dir_200km,
+                                  360 + loc$wind_meteo_dir_200km)
 
-summary(loc$diff_wind_bird) # **** WARNING **** Données circulaires 
+# --------------- #
+loc$diff_wind_bird_loc <- (loc$dir_bird_deg0_360 - loc$wind_meteo_dir0_360_loc) %% 360
+loc$diff_wind_bird_200km <- (loc$dir_bird_deg0_360 - loc$wind_meteo_dir0_360_200km) %% 360
+
+summary(loc$diff_wind_bird_loc) # **** WARNING **** Données circulaires 
+summary(loc$diff_wind_bird_200km) # **** WARNING **** Données circulaires 
+
 
 # ---- visualisation
-x11()
-hist(loc$diff_wind_bird, breaks = 36)
-hist(loc$diff_wind_bird[lubridate::month(loc$date) == 4], breaks = 36)
-hist(loc$diff_wind_bird[lubridate::month(loc$date) == 5], breaks = 36)
-hist(loc$diff_wind_bird[lubridate::month(loc$date) == 6], breaks = 36)
-hist(loc$diff_wind_bird[lubridate::month(loc$date) == 7], breaks = 36)
-hist(loc$diff_wind_bird[lubridate::month(loc$date) == 8], breaks = 36)
-hist(loc$diff_wind_bird[lubridate::month(loc$date) == 9], breaks = 36)
-hist(loc$diff_wind_bird[lubridate::month(loc$date) == 10], breaks = 36)
-hist(loc$diff_wind_bird[lubridate::month(loc$date) == 11], breaks = 36)
+x11(); par(mfrow = c(3, 3))
+hist(loc$diff_wind_bird_loc, breaks = 36, main = "Global", col = "#178a17")
+hist(loc$diff_wind_bird_200km, breaks = 36, main = "Global", add = T, col = "#00ddff51")
 
-# ---- Wind orientation distribution
-hist(loc$wind_meteo_dir0_360[lubridate::month(loc$date) == 4],
+loc_month <- split(loc, month(loc$date))
+for(i in 2:9){
+     hist(loc_month[[i]]$diff_wind_bird_loc,
+          breaks = 36,
+          main = unique(month(loc_month[[i]]$date,
+                              label = T,
+                              abbr = F)))
+     hist(loc_month[[i]]$diff_wind_bird_200km,
+          breaks = 36,
+          add = T,
+          col = "#00ddff51")
+}
+
+# ---- Wind orientation distribution at locs
+hist(loc$wind_meteo_dir0_360_loc[lubridate::month(loc$date) == 4],
      breaks = 36,
      col = "#e6891f82",
      freq = F)
-lines(density(loc$wind_meteo_dir0_360[lubridate::month(loc$date) == 4]),
+lines(density(loc$wind_meteo_dir0_360_loc[lubridate::month(loc$date) == 4]),
       lwd = 2,
       col = "sienna3")
-circular::mean.circular(loc$wind_meteo_dir0_360[lubridate::month(loc$date) == 4])
 
-# ---- circular mean 
+# circular mean 
 library(circular)
-ang_circ <- circular(loc$wind_meteo_dir0_360[lubridate::month(loc$date) == 4],
+ang_circ <- circular(loc$wind_meteo_dir0_360_loc[lubridate::month(loc$date) == 4],
                      type = "angles",
                      units = "degrees",
                      modulo = "2pi")
 mean.circular(ang_circ, na.rm = T) # 168.436°
+
+# ---- Wind orientation distribution at 200km
+hist(loc$wind_meteo_dir0_360_200km[lubridate::month(loc$date) == 4],
+     breaks = 36,
+     col = "#e6891f82",
+     freq = F)
+lines(density(loc$wind_meteo_dir0_360_200km[lubridate::month(loc$date) == 4]),
+      lwd = 2,
+      col = "sienna3")
+
+# circular mean 
+ang_circ <- circular(loc$wind_meteo_dir0_360_200km[lubridate::month(loc$date) == 4],
+                     type = "angles",
+                     units = "degrees",
+                     modulo = "2pi")
+mean.circular(ang_circ, na.rm = T) # 0.161934°
 
 # ---- Bird orientation distribution
 hist(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4],
@@ -794,6 +825,10 @@ ang_circ <- circular(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4],
                      modulo = "2pi")
 mean.circular(ang_circ, na.rm = T) # 102.6694°
 
+
+
+############################## STOP HERE FOR REVISION OF SCRIPT ###############################
+################ NEED TO CHECK VALUES FOR 200KM ZONE #####################################
 # ----- Creation of group of bird per year and track type
 loc$group <- NA
 loc$group[loc$id %in% c("162070",
