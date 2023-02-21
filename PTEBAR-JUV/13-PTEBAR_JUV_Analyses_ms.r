@@ -568,9 +568,9 @@ fl3 <- lapply(mp_2_list, function(x) {
                               crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0") # reconversion en latlon pour extraire du raster, lui aussi en latlon
     
 # ---- raster cropping & masking only for vizualisation
-#     cr <- terra::crop(speed_raster,
-#                       latlon_buff,
-#                       snap = "out")
+# cr <- terra::crop(speed_raster,
+#                   latlon_buff,
+#                   snap = "out")
 # plot(cr)
 # plot(st_geometry(st_transform(utm_sf, crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")), add = T)
 # plot(st_geometry(latlon_buff), add = T)
@@ -580,18 +580,39 @@ fl3 <- lapply(mp_2_list, function(x) {
 speed_zone_tamp <- terra::extract(speed_raster,
                                   latlon_buff,
                                   exact = T) # exact = True donne la portion du pixel recouvert
+names(speed_zone_tamp) <- c("ID", "value", "fraction")
+speed_zone_tamp <- speed_zone_tamp[!is.na(speed_zone_tamp$value),]
+
 north_zone_tamp <- terra::extract(north_raster,
                                   latlon_buff,
                                   exact = T)
+names(north_zone_tamp) <- c("ID", "value", "fraction")
+north_zone_tamp <- north_zone_tamp[!is.na(north_zone_tamp$value),]
+
 east_zone_tamp <- terra::extract(east_raster,
                                  latlon_buff,
                                  exact = T)
+names(east_zone_tamp) <- c("ID", "value", "fraction")
+east_zone_tamp <- east_zone_tamp[!is.na(east_zone_tamp$value),]
 
-x$wind_speed_200km <- sum(speed_zone_tamp$wind_speed_43*speed_zone_tamp$fraction)/sum(speed_zone_tamp$fraction)
-x$wind_north_200km <- sum(north_zone_tamp$northward_wind_43*north_zone_tamp$fraction)/sum(north_zone_tamp$fraction)
-x$wind_east_200km <- sum(east_zone_tamp$eastward_wind_43*east_zone_tamp$fraction)/sum(east_zone_tamp$fraction)
+# ---- data manipulation to fit in finam DF 
+wd_spd_200km <- lapply(split(speed_zone_tamp, speed_zone_tamp$ID),
+                       function(y){
+                            sum(y$value*y$fraction)/sum(y$fraction)
+                       })
+x$wind_speed_200km <- as.vector(unlist(wd_spd_200km))
 
+wd_north_200km <- lapply(split(north_zone_tamp, north_zone_tamp$ID),
+                       function(y){
+                            sum(y$value*y$fraction)/sum(y$fraction)
+                       })
+x$wind_north_200km <- as.vector(unlist(wd_north_200km))
 
+wd_east_200km <- lapply(split(east_zone_tamp, east_zone_tamp$ID),
+                       function(y){
+                            sum(y$value*y$fraction)/sum(y$fraction)
+                       })
+x$wind_east_200km <- as.vector(unlist(wd_east_200km))
 
 # ---- #
     print(unique(x$loc_raster_layer))
@@ -692,6 +713,7 @@ mapview(list(ver90_a, ver50_a, ver25_a))
 
 loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_110max.rds")
 dim(loc)
+head(loc)
 class(loc$date)
 
 library(trajr)
@@ -735,7 +757,7 @@ dir2 <- do.call("rbind", dir)
 ################################################################
 loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_bird_dir_110max.rds")
 names(loc)
-head(loc$wind_meteo_dir)
+head(loc$wind_meteo_dir_loc)
 # --------------- #
 loc$dir_bird_deg0_360 <- ifelse(loc$dir_bird_deg >= 0,
                                 loc$dir_bird_deg,
@@ -758,9 +780,26 @@ summary(loc$diff_wind_bird_200km) # **** WARNING **** Données circulaires
 
 
 # ---- visualisation
-x11(); par(mfrow = c(3, 3))
-hist(loc$diff_wind_bird_loc, breaks = 36, main = "Global", col = "#178a17")
+# png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/Analyses/Figures/DIFF_bird_wind_GLOBAL.png",
+#     res = 300,
+#     width = 30,
+#     height = 20,
+#     pointsize = 12,
+#     units = "cm",
+#     bg = "white")
+
+# x11()
+par(mfrow = c(3, 3))
+hist(loc$diff_wind_bird_loc,
+     breaks = 36,
+     main = "Global",
+     xlab = "Diff btw wind & bird orientation")
 hist(loc$diff_wind_bird_200km, breaks = 36, main = "Global", add = T, col = "#00ddff51")
+legend("topright",
+       legend = c("loc", "200km"),
+       fill = c("grey", "#00ddff51"),
+       border = c("grey", "#00ddff51"),
+       bty = "n")
 
 loc_month <- split(loc, month(loc$date))
 for(i in 2:9){
@@ -768,12 +807,16 @@ for(i in 2:9){
           breaks = 36,
           main = unique(month(loc_month[[i]]$date,
                               label = T,
-                              abbr = F)))
+                              abbr = F)),
+          xlab = "Diff btw wind & bird orientation")
      hist(loc_month[[i]]$diff_wind_bird_200km,
           breaks = 36,
           add = T,
           col = "#00ddff51")
 }
+dev.off() 
+# PAS DE GROSSE DIFFERENCE ENTRE LES VALEURS PRISES SOUS LES LOCS ET DANS UNE ZONE TAMPON DE 200KM
+# ----------------------------------------------------------------------------------------------- #
 
 # ---- Wind orientation distribution at locs
 hist(loc$wind_meteo_dir0_360_loc[lubridate::month(loc$date) == 4],
@@ -806,7 +849,7 @@ ang_circ <- circular(loc$wind_meteo_dir0_360_200km[lubridate::month(loc$date) ==
                      type = "angles",
                      units = "degrees",
                      modulo = "2pi")
-mean.circular(ang_circ, na.rm = T) # 0.161934°
+mean.circular(ang_circ, na.rm = T) # 167.4011°
 
 # ---- Bird orientation distribution
 hist(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4],
@@ -827,8 +870,9 @@ mean.circular(ang_circ, na.rm = T) # 102.6694°
 
 
 
-############################## STOP HERE FOR REVISION OF SCRIPT ###############################
-################ NEED TO CHECK VALUES FOR 200KM ZONE #####################################
+#########################################################################
+#### ---- PART 7 - Difference bird & wind orientation per GROUP ---- ####
+#########################################################################
 # ----- Creation of group of bird per year and track type
 loc$group <- NA
 loc$group[loc$id %in% c("162070",
@@ -862,64 +906,81 @@ ang_circ <- circular(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4  & lo
 mean.circular(ang_circ, na.rm = T) # 116.4137°
 
 # ---- 
-loc_group <- split(loc, loc$group)
+loc_group <- split(loc,
+                   list(loc$group, month(loc$date)))
 
-lapply(loc_group, function(x){
-    x11()
-#     png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/DIFF_bird_wind_",
-#               unique(x$group),
-#               ".png",
-#               sep = ""),
-#         res = 300,
-#         width = 15,
-#         height = 20,
-#         pointsize = 12,
-#         units = "cm",
-#         bg = "white")
+loc_group_dim <- loc_group[4:27]
+
+lapply(loc_group_dim, function(x){
+#     x11()
+    png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/DIFF_bird_wind_",
+              unique(x$group),
+              "_",
+              unique(month(x$date, label = TRUE, abbr = FALSE)),
+              ".png",
+              sep = ""),
+        res = 300,
+        width = 15,
+        height = 20,
+        pointsize = 12,
+        units = "cm",
+        bg = "white")
     
-    hist(x$diff_wind_bird[month(x$date) == 4],
+    hist(x$diff_wind_bird_loc,
          col = "#2812c8ae",
          breaks = 36,
          freq = F,
-         main = paste("diff angle bird-wind APRIL", unique(x$group), sep = " "),
+         main = paste("diff orient° bird-wind", unique(month(x$date, label = TRUE, abbr = FALSE)), unique(x$group), sep = " - "),
          xlab = "Angle (°)")
-    lines(density(x$diff_wind_bird[month(x$date) == 4]),
+    lines(density(x$diff_wind_bird_loc, na.rm = T),
          col = "#041c38",
          lwd = 2)
     
-    x11()
-#     png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/ORIENTATION_bird_wind_",
-#               unique(x$group),
-#               ".png",
-#               sep = ""),
-#         res = 300,
-#         width = 15,
-#         height = 20,
-#         pointsize = 12,
-#         units = "cm",
-#         bg = "white")
-    hist(x$wind_meteo_dir0_360[lubridate::month(x$date) == 4],
+#     x11()
+    png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/ORIENTATION_bird_wind_",
+              unique(x$group),
+              "_",
+              unique(month(x$date, label = TRUE, abbr = FALSE)),
+              ".png",
+              sep = ""),
+        res = 300,
+        width = 20,
+        height = 30,
+        pointsize = 12,
+        units = "cm",
+        bg = "white")
+    hist(x$wind_meteo_dir0_360_loc,
          breaks = 36,
          col = "#e6891f82",
          freq = F,
-         main = paste("angle bird-wind APRIL", unique(x$group), sep = " "),
-         xlab = "Angle (°)")
-    lines(density(x$wind_meteo_dir0_360[lubridate::month(x$date) == 4]),
+         main = paste("orient° bird-wind", unique(month(x$date, label = TRUE, abbr = FALSE)), unique(x$group), sep = " "),
+         xlab = "Angle (°)",
+         xlim = c(0, 360))
+    lines(density(x$wind_meteo_dir0_360_loc, na.rm = T),
           lwd = 2,
           col = "sienna3")
     
-    hist(x$dir_bird_deg0_360[lubridate::month(x$date) == 4],
+     hist(x$wind_meteo_dir0_360_200km,
+         breaks = 36,
+         col = "#bebebe87",
+         freq = F,
+         add = T)
+    lines(density(x$wind_meteo_dir0_360_200km, na.rm = T),
+          lwd = 2,
+          col = "#1e1e1e")
+    
+    hist(x$dir_bird_deg0_360,
          breaks = 36,
          freq = F,
          col = "#0baea0aa",
          add = T)
-    lines(density(x$dir_bird_deg0_360[lubridate::month(x$date) == 4]),
+    lines(density(x$dir_bird_deg0_360, na.rm = T),
           lwd = 2,
           col = "#076864")
     legend("topright",
-           legend = c("wind orientation", "bird orientation"),
-           fill = c("#e6891f82", "#0baea0aa"),
-           border = c("#e6891f82", "#0baea0aa"),
+           legend = c("wind orientation loc", "wind orientation 200km", "bird orientation"),
+           fill = c("#e6891f82", "grey", "#0baea0aa"),
+           border = c("#e6891f82", "grey", "#0baea0aa"),
            bty = "n")
     
     graphics.off()
@@ -931,7 +992,7 @@ lapply(loc_group, function(x){
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
 
 ####################################################################
-#### ---- PART 6 - Zoom Ouest OI lors départ des oiseaux  ---- ####
+#### ---- PART 8 - Zoom Ouest OI lors départ des oiseaux  ---- ####
 ################################################################### 
 loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
 summary(loc)
