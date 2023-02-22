@@ -992,10 +992,241 @@ lapply(loc_group_dim, function(x){
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
 
 ####################################################################
+#### ---- PART 8 - Details à la semaine pour avril et mai ---- ####
+################################################################### 
+# orientation oiseau
+# orientation vent
+# diff orientation oiseau et vent
+# distance parcourue par les oiseaux
+# sinuosite du trajet des oiseaux par semaine
+
+
+loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
+dim(loc)
+summary(loc)
+names(loc)
+
+loc$week_num <- lubridate::isoweek(loc$date)
+table(loc$week_num)
+
+# garder uniquement mois avril & mai & le groupe 2018 NORD (le plus propre)
+# ------------------------------------------------------------------------- #
+loc2 <- loc[loc$group == "2018-Nord" & month(loc$date) == 4,]
+dim(loc2)
+table(loc2$week_num)
+# retrait de la S14 car pas assez de locs
+loc2 <- loc2[loc2$week_num != 14,]
+
+# split en fonction de id & week_num
+loc2_ls <- split(loc2,
+                 list(loc2$id, loc2$week_num))
+length(loc2_ls)
+lapply(loc2_ls, dim) # necessite de virer la semaine 14
+
+# Calcul de straightness & sinuosity
+library(trajr)
+track_prof <- data.frame()
+for(i in 1:length(loc2_ls)){
+     
+     test <- loc2_ls[[i]]
+     print(paste(unique(test$id), unique(test$week_num), sep = " "))
+# obtention objet trajectory
+    # conversion sp object
+    t_sp <- SpatialPoints(test[, c("lon", "lat")],
+                          proj4string = CRS("+proj=longlat"))
+    # obtention UTM coord
+    t_UTM <- spTransform(t_sp,
+                         CRS("+init=epsg:32743"))
+    # obtention object trajectory
+    coord <- data.frame(x = t_UTM$lon,
+                        y = t_UTM$lat,
+                        date = as.numeric(test$date))
+    trj <- TrajFromCoords(coord,
+                          timeCol = "date",
+                          spatialUnits = "m")
+    # rediscretisation des tracks
+#     trj_redis <- TrajRediscretize(trj,
+#                                   R = 1) # inutile pour le calcul de la sinuosite
+# print(TrajSinuosity(trj)) # for trajectory with a constant step length
+
+
+     sinuo <- TrajSinuosity2(trj)
+     straight <- TrajStraightness(trj)
+
+     # x11()
+     # plot(test$lon,
+     #      test$lat,
+     #      type = "b",
+     #      main = paste(unique(test$id), unique(test$week_num), sep = "-"))
+     # legend("bottomleft",
+     #        legend = paste("sinuosity = ", round(sinuo, digits = 5)))
+     
+     track_prof <- rbind(track_prof,
+                         c(unique(test$id),
+                           unique(test$week_num),
+                           straight,
+                           sinuo))
+}
+
+names(track_prof) <- c("id", "week", "straightness", "sinuosity")
+
+# vizualisation
+l <- split(track_prof,
+           track_prof$id)
+
+cols <- viridis(3)
+x11()
+plot(x = l[[1]]$week,
+     y = l[[1]]$straightness,
+     ylim = c(0, 1),
+     type = "b",
+     col = cols[1])
+lines(x = l[[2]]$week,
+     y = l[[2]]$straightness,
+     type = "b",
+     col = cols[2])
+lines(x = l[[3]]$week,
+     y = l[[3]]$straightness,
+     type = "b",
+     col = cols[3])
+
+#### ---- Pour toute la periode de tracking ---- ####
+# ------------------------------------------------- #
+table(loc$week_num)
+table(loc$group)
+
+# retrait de S14 et S1 & garder groupe NORD-2018
+loc3 <- loc[!loc$week_num %in% c(1, 14) & loc$group == "2018-Nord", ]
+table(loc3$week_num)
+table(loc3$group)
+loc3 <- droplevels(loc3)
+
+loc3$split_id_wk <- paste(loc3$id, loc3$week_num, sep = "-")
+# split en fonction de id & week_num
+loc3_ls <- split(loc3,
+                 loc3$split_id_wk)
+length(loc3_ls)
+lapply(loc3_ls, dim)
+
+#### ---- Calcul de straightness & sinuosity ---- ####
+library(trajr)
+track_prof_glob <- data.frame()
+for(i in 1:length(loc3_ls)){
+     
+     test <- loc3_ls[[i]]
+     print(paste(unique(test$id), unique(test$week_num), sep = " "))
+# obtention objet trajectory
+    # conversion sp object
+    t_sp <- SpatialPoints(test[, c("lon", "lat")],
+                          proj4string = CRS("+proj=longlat"))
+    # obtention UTM coord
+    t_UTM <- spTransform(t_sp,
+                         CRS("+init=epsg:32743"))
+    # obtention object trajectory
+    coord <- data.frame(x = t_UTM$lon,
+                        y = t_UTM$lat,
+                        date = as.numeric(test$date))
+    trj <- TrajFromCoords(coord,
+                          timeCol = "date",
+                          spatialUnits = "m")
+
+     sinuo <- TrajSinuosity2(trj)
+     straight <- TrajStraightness(trj)
+
+     track_prof_glob <- rbind(track_prof_glob,
+                              c(unique(test$id),
+                                unique(test$week_num),
+                                straight,
+                                sinuo))
+}
+
+names(track_prof_glob) <- c("id", "week", "straightness", "sinuosity")
+
+# vizualisation
+l_glob <- split(track_prof_glob,
+           track_prof_glob$id)
+
+cols <- viridis(length(unique(loc3$id)))
+x11(); par(mfrow = c(2, 3))
+j <- 0
+for(i in 2:length(l_glob)) {
+     j <- j + 1
+     plot(x = l_glob[[i]]$week,
+           y = l_glob[[i]]$straightness,
+           type = "b",
+           col = cols[[j]],
+           main = unique(l_glob[[i]]$id),
+           bty = "n",
+           ylim = c(0, 1),
+           xlab = "week number",
+           ylab = "Straightness index")
+     abline(h = 0.5,
+            lty = 3)
+}
+
+x11(); par(mfrow = c(2, 3))
+j <- 0
+for(i in 2:length(l_glob)) {
+     j <- j + 1
+     plot(x = l_glob[[i]]$week,
+           y = l_glob[[i]]$sinuosity,
+           type = "b",
+           col = cols[[j]],
+           main = unique(l_glob[[i]]$id),
+           bty = "n",
+           ylim = c(0, 0.01),
+           xlab = "week number",
+           ylab = "Sinuosity")
+     abline(h = 0.005,
+            lty = 3)
+}
+
+#### ---- Orientation oiseaux et vent, difference orientation oiseaux et vent, vitesse oiseaux et vent ---- ####
+length(loc3_ls)
+names(loc3_ls)
+
+or_spd <- lapply(loc3_ls,
+                 function(x) {
+               # mean bird orientation
+                      ang_circ_b <- circular(x$dir_bird_deg0_360,
+                                             type = "angles",
+                                             units = "degrees",
+                                             modulo = "2pi")
+                      mean_or_b <- mean.circular(ang_circ_b,
+                                                 na.rm = T)
+                      
+               # mean wind orientation 200km buffer
+                      ang_circ_w <- circular(x$wind_meteo_dir0_360_200km,
+                                             type = "angles",
+                                             units = "degrees",
+                                             modulo = "2pi")
+                      mean_or_w_200km <- mean.circular(ang_circ_w,
+                                                       na.rm = T)
+                      
+               # mean difference btw bird and wind (buffer 200km)
+                      ang_circ_diff_b_w <- circular(x$diff_wind_bird_200km,
+                                                    type = "angles",
+                                                    units = "degrees",
+                                                    modulo = "2pi")
+                      mean_diff_wd_bd_200km <- mean.circular(ang_circ_w,
+                                                             na.rm = T)
+                      
+               # mean speed of bird
+                      mean_speed_bird <- mean(x$speed_km.h_treat, na.rm = T)
+                      
+               # distance parcourue
+                       
+                 })
+
+#### ---- ABANDON ---- ####
+####################################################################
 #### ---- PART 8 - Zoom Ouest OI lors départ des oiseaux  ---- ####
 ################################################################### 
+
+################### RESTART HERE ####################
 loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
 summary(loc)
+names(loc)
 
 loc$week_num <- lubridate::isoweek(loc$date)
 table(loc$week_num)
@@ -2270,4 +2501,4 @@ ang_circ <- circular(dep_2018N$dir_bird_deg0_360,
                      units = "degrees",
                      modulo = "2pi")
 mean.circular(ang_circ,
-              na.rm =T)
+              na.rm = T)
