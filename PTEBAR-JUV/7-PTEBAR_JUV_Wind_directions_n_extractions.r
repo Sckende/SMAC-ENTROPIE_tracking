@@ -287,7 +287,7 @@ summary(argos_df_2$abs_ws)
 # ---- > Wind roses of bird directions ####
 ###########################################
 
-g <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_argos_&_speed_ltraj.rds")
+g <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/RMD/PTEBAR_JUV_argos_&_speed_ltraj.rds")
 
 str(g)
 g2 <- do.call("rbind", g)
