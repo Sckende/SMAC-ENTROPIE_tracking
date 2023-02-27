@@ -620,7 +620,7 @@ x$wind_east_200km <- as.vector(unlist(wd_east_200km))
     x
 })
 print("ayééé")
-
+ 
 mp_3 <- do.call("rbind",
                 fl3)
 dim(mp_3)
@@ -710,7 +710,6 @@ mapview(list(ver90_a, ver50_a, ver25_a))
 #################################################################
 #### ---- PART 5 - Direction que prennent les oiseaux  ---- ####
 ################################################################
-
 loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_110max.rds")
 dim(loc)
 head(loc)
@@ -747,6 +746,9 @@ dir <- lapply(l, function(x){
 })
 
 dir2 <- do.call("rbind", dir)
+x11(); hist(dir2$dir_bird_deg)
+x11(); hist(dir2$dir_bird_deg[dir2$delay_min <= 120])
+
 
 # ---- save the database
 # saveRDS(dir2,
@@ -778,6 +780,7 @@ loc$diff_wind_bird_200km <- (loc$dir_bird_deg0_360 - loc$wind_meteo_dir0_360_200
 summary(loc$diff_wind_bird_loc) # **** WARNING **** Données circulaires 
 summary(loc$diff_wind_bird_200km) # **** WARNING **** Données circulaires 
 
+####### ******************* VIRER LES DELAY > 120 MIN ******************** ################
 
 # ---- visualisation
 # png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/Analyses/Figures/DIFF_bird_wind_GLOBAL.png",
@@ -791,10 +794,26 @@ summary(loc$diff_wind_bird_200km) # **** WARNING **** Données circulaires
 # x11()
 par(mfrow = c(3, 3))
 hist(loc$diff_wind_bird_loc,
+     freq = FALSE,
      breaks = 36,
      main = "Global",
      xlab = "Diff btw wind & bird orientation")
-hist(loc$diff_wind_bird_200km, breaks = 36, main = "Global", add = T, col = "#00ddff51")
+lines(density(loc$diff_wind_bird_loc,
+              na.rm = T,
+              from = 0,
+              to = 360))
+hist(loc$diff_wind_bird_200km,
+     freq = FALSE,
+     breaks = 36,
+     main = "Global",
+     add = T,
+     col = "#00ddff51")
+lines(density(loc$diff_wind_bird_200km,
+              na.rm = T,
+              from = 0,
+              to = 360),
+     col = "#0f0f7f")
+
 legend("topright",
        legend = c("loc", "200km"),
        fill = c("grey", "#00ddff51"),
@@ -804,15 +823,26 @@ legend("topright",
 loc_month <- split(loc, month(loc$date))
 for(i in 2:9){
      hist(loc_month[[i]]$diff_wind_bird_loc,
+     freq = FALSE,
           breaks = 36,
           main = unique(month(loc_month[[i]]$date,
                               label = T,
                               abbr = F)),
           xlab = "Diff btw wind & bird orientation")
+     lines(density(loc_month[[i]]$diff_wind_bird_loc,
+                   na.rm = T,
+                   from = 0,
+                   to = 360))
+     
      hist(loc_month[[i]]$diff_wind_bird_200km,
+     freq = FALSE,
           breaks = 36,
           add = T,
           col = "#00ddff51")
+     lines(density(loc_month[[i]]$diff_wind_bird_200km,
+                   na.rm = T,
+                   from = 0,
+                   to = 360))
 }
 dev.off() 
 # PAS DE GROSSE DIFFERENCE ENTRE LES VALEURS PRISES SOUS LES LOCS ET DANS UNE ZONE TAMPON DE 200KM
@@ -1217,6 +1247,35 @@ or_spd <- lapply(loc3_ls,
                # distance parcourue
                        
                  })
+
+
+#########################################
+# regarder s’il y a une différence dans la distribution de la variable "orientation bird - orientation vent »
+# - suivant les mois (différence de comportement en migration - sur zone hivernage) ?
+# - suivant les groupes d’individus 2017 - 2018 nord - 2018 sud ?
+#######################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #### ---- ABANDON ---- ####
 ####################################################################
