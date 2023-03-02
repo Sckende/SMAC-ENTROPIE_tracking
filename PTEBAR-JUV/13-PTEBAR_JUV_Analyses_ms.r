@@ -694,7 +694,7 @@ mapview(list(ver90_a, ver50_a, ver25_a))
 # kernel computation LATLON
 KUD_a <- kernelUD(ad_nr_sp,
                   h = 'href')
-KUD_a@h # 201454.8 m
+KUD_a@h 
 
 KUDvol_a <- getvolumeUD(KUD_a)
 
@@ -876,10 +876,13 @@ table(loc$group, useNA = "always")
 # ---- APRIL
 x11()
 hist(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4 & loc$group == "2018-Nord"],
-     breaks = 36,
+     breaks = seq(0, 360, 5),
      freq = F,
      col = "#0baea0aa")
-lines(density(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4 & loc$group == "2018-Nord"], na.rm = T),
+lines(density(loc$dir_bird_deg0_360[lubridate::month(loc$date) == 4 & loc$group == "2018-Nord"],
+              na.rm = T,
+              from = 0,
+              to = 360),
       lwd = 2,
       col = "#076864")
 
@@ -918,10 +921,11 @@ lapply(loc_group_dim, function(x){
     print(unique(x$group))
     hist(x$diff_wind_bird_loc,
          col = "#2812c8ae",
-         breaks = 36,
+         breaks = seq(0, 360, 5),
          freq = F,
          main = paste("diff orient° bird-wind", unique(month(x$date, label = TRUE, abbr = FALSE)), unique(x$group), sep = " - "),
-         xlab = "Angle (°)")
+         xlab = "Angle (°)",
+         ylim = c(0, 0.02))
     lines(density(x$diff_wind_bird_loc, na.rm = T),
          col = "#041c38",
          lwd = 2)
@@ -940,18 +944,19 @@ lapply(loc_group_dim, function(x){
         units = "cm",
         bg = "white")
     hist(x$wind_meteo_dir0_360_loc,
-         breaks = 36,
+         breaks = seq(0, 360, 5),
          col = "#e6891f82",
          freq = F,
          main = paste("orient° bird-wind", unique(month(x$date, label = TRUE, abbr = FALSE)), unique(x$group), sep = " "),
          xlab = "Angle (°)",
-         xlim = c(0, 360))
+         xlim = c(0, 360),
+         ylim = c(0, 0.06))
     lines(density(x$wind_meteo_dir0_360_loc, na.rm = T),
           lwd = 2,
           col = "sienna3")
     
      hist(x$wind_meteo_dir0_360_200km,
-         breaks = 36,
+         breaks = seq(0, 360, 5),
          col = "#bebebe87",
          freq = F,
          add = T)
@@ -960,7 +965,7 @@ lapply(loc_group_dim, function(x){
           col = "#1e1e1e")
     
     hist(x$dir_bird_deg0_360,
-         breaks = 36,
+         breaks = seq(0, 360, 5),
          freq = F,
          col = "#0baea0aa",
          add = T)
@@ -997,14 +1002,18 @@ lapply(group_ls, function(x) {
     par(mfrow = c(2, 3))
     for(i in 4:9) {
              hist(x$diff_wind_bird_loc[month(x$date) == i],
-         col = "#2812c8ae",
-         breaks = 36,
-         freq = F,
-         main = paste("diff orient° bird-wind", unique(month(x$date[month(x$date) == i], label = TRUE, abbr = FALSE)), unique(x$group), sep = " - "),
-         xlab = "Angle (°)")
-    lines(density(x$diff_wind_bird_loc, na.rm = T),
-         col = "#041c38",
-         lwd = 2)
+                  col = "#2812c8ae",
+                  breaks = seq(0, 360, 5),
+                  freq = F,
+                  main = paste("diff orient° bird-wind", unique(month(x$date[month(x$date) == i], label = TRUE, abbr = FALSE)), unique(x$group), sep = " - "),
+                  xlab = "Angle (°)",
+                  ylim = c(0, 0.02))
+             
+    lines(density(x$diff_wind_bird_loc[month(x$date) == i], na.rm = T,
+                  from = 0,
+                  to = 360,),
+          col = "#041c38",
+          lwd = 2)
     }
     dev.off()
 })
@@ -1023,32 +1032,42 @@ lapply(group_ls, function(x) {
          
          par(mfrow = c(2, 3))
          for(i in 4:9) {
-              hist(x$wind_meteo_dir0_360_loc[month(x$date) == i],
-         breaks = 36,
-         col = "#e6891f82",
-         freq = F,
-         main = paste("orient° bird-wind", unique(month(x$date[month(x$date) == i], label = TRUE, abbr = FALSE)), unique(x$group), sep = " "),
-         xlab = "Angle (°)",
-         xlim = c(0, 360))
-    lines(density(x$wind_meteo_dir0_360_loc[month(x$date) == i], na.rm = T),
+              hist(x$wind_meteo_dir0_360_200km[month(x$date) == i],
+                   breaks = seq(0, 360, 5),
+                   col = "#e6891f82",
+                   freq = F,
+                   main = paste("orient° bird-wind", unique(month(x$date[month(x$date) == i], label = TRUE, abbr = FALSE)), unique(x$group), sep = " "),
+                   xlab = "Angle (°)",
+                   xlim = c(0, 360),
+                   ylim = c(0, 0.06))
+    lines(density(x$wind_meteo_dir0_360_200km[month(x$date) == i],
+                  na.rm = T,
+                  from = 0,
+                  to = 360,),
           lwd = 2,
           col = "sienna3")
     
-     hist(x$wind_meteo_dir0_360_200km[month(x$date) == i],
-         breaks = 36,
-         col = "#bebebe87",
-         freq = F,
-         add = T)
-    lines(density(x$wind_meteo_dir0_360_200km[month(x$date) == i], na.rm = T),
+     hist(x$wind_meteo_dir0_360_loc[month(x$date) == i],
+          breaks = seq(0, 360, 5),
+          col = "#bebebe87",
+          freq = F,
+          add = T)
+    lines(density(x$wind_meteo_dir0_360_loc[month(x$date) == i],
+                  na.rm = T,
+                  from = 0,
+                  to = 360,),
           lwd = 2,
           col = "#1e1e1e")
     
     hist(x$dir_bird_deg0_360[month(x$date) == i],
-         breaks = 36,
+         breaks = seq(0, 360, 5),
          freq = F,
          col = "#0baea0aa",
          add = T)
-    lines(density(x$dir_bird_deg0_360[month(x$date) == i], na.rm = T),
+    lines(density(x$dir_bird_deg0_360[month(x$date) == i],
+                  na.rm = T,
+                  from = 0,
+                  to = 360,),
           lwd = 2,
           col = "#076864")
     legend("topright",
@@ -1459,7 +1478,7 @@ head(fin_wk)
 plot(fin_wk$week_num,
      as.numeric(fin_wk$mean_or_b),
      type = "b")
-lines(fin_wk$week_num,
+plot(fin_wk$week_num,
      as.numeric(fin_wk$mean_or_w_200km),
      type = "b")
 
@@ -1467,32 +1486,118 @@ lines(fin_wk$week_num,
      as.numeric(fin_wk$mean_diff_wd_bd_200km),
      type = "b")
 
-lines(fin_wk$week_num,
+plot(fin_wk$week_num,
      as.numeric(fin_wk$mean_speed_bird),
      type = "b")
-
-lines(fin_wk$week_num,
+par(new = T)
+plot(fin_wk$week_num,
      as.numeric(fin_wk$trav_dist_km),
-     type = "b")
+     type = "h")
 
 #########################################
-# regarder s’il y a une différence dans la distribution de la variable "orientation bird - orientation vent »
-# - suivant les mois (différence de comportement en migration - sur zone hivernage) ?
-# - suivant les groupes d’individus 2017 - 2018 nord - 2018 sud ?
+# revérifier le distance travelled (cf dan sla suite du script)
+# RESULTATS ASSEZ DIFFERENTS - PREFERER LA DEUXIEME METHODE
+# CELLE QUI SUIT
 #######################################################################
+loc4 <- loc[loc$group == "2018-Nord" & month(loc$date) %in% c(4, 5),]
 
+table(loc4$group) 
 
+# calcul de la distance voyagée et vitesse moyenne par semaine
+dep_2018N_sf_latlon <- st_as_sf(loc4,
+                         coords = c("lon", "lat"),
+                         crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+dep_2018N_sf_UTM <- st_transform(dep_2018N_sf_latlon,
+                                 crs = 32743)
+mapview(dep_2018N_sf_UTM)
 
+# distance
+k <- split(dep_2018N_sf_UTM,
+           list(dep_2018N_sf_UTM$week_num,
+                dep_2018N_sf_UTM$id))
 
+k_list <- lapply(k,
+                 function(x) {
+                     wk <- unique(x$week_num)
+                     id <- unique(x$id)
+                     dista <- as.numeric(st_distance(x[1,],
+                                          x[dim(x)[1], ]))
+                     
+                     data.frame(id = id,
+                                wk_num = wk,
+                                dist_m = dista)
+                 })
 
+################
+# ---- distance parcourue par les oiseaux par semaine
+# en partant du dernier point de la semaine précédente
+# et recalcul de la vitesse en partant de cette distance
 
+dist_wk_bd <- data.frame()
 
+for(i in 1:length(k)){
+    
+    wk <- unique(k[[i]]$week_num)
+    id <- unique(k[[i]]$id)
+    
 
+    
+    if(wk > 14){
+            pres <- k[[i]]
+            past <- k[[i-1]]
+        dista <- st_distance(pres[dim(pres)[1], ],
+                             past[dim(past)[1],])
+        bd_speed_mean  <- mean(k[[i]]$speed_km.h_treat, na.rm = T)
+        bd_speed_sd  <- sd(k[[i]]$speed_km.h_treat, na.rm = T)
+        
+    } else {
+        dista <- NA
+        bd_speed_mean <- NA
+        bd_speed_sd <- NA
+    }
+    
+    dist_wk_bd <- rbind(dist_wk_bd,
+                        c(id, wk, as.numeric(dista), bd_speed_mean, bd_speed_sd))
+}
 
+names(dist_wk_bd) <- c("id", "week_num", "dist_m", "bd_spd_mean_km.h", "bd_spd_sd")
+dist_wk_bd <- apply(dist_wk_bd,
+                    2,
+                    as.numeric)
+summary(dist_wk_bd)
+dist_wk_bd <- as.data.frame(dist_wk_bd)
 
+# ---- mean dist per week
+dist_mean_wk <- aggregate(dist_m ~ week_num,
+                          data = dist_wk_bd,
+                          mean,
+                          na.rm = T)
 
+# ---- cumul dist per week
+dist_cum_wk <- aggregate(dist_m ~ week_num,
+                         data = dist_wk_bd,
+                         sum,
+                         na.rm = T)
+# ---- mean speed of bird per week
+spd_brd_mean_wk <- aggregate(bd_spd_mean_km.h ~ week_num,
+                             data = dist_wk_bd,
+                             mean,
+                             na.rm = T)
 
-
+x11()
+plot(dist_mean_wk$week_num,
+     dist_mean_wk$dist_m,
+     type = "h")
+par(new = T)
+plot(dist_cum_wk$week_num,
+     dist_cum_wk$dist_m,
+     type = "b",
+     col = "darkgreen")
+par(new = T)
+plot(fin_wk$week_num,
+     fin_wk$trav_dist_km,
+     type = "b",
+     col = "darkred")
 
 
 
