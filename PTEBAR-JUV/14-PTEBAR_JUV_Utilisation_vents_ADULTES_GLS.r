@@ -59,8 +59,14 @@ pts_out_ls <- lapply(ls_sp, function(x) {
 # interessant, tous les trajets par le sud, souvent dépasse la zone à l'est pour y revenir
 
 # conversion en DF
-pts_out <- do.call("rbind", pts_out_ls)
-head(pts_out)
+pts_out_utm <- do.call("rbind", pts_out_ls)
+head(pts_out_utm)
+class(pts_out_utm) # class SF - UTM
+
+# conversion de class SF - UTM vers class SF latlon
+pts_out <- st_transform(pts_out_utm,
+                        crs = "+proj=longlat +datum=WGS84")
+mapview(pts_out)
 
 # saveRDS(pts_out,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_Locs_anterieures_zone_hivernage.rds")
@@ -69,7 +75,7 @@ head(pts_out)
 
 pts_out <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_Locs_anterieures_zone_hivernage.rds")
 class(pts_out)
-table(month(pts_out$DATE))
+table(month(pts_out$DATE)) # mars avril mai
 
 # ---- Creation des rasters
 env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018" 
@@ -87,17 +93,17 @@ speed_ls <- list_names[str_detect(list_names,
 wind_speed_stack <- terra::rast(speed_ls)
 table(duplicated(time(wind_speed_stack)))
 wind_speed_stack <- wind_speed_stack[[!duplicated(time(wind_speed_stack))]]
-time(wind_speed_stack)[order(time(wind_speed_stack))] 
+# time(wind_speed_stack)[order(time(wind_speed_stack))] 
 
 wind_north_stack <- terra::rast(north_ls)
 table(duplicated(time(wind_north_stack)))
 wind_north_stack <- wind_north_stack[[!duplicated(time(wind_north_stack))]]
-time(wind_north_stack)[order(time(wind_north_stack))] 
+# time(wind_north_stack)[order(time(wind_north_stack))] 
 
 wind_east_stack <- terra::rast(east_ls)
 table(duplicated(time(wind_east_stack)))
 wind_east_stack <- wind_east_stack[[!duplicated(time(wind_east_stack))]]
-time(wind_east_stack)[order(time(wind_east_stack))] 
+# time(wind_east_stack)[order(time(wind_east_stack))] 
 
 #######################################
 # ---- For WIND speed & orientation ####
@@ -161,3 +167,174 @@ fl3 <- lapply(pts_out_list, function(x) {
     x
 })
 print("ayééé")
+
+# creation du DF
+pts_out_wind <- do.call("rbind", fl3)
+
+# formatage des variables vents
+summary(pts_out_wind)
+
+pts_out_wind$wind_spd_loc_km_h <- pts_out_wind$wind_speed_loc* 3.6 # conversion wind speed en km/h
+summary(pts_out_wind$wind_spd_loc_km_h) # COMPARER AVEC LES BEBES
+
+# calcul orientation vent
+# wind_dir <- 180 * atan2(v, u) / pi # with u = east and v = north AND atan2 gives direction in radian, then *180/pi allows the conversion in degree from -180 to 180
+# In addition, HERE the atan2 gives the angle with METEOROLOGICAL convention
+# N = 0 = 360, E = 90, S = 180, W = 270
+
+# for locs
+pts_out_wind$wind_meteo_dir_loc <- 180 * atan2(pts_out_wind$wind_north_loc, pts_out_wind$wind_east_loc) / pi # From -180 to 180°
+
+summary(pts_out_wind$wind_meteo_dir_loc)
+hist(pts_out_wind$wind_meteo_dir_loc)
+
+pts_out_wind$wind_meteo_dir0_360_loc <- ifelse(pts_out_wind$wind_meteo_dir_loc >= 0,
+                                               pts_out_wind$wind_meteo_dir_loc,
+                                               360 + pts_out_wind$wind_meteo_dir_loc) # From 0 to 360
+hist(pts_out_wind$wind_meteo_dir0_360_loc,
+     breaks = seq(0, 360, 5)) # vent du sud
+
+# visualisation des points avec un vectorplot
+nlev <- 100
+my_at <- seq(from = 0,
+             to = 20,
+             length.out = nlev+1)
+my_cols <- viridis_pal(begin = 1,
+                       end = 0,
+                       option = "A")(nlev)
+
+rasterVis::vectorplot(raster::stack(raster(wind_east_stack[[month(time(wind_east_stack)) == 4]]),
+                                    raster(wind_north_stack[[month(time(wind_north_stack)) == 4]])),
+               isField = 'dXY',
+               units = "degrees",
+               narrows = 1000,
+               lwd.arrows = 2,
+               aspX = 0.1,
+               region = raster(wind_speed_stack[[month(time(wind_speed_stack)) == 4]]),
+               at = my_at,
+               col.regions = my_cols,
+               colorkey = list(labels = list(cex = 1.5),
+                               title = list("wind speed (km/h)",
+                                            cex = 2,
+                                            vjust = 0)),
+            #    main = list(label = paste("week # ", i, " 2018", sep = ""),
+                        #    cex = 3),
+               xlab = list(label = "Longitude", 
+                           cex = 2),
+               ylab = list(label = "Latitude",
+                           cex = 2),
+               scales = list(x = list(cex = 1.5),
+                             y = list(cex = 1.5))) +
+      layer(c(sp.points(as_Spatial(pts_out[month(pts_out$DATE) == 4,]),
+                        col = "white",
+                        cex = 3,
+                        lwd = 3),
+              sp.polygons(ne_countries(),
+                    col = "#e3d0d0",
+                    fill = "#e3d0d0")))
+
+#### ---- Calcul de l'orientation des oiseaux ---- ####
+library(trajr)
+
+l <- split(pts_out_wind, pts_out_wind$ID)
+
+dir <- lapply(l, function(x){
+    t <- as.data.frame(x)
+    # conversion sp object
+    t_sp <- SpatialPoints(t[, c("LON", "LAT")],
+                          proj4string = CRS("+proj=longlat"))
+    # obtention UTM coord
+    t_UTM <- spTransform(t_sp,
+                         CRS("+init=epsg:32743"))
+    # obtention object trajectory
+    coord <- data.frame(x = t_UTM$LON,
+                        y = t_UTM$LAT,
+                        date = as.numeric(t$DATE))
+    trj <- TrajFromCoords(coord,
+                          timeCol = "date",
+                          spatialUnits = "m")
+    # obtention des angles
+    rad <- TrajAngles(trj,
+                      compass.direction = 0)
+    deg <- rad*180/pi
+    
+    x$dir_bird_deg <- c(deg, NA)
+    x$x_trj <- trj$x
+    x$y_trj <- trj$y
+    x
+})
+
+dir_DF <- do.call("rbind", dir)
+head(dir_DF)
+
+dir_DF$dir_bird_deg0_360 <- ifelse(dir_DF$dir_bird_deg >= 0,
+                                dir_DF$dir_bird_deg,
+                                360 + dir_DF$dir_bird_deg) # From 0 to 360
+hist(dir_DF$dir_bird_deg0_360,
+     breaks = seq(0, 360, 5))
+
+#### ---- Difference orientation nd and bird ---- ####
+dir_DF$diff_wind_bird <- (dir_DF$dir_bird_deg0_360 - dir_DF$wind_meteo_dir0_360_loc) %% 360
+
+png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/DIFF_bird_wind_ADULTS_go_wintering.png",
+        res = 300,
+        width = 15,
+        height = 20,
+        pointsize = 12,
+        units = "cm",
+        bg = "white")
+hist(dir_DF$diff_wind_bird,
+     breaks = seq(0, 360, 5),
+     freq = F,
+     main = "Diff orient° vent & adultes PTEBAR",
+     xlab = "angle (°)")
+lines(density(dir_DF$diff_wind_bird,
+              from = 0,
+              to = 360,
+              na.rm = T))
+dev.off()
+
+# moyenne circulaire de la difference entre orientation ent & oiseaux
+library(circular)
+ang_circ <- circular(dir_DF$diff_wind_bird,
+                     type = "angles",
+                     units = "degrees",
+                     modulo = "2pi")
+mean.circular(ang_circ, na.rm = T) # 222.0148°
+
+
+
+#### ---- Pour comparaison avec juveniles ---- ####
+loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_pu 
+    bli/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_d 
+    ata_env_param_diff_wind_bird_dir_110max.rds")
+
+png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/COMP_DIFF_bird_wind_ADULTS_JUV_mars_mai.png",
+        res = 300,
+        width = 30,
+        height = 20,
+        pointsize = 12,
+        units = "cm",
+        bg = "white")
+par(mfrow = c(1, 2))
+
+hist(dir_DF$diff_wind_bird,
+     breaks = seq(0, 360, 5),
+     freq = F,
+     main = "Diff orient° vent & adultes PTEBAR",
+     xlab = "angle (°)")
+lines(density(dir_DF$diff_wind_bird,
+              from = 0,
+              to = 360,
+              na.rm = T))
+
+hist(loc$diff_wind_bird_loc[month(loc$date) %in% 3:5],
+     breaks = seq(0, 360, 5),
+     freq = F,
+     main = "Diff orient° vent & juveniles PTEBAR",
+     xlab = "angle (°)")  
+lines(density(loc$diff_wind_bird_loc[month(loc$date) %in% 3:5],
+              from = 0,
+              to = 360,
+              na.rm = T))
+graphics.off()
