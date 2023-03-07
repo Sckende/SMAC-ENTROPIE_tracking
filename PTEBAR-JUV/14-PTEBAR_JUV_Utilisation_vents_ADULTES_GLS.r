@@ -137,7 +137,7 @@ pts_out_list <- split(pts_out,
                       pts_out$loc_raster_layer)
 length(pts_out_list)
 
-########## !!!!!!!!! DEBEUG ICI AVEC CONVERSION DE PTS_OUT DE UTM VERS LATLON
+
 fl3 <- lapply(pts_out_list, function(x) {
 # ----- extraction at location #
     speed_raster <- wind_speed_stack[[str_which(as.character(time(wind_speed_stack)),
@@ -305,9 +305,7 @@ mean.circular(ang_circ, na.rm = T) # 222.0148°
 
 
 #### ---- Pour comparaison avec juveniles ---- ####
-loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_pu 
-    bli/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_d 
-    ata_env_param_diff_wind_bird_dir_110max.rds")
+loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
 
 png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/COMP_DIFF_bird_wind_ADULTS_JUV_mars_mai.png",
         res = 300,
@@ -338,3 +336,68 @@ lines(density(loc$diff_wind_bird_loc[month(loc$date) %in% 3:5],
               to = 360,
               na.rm = T))
 graphics.off()
+
+
+
+x11()
+ggplot(dat,
+       aes(x = diff_wind_bird_loc)) +
+  geom_histogram() +
+  coord_polar() +
+  scale_x_continuous(limits = c(0,360),
+                     breaks = seq(0, 360, by = 45),
+                     minor_breaks = seq(0, 360, by = 15))
+  
+  
+  
+  
+  
+  
+  
+  
+  library(openair)
+  library(viridis)
+  argos_2018 <- loc[loc$group %in% c("2018-Nord", "2018-Sud"), ]
+  argos_2018$wind_fake <- 1 
+  
+  png("C:/Users/ccjuhasz/Desktop/test_WR.png",
+        res = 600,
+        width = 20,
+        height = 20,
+        pointsize = 12,
+        units = "cm",
+        bg = "white")
+  
+  windRose(mydata = argos_2018,
+         wd = "diff_wind_bird_loc",
+         ws = "wind_fake",
+         angle = 5,
+         auto.text = F,
+         paddle = F,
+         annotate = F,
+         col = "olivedrab3")
+  dev.off()
+  
+  
+
+    png("C:/Users/ccjuhasz/Desktop/test_WR.png",
+        res = 600,
+        width = 20,
+        height = 20,
+        pointsize = 12,
+        units = "cm",
+        bg = "white")
+
+  dir_DF2 <- data.frame(dir = dir_DF$diff_wind_bird[!is.na(dir_DF$diff_wind_bird)],
+                           speed = 1)
+  windRose(mydata = dir_DF2,
+         wd = "dir",
+         ws = "speed",
+         angle = 5,
+         auto.text = F,
+         paddle = F,
+         annotate = F,
+         col = "olivedrab3")
+  dev.off()
+  hist(dir_DF2$dir,
+       breaks = seq(0, 360, 5))
