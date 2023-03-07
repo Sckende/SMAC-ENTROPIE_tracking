@@ -658,11 +658,12 @@ summary(mp_3$abs_wind_spd_200km * 0.001 * 3600)
 # saveRDS(mp_3,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_110max.rds")
 
-#########################################################
-#### ---- PART 4 - Kernels avec locs corrigees ---- ####
-########################################################
+######################################################################################
+#### ---- PART 4 - Kernels ADULTES & JUVENILES avec locs corrigees/map production ---- ####
+######################################################################################
 
 #### ---- ADULT GLS
+# ------------------
 ad_gls <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_2008-2009_clean_from_Audrey.txt",
                      h = T,
                      sep = "\t")
@@ -676,20 +677,20 @@ xy <- ad_nr[,c('LON', 'LAT')]
 ad_nr_sp <- SpatialPointsDataFrame(coords = xy,
                                  data = ad_nr,
                                  proj4string = CRS("+proj=longlat +datum=WGS84"))
-ad_nr_UTM <- spTransform(ad_nr_sp,
-                         CRS('+init=epsg:32743'))
+# ad_nr_UTM <- spTransform(ad_nr_sp,
+#                          CRS('+init=epsg:32743'))
 # kernel computation UTM
-KUD_a <- kernelUD(ad_nr_UTM,
-                  h = 'href')
-KUD_a@h # 201454.8 m
+# KUD_a <- kernelUD(ad_nr_UTM,
+#                   h = 'href')
+# KUD_a@h # 201454.8 m
 
-KUDvol_a <- getvolumeUD(KUD_a)
+# KUDvol_a <- getvolumeUD(KUD_a)
 
-ver90_a <- getverticeshr(KUDvol_a, 90)
-ver50_a <- getverticeshr(KUDvol_a, 50)
-ver25_a <- getverticeshr(KUDvol_a, 25)
+# ver90_a <- getverticeshr(KUDvol_a, 90)
+# ver50_a <- getverticeshr(KUDvol_a, 50)
+# ver25_a <- getverticeshr(KUDvol_a, 25)
 
-mapview(list(ver90_a, ver50_a, ver25_a))
+# mapview(list(ver90_a, ver50_a, ver25_a))
 
 # kernel computation LATLON
 KUD_a <- kernelUD(ad_nr_sp,
@@ -707,6 +708,147 @@ mapview(list(ver90_a, ver50_a, ver25_a))
 # saveRDS(list(ver90_a, ver50_a, ver25_a),
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/MS_DATA/PTEBAR_AD_GLS_kernels.rds")
 
+# Map production - lines for movement & kernels for wintering
+ad_sp_list <- split(ad_nr_sp, ad_nr_sp$ID)
+track <- lapply(ad_sp_list,
+                function(x) {
+                    Lines(list(Line(coordinates(x))),
+                          x$ID[1L])
+                })
+
+lines <- SpatialLines(track)
+data_ad_track <- data.frame(Vessel = unique(ad_sp$ID))
+rownames(data_ad_track) <- data_ad_track$Vessel
+gls_lines <- SpatialLinesDataFrame(lines, data_ad_track)
+
+# ---- #
+library(ggplot2)
+lat_min = -40
+lon_min = 30
+lat_max = 30
+lon_max = 125
+world <- sf::st_as_sf(maps::map("world",
+                                plot = FALSE,
+                                fill = TRUE))
+
+colo <- "olivedrab3"
+cols <- rep("olivedrab3",
+            length(unique(ad_nr$ID)))
+x11()
+ggplot() + 
+  theme_linedraw() +
+  xlim(lon_min, lon_max) +
+  xlab("Longitude") +
+  theme(axis.title.x = element_text(size = 14)) +
+  ylim(lat_min, lat_max) +
+  ylab("Latitude") +
+  theme(axis.title.y = element_text(size = 14)) +
+  geom_path(data = ad_nr,
+            mapping = aes(x = LON, y = LAT, group = ID),
+            size = 1) +
+  geom_sf(data = st_as_sf(ver50_a),
+          fill = "olivedrab3",
+          color = "olivedrab3",
+          alpha = .4) +
+  geom_sf(data = world,
+          color = "gray75",
+          fill = "grey75") +
+  theme (panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.position = "none")
+
+
+#### ---- JUVENILES GLS
+# ----------------------
+arg <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_110max.rds")
+summary(arg)
+unique(arg$id)
+arg_2018 <- arg[arg$id %in% c("162072", "162073", "162070", "166565", "166564", "166563", "166561"), ]
+table(arg_2018$id)
+
+# spatial object SP for kernels
+xy <- arg_2018[,c("lon", "lat")]
+arg_2018_sp <- SpatialPointsDataFrame(coords = xy,
+                                 data = arg_2018,
+                                 proj4string = CRS("+proj=longlat +datum=WGS84"))
+
+sp_ls <- split(arg_2018_sp,
+               arg_2018_sp$id)
+
+ker50 <- lapply(sp_ls,
+                function(x) {
+                     KUD <- kernelUD(x,
+                                     h = 'href')
+                     KUDvol <- getvolumeUD(KUD)
+                     ver50 <- getverticeshr(KUDvol, 50)
+                     
+                })
+kers <- do.call("rbind", ker50)
+
+# Map production - lines for movement & kernels for wintering
+x11()
+ggplot() + 
+  theme_linedraw() +
+  xlim(lon_min, lon_max) +
+  xlab("Longitude") +
+  theme(axis.title.x = element_text(size = 14)) +
+  ylim(lat_min, lat_max) +
+  ylab("Latitude") +
+  theme(axis.title.y = element_text(size = 14)) +
+  geom_path(data = arg_2018,
+            mapping = aes(x = lon, y = lat, group = id),
+            colour = "darkgrey",
+            size = 1) +
+  geom_sf(data = st_as_sf(kers),
+          fill = "olivedrab3",
+          color = "olivedrab3",
+          alpha = .4) +
+  geom_sf(data = world,
+          color = "gray75",
+          fill = "grey75") +
+  theme (panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.position = "none")
+
+
+# Overlapped map
+png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/carto_globale_locs_corrigees_aniMotum/AD_JUV_tracks_kernel.png",
+    res = 300,
+    width = 30,
+    height = 20,
+    pointsize = 12,
+    units = "cm",
+    bg = "white")
+# x11()
+g <- ggplot() + 
+  theme_linedraw() +
+  xlim(lon_min, lon_max) +
+  xlab("Longitude") +
+  theme(axis.title.x = element_text(size = 14)) +
+  ylim(lat_min, lat_max) +
+  ylab("Latitude") +
+  theme(axis.title.y = element_text(size = 14)) +
+  geom_sf(data = world,
+          color = "gray75",
+          fill = "grey75") +
+  geom_path(data = ad_nr,
+            mapping = aes(x = LON, y = LAT, group = ID),
+            size = 1,
+            colour = "#dfaf3e") +
+  geom_path(data = arg_2018,
+            mapping = aes(x = lon, y = lat, group = id),
+            colour = "dodgerblue4",
+            size = 1) +
+  geom_sf(data = st_as_sf(ver50_a),
+          fill = "chartreuse4",
+          color = "chartreuse4",
+          alpha = .6) +
+  theme (panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.position = "none")
+  print(g)
+  dev.off()
+  
 #################################################################
 #### ---- PART 5 - Direction que prennent les oiseaux  ---- ####
 ################################################################
