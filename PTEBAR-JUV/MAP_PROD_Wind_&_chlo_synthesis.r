@@ -1,15 +1,17 @@
 # Production de carte synthétiques aux 3 mois #
 # Pour la direction & la force des vents #
 # Pour la chlo-a #
-# Avec trajet des juveniles (RAGOS) et des adultes (GLS) #
+# Avec trajet des juveniles (ARGOS) et des adultes (GLS) #
 
 # ---- Load packages ------ #
 source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
 
 ##### ----- Juvenile data - Argos from Pinet 2017 & 2018 ----- ####
 # ----- Load data ----- #
-juv_argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_wind_dirs_n_abs_speed_2.rds")
-
+# juv_argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_wind_dirs_n_abs_speed_2.rds")
+juv_argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
+juv_argos <- juv_argos[juv_argos$group == "2018-Nord",]
+names(juv_argos)[2:4] <- c("Date", "Longitude", "Latitude")
 summary(juv_argos)
 class(juv_argos$Date)
 
@@ -26,12 +28,13 @@ juv_argos_sp <- SpatialPointsDataFrame(coords = juv_argos[, c("Longitude", "Lati
 
 ##### ----- Adulte data - cleaned GLS data from Audrey Jaeger 2008 & 2009 ----- ####
 # ----- Load data ----- #
-ad_gls <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_2008-2009_clean_from_Audrey.txt",
+ad_gls <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_2008-2009_clean_from_Audrey.txt",
                      h = T,
-                     sep = "\t")
+                     sep = "\t")[ad_gls$STATUT == "NR",]
 head(ad_gls)
 summary(ad_gls)
 dim(ad_gls)
+names(ad_gls)
 
 # ----- Year division in trimestre ----- #
 ad_gls$DATE <- dmy_hm(ad_gls$DATE)
@@ -285,7 +288,7 @@ layer(c(sp.points(ad_gls_sp[ad_gls_sp$year_period == "OND", ],
 # ----------------------------------------------- #
 
 ## YEAR 1 - 2017 ####
-speed1 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637652088629_YEAR1_SPEED.nc')
+speed1 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637652088629_YEAR1_SPEED.nc')
 
 zon1 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637651769964_YEAR1_ZONAL.nc')
 mer1 <- stack('C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/AUDREY/Env_Variables/WIND/CERSAT-GLO-BLENDED_WIND_L4_REP-V6-OBS_FULL_TIME_SERIE_1637651880863_YEAR1_MERIDIONAL.nc')
@@ -462,7 +465,7 @@ png("C:/Users/ccjuhasz/Desktop/Wind_n_birds_2008-2018_JFM.png",
     unit = "cm",
     # bg = "transparent",
     bg = "white")
-
+# x11()
 print(rasterVis::vectorplot(raster::stack(raster::raster(east_JFM_08_18),
                                     raster::raster(north_JFM_08_18)), # stack(x/east, y/north)
                isField = 'dXY',
@@ -482,12 +485,12 @@ print(rasterVis::vectorplot(raster::stack(raster::raster(east_JFM_08_18),
                            cex = 2.5))      +
 layer(sp.polygons(IndOcean_sp,
                   col = "darkgrey",
-                  fill = "grey"))
-          # ,
-#         sp.points(ad_gls_sp[ad_gls_sp$year_period == "JFM", ],
-#                       col = rgb(141, 173, 52, maxColorValue = 255),
-#                       lwd = 4,
-#                       cex = 2)))
+                  fill = "grey")
+          ,
+        sp.points(ad_gls_sp[ad_gls_sp$year_period == "JFM", ],
+                      col = rgb(141, 173, 52, maxColorValue = 255),
+                      lwd = 4,
+                      cex = 2))
 )
 
 dev.off()
@@ -522,17 +525,18 @@ print(rasterVis::vectorplot(raster::stack(raster::raster(east_AMJ_08_18),
                            cex = 2.5))     +
 layer(sp.polygons(IndOcean_sp,
                   col = "darkgrey",
-                  fill = "grey")))
-     #    ,
-     #    sp.points(ad_gls_sp[ad_gls_sp$year_period == "AMJ", ],
-     #                  col = rgb(141, 173, 52, maxColorValue = 255),
-     #                  lwd = 4,
-     #                  cex = 2),
+                  fill = "grey")
+        ,
+        sp.points(ad_gls_sp[ad_gls_sp$year_period == "AMJ", ],
+                      col = rgb(141, 173, 52, maxColorValue = 255),
+                      lwd = 4,
+                      cex = 2)
+     # ,
      #    sp.points(juv_argos_sp[juv_argos_sp$year_period == "AMJ", ],
      #                  col = rgb(97, 250, 250, maxColorValue = 255),
      #                  lwd = 4,
      #                  cex = 2)
-     #    )))
+        ))
 dev.off()
 
 # -------------------------------- #
@@ -565,12 +569,13 @@ print(rasterVis::vectorplot(raster::stack(raster::raster(east_JAS_08_18),
                            cex = 2.5))     +
 layer(sp.polygons(IndOcean_sp,
                   col = "darkgrey",
-                  fill = "grey")))
-     #  ,
-     #    sp.points(ad_gls_sp[ad_gls_sp$year_period == "JAS", ],
-     #                  col = rgb(141, 173, 52, maxColorValue = 255),
-     #                  lwd = 4,
-     #                  cex = 2),
+                  fill = "grey")
+      ,
+        sp.points(ad_gls_sp[ad_gls_sp$year_period == "JAS", ],
+                      col = rgb(141, 173, 52, maxColorValue = 255),
+                      lwd = 4,
+                      cex = 2)))
+     # ,
      #    sp.points(juv_argos_sp[juv_argos_sp$year_period == "JAS", ],
      #                  col = rgb(97, 250, 250, maxColorValue = 255),
      #                  lwd = 4,

@@ -414,7 +414,17 @@ mapview(list(winHR90,
 # ----- Chargement des donnees ARGOS JUV ----- #
 # -------------------------------------------- #
 
-argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_wind_dirs_n_abs_speed_2.rds")
+# argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_wind_dirs_n_abs_speed_2.rds")
+argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_110max.rds")
+names(argos)[c(1,3:4)] <- c("Vessel", "Longitude", "Latitude")
+argos <- argos[argos$Vessel %in% c("162070",
+                                   "162072",
+                                   "162073",
+                                   "166561",
+                                   "166563",
+                                   "166565",
+                                   "166564"),] # deploiement 2018
+
 argos_sp <- SpatialPointsDataFrame(coords = argos[, c("Longitude", "Latitude")],
                                   data = argos,
                                   proj4string = CRS("+init=epsg:4326"))

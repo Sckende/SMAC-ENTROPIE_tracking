@@ -383,7 +383,7 @@ x11();barplot(data_mp$speed_km.h_treat)
 ##### ---- EXPLORATION ZONE - END ---- #####
 
 #######################################################################
-#### ---- PART 3 - extraction des paramètres environnementaux sous les localisations ajustées ---- ####
+#### ---- PART 3 - Production carte des vents ad & juv ---- ####
 #######################################################################
 # WARNING - UTILISER PACKAGE TERRA ET SF EN PRIORITE ****
 
@@ -436,7 +436,184 @@ table(duplicated(time(wind_east_stack)))
 wind_east_stack <- wind_east_stack[[!duplicated(time(wind_east_stack))]]
 time(wind_east_stack)[order(time(wind_east_stack))] 
 
+# ---- Carte juv 2018-Nord tracks & vents 2018
+extend <- extent(30, 120, -50, 10) # xmin, xmax, ymin, ymax
 
+spd2018 <- wind_speed_stack[[year(time(wind_speed_stack)) == 2018]] # from April to December 2018
+spd2018 <- crop(spd2018,
+                extend)
+north2018 <- wind_north_stack[[year(time(wind_north_stack)) == 2018]] # from April to December 2018
+north2018 <- crop(north2018,
+                  extend)
+east2018 <- wind_east_stack[[year(time(wind_east_stack)) == 2018]] # from April to December 2018
+east2018 <- crop(east2018,
+                 extend)
+
+# periode de l'annee data juv
+juv2018 <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
+names(juv2018)
+juv2018N <- juv2018[juv2018$group == "2018-Nord",]
+dim(juv2018N)
+for(i in 1:length(juv2018N$date)) {
+     if(month(juv2018N$date[i]) %in% 1:3) {
+          juv2018N$year_period[i] <- "JFM"
+     } else if(month(juv2018N$date[i]) %in% 4:6) {
+          juv2018N$year_period[i] <- "AMJ"
+     } else if(month(juv2018N$date[i]) %in% 7:9) {
+          juv2018N$year_period[i] <- "JAS"
+     } else {
+          juv2018N$year_period[i] <- "OND"
+     }
+}
+head(juv2018N)
+
+juv2018N_sp <- SpatialPointsDataFrame(coords = juv2018N[, c("lon", "lat")],
+                                      data = juv2018N,
+                                      proj4string = CRS("+init=epsg:4326"))
+
+# ---- map AMJ
+nlev <- 100
+my_at <- seq(from = 0,
+             to = 20,
+             length.out = nlev + 1)
+my_cols <- viridis_pal(begin = 1,
+                       end = 0,
+                       option = "A")(nlev)
+
+library(maps)
+library(maptools)
+IndOcean <- map("world",
+             fill = T,
+             xlim = c(30, 120),
+             ylim = c(-50, 10),
+             col = "grey")
+
+IndOcean_sp <- maptools::map2SpatialPolygons(IndOcean,
+                                             IDs = IndOcean$names,
+                                             proj4string = CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"))
+# -------------------------------- #
+#### ----- AMJ 2018 JUV ----- ####
+# ------------------------------ #
+png("C:/Users/ccjuhasz/Desktop/Wind_n_birds_2018_AMJ_JUV.png",
+    res = 300,
+    width = 50,
+    height = 40,
+    pointsize = 20,
+    unit = "cm",
+    # bg = "transparent",
+    bg = "white")
+# x11()
+print(rasterVis::vectorplot(raster::stack(raster::raster(east2018[[month(time(east2018)) %in% 4:6]]),
+                                    raster::raster(north2018[[month(time(north2018)) %in% 4:6]])), # stack(x/east, y/north)
+               isField = 'dXY',
+               narrows = 800,
+               lwd.arrows = 1,
+               aspX = 0.4,
+               region = raster::raster(spd2018[[month(time(spd2018)) %in% 4:6]]),
+               at = my_at,
+               col.regions = my_cols,
+               # scales = list(cex = 1.5),
+               colorkey = list(labels = list(cex = 2)),
+               main = list("AMJ 2018 JUV",
+                           cex = 2.5),
+               xlab = list("Longitude", 
+                           cex = 2.5),
+               ylab = list("Latitude",
+                           cex = 2.5))     +
+layer(sp.polygons(IndOcean_sp,
+                  col = "darkgrey",
+                  fill = "grey")
+        ,
+        sp.points(juv2018N_sp[juv2018N_sp$year_period == "AMJ", ],
+                      col = rgb(141, 173, 52, maxColorValue = 255),
+                      lwd = 4,
+                      cex = 2)
+        ))
+dev.off()
+
+# -------------------------------- #
+#### ----- JAS 2018 JUV ----- ####
+# ------------------------------ #
+png("C:/Users/ccjuhasz/Desktop/Wind_n_birds_2018_JAS_JUV.png",
+    res = 300,
+    width = 50,
+    height = 40,
+    pointsize = 20,
+    unit = "cm",
+    # bg = "transparent",
+    bg = "white")
+# x11()
+print(rasterVis::vectorplot(raster::stack(raster::raster(east2018[[month(time(east2018)) %in% 7:9]]),
+                                    raster::raster(north2018[[month(time(north2018)) %in% 7:9]])), # stack(x/east, y/north)
+               isField = 'dXY',
+               narrows = 800,
+               lwd.arrows = 1,
+               aspX = 0.4,
+               region = raster::raster(spd2018[[month(time(spd2018)) %in% 7:9]]),
+               at = my_at,
+               col.regions = my_cols,
+               # scales = list(cex = 1.5),
+               colorkey = list(labels = list(cex = 2)),
+               main = list("JAS 2018 JUV",
+                           cex = 2.5),
+               xlab = list("Longitude", 
+                           cex = 2.5),
+               ylab = list("Latitude",
+                           cex = 2.5))     +
+layer(sp.polygons(IndOcean_sp,
+                  col = "darkgrey",
+                  fill = "grey")
+        ,
+        sp.points(juv2018N_sp[juv2018N_sp$year_period == "JAS", ],
+                      col = rgb(141, 173, 52, maxColorValue = 255),
+                      lwd = 4,
+                      cex = 2)
+        ))
+dev.off()
+
+# -------------------------------- #
+#### ----- OND 2018 JUV ----- ####
+# ------------------------------ #
+png("C:/Users/ccjuhasz/Desktop/Wind_n_birds_2018_OND_JUV.png",
+    res = 300,
+    width = 50,
+    height = 40,
+    pointsize = 20,
+    unit = "cm",
+    # bg = "transparent",
+    bg = "white")
+# x11()
+print(rasterVis::vectorplot(raster::stack(raster::raster(east2018[[month(time(east2018)) %in% 10:12]]),
+                                    raster::raster(north2018[[month(time(north2018)) %in% 10:12]])), # stack(x/east, y/north)
+               isField = 'dXY',
+               narrows = 800,
+               lwd.arrows = 1,
+               aspX = 0.4,
+               region = raster::raster(spd2018[[month(time(spd2018)) %in% 10:12]]),
+               at = my_at,
+               col.regions = my_cols,
+               # scales = list(cex = 1.5),
+               colorkey = list(labels = list(cex = 2)),
+               main = list("OND 2018 JUV",
+                           cex = 2.5),
+               xlab = list("Longitude", 
+                           cex = 2.5),
+               ylab = list("Latitude",
+                           cex = 2.5))     +
+layer(sp.polygons(IndOcean_sp,
+                  col = "darkgrey",
+                  fill = "grey")
+        ,
+        sp.points(juv2018N_sp[juv2018N_sp$year_period == "OND", ],
+                      col = rgb(141, 173, 52, maxColorValue = 255),
+                      lwd = 4,
+                      cex = 2)
+        ))
+dev.off()
+#######################################################################
+#### ---- PART 3 - extraction des paramètres environnementaux sous les localisations ajustées ---- ####
+#######################################################################
+# WARNING - UTILISER PACKAGE TERRA ET SF EN PRIORITE ****
 # RANGE TEMPOREL SST: 01-04-2017 12:00 -> 31-01-2019 12:00 - 489 layers
 #                chlo: 01-01-2017 -> 31-01-2019 - 761 layers
 #                wind_speed: 01-04-2017 -> 01-02-2019 - 1988 layers
@@ -694,7 +871,10 @@ ad_nr_sp <- SpatialPointsDataFrame(coords = xy,
 
 # kernel computation LATLON
 KUD_a <- kernelUD(ad_nr_sp,
-                  h = 'href')
+               #    h = 'href'
+               h = 1,
+               grid = 500
+                  )
 KUD_a@h 
 
 KUDvol_a <- getvolumeUD(KUD_a)
@@ -709,6 +889,8 @@ mapview(list(ver90_a, ver50_a, ver25_a))
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/MS_DATA/PTEBAR_AD_GLS_kernels.rds")
 
 # Map production - lines for movement & kernels for wintering
+ker_ls <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/MS_DATA/PTEBAR_AD_GLS_kernels.rds")
+
 ad_sp_list <- split(ad_nr_sp, ad_nr_sp$ID)
 track <- lapply(ad_sp_list,
                 function(x) {
@@ -717,7 +899,7 @@ track <- lapply(ad_sp_list,
                 })
 
 lines <- SpatialLines(track)
-data_ad_track <- data.frame(Vessel = unique(ad_sp$ID))
+data_ad_track <- data.frame(Vessel = unique(ad_nr_sp$ID))
 rownames(data_ad_track) <- data_ad_track$Vessel
 gls_lines <- SpatialLinesDataFrame(lines, data_ad_track)
 
@@ -734,7 +916,17 @@ world <- sf::st_as_sf(maps::map("world",
 colo <- "olivedrab3"
 cols <- rep("olivedrab3",
             length(unique(ad_nr$ID)))
-x11()
+
+
+png("C:/Users/ccjuhasz/Desktop/AD_tracks_kernel.png",
+    res = 300,
+    width = 30,
+    height = 20,
+    pointsize = 12,
+    units = "cm",
+    bg = "white")
+# x11()
+print(
 ggplot() + 
   theme_linedraw() +
   xlim(lon_min, lon_max) +
@@ -745,10 +937,19 @@ ggplot() +
   theme(axis.title.y = element_text(size = 14)) +
   geom_path(data = ad_nr,
             mapping = aes(x = LON, y = LAT, group = ID),
-            size = 1) +
-  geom_sf(data = st_as_sf(ver50_a),
-          fill = "olivedrab3",
-          color = "olivedrab3",
+            size = 1,
+            color = "goldenrod3") +
+  geom_sf(data = st_as_sf(ker_ls[[1]]),
+          fill = "olivedrab2",
+          color = "olivedrab2",
+          alpha = .4) +
+  geom_sf(data = st_as_sf(ker_ls[[2]]),
+          fill = "olivedrab2",
+          color = "olivedrab2",
+          alpha = .4) +
+  geom_sf(data = st_as_sf(ker_ls[[3]]),
+          fill = "olivedrab2",
+          color = "olivedrab2",
           alpha = .4) +
   geom_sf(data = world,
           color = "gray75",
@@ -756,11 +957,14 @@ ggplot() +
   theme (panel.grid.major = element_blank(),
          panel.grid.minor = element_blank(),
          legend.position = "none")
+)
 
+dev.off()
 
-#### ---- JUVENILES GLS
+#### ---- JUVENILES ARGOS
 # ----------------------
 arg <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_110max.rds")
+
 summary(arg)
 unique(arg$id)
 arg_2018 <- arg[arg$id %in% c("162072", "162073", "162070", "166565", "166564", "166563", "166561"), ]
@@ -772,21 +976,102 @@ arg_2018_sp <- SpatialPointsDataFrame(coords = xy,
                                  data = arg_2018,
                                  proj4string = CRS("+proj=longlat +datum=WGS84"))
 
+# conservation des individus dans la track entre dans kernels adultes apres le depart de la colonie
 sp_ls <- split(arg_2018_sp,
                arg_2018_sp$id)
+mapview(sp_ls) + mapview(ker_ls)
+# => conservation de 162072(N), 162073(N), 166561(N), 166563(N), 166565(S)
 
-ker50 <- lapply(sp_ls,
-                function(x) {
-                     KUD <- kernelUD(x,
-                                     h = 'href')
+arg_2018_sp_2 <- arg_2018_sp[arg_2018_sp$id %in% c("162072", "162073", "166561", "166563", "166565"), ] 
+
+# infos extraites de "10-PTEBAR_JUV_&_AD-segr_points_depl_vs_other.r"
+infos <- data.frame(Vessel = c("162072",
+                               "162073",
+                               "166561",
+                               "166563",
+                               "166565"),
+                    enter_HR50 = as.Date(c("18/07/2018",
+                                           "10/07/2018",
+                                           "04/06/2018",
+                                           "30/06/2018",
+                                           "23/05/2018"),
+                                         "%d/%m/%Y"),
+                    exit_HR50 = c(NA, NA, "20/11/2018",
+                                                    "21/10/2018",
+                                                    "21/11/2018"))
+infos$exit_HR50 <- as.Date(infos$exit_HR50,
+                           "%d/%m/%Y")
+
+# MOVE vs STOP
+
+sp_ls2 <- split(arg_2018_sp_2,
+               arg_2018_sp_2$id)
+
+juv_behav <- lapply(sp_ls2, function(x) {
+     id <- unique(x$id)
+     date_enter <- infos$enter_HR50[infos$Vessel == id]
+     date_exit <- infos$exit_HR50[infos$Vessel == id]
+     
+     if (is.na(date_exit)) {
+          x$behav[as.Date(x$date) >= date_enter] <- "STOP"
+          x$behav[as.Date(x$date) < date_enter] <- "MOVE"
+          } else {
+               x$behav[as.Date(x$date) >= date_enter & as.Date(x$date) <= date_exit] <- "STOP"
+               x$behav[as.Date(x$date) < date_enter | as.Date(x$date) > date_exit] <- "MOVE"
+          }
+     x
+})
+
+# kernel 50 par individu
+ker50_stop <- lapply(juv_behav,
+                     function(x) {
+                          x <- x[x$behav == "STOP", ]
+                          KUD <- kernelUD(x,
+                                        #   h = 'href'
+                                        h = 1,
+                                        grid = 500
+                                     )
                      KUDvol <- getvolumeUD(KUD)
                      ver50 <- getverticeshr(KUDvol, 50)
-                     
-                })
-kers <- do.call("rbind", ker50)
+                     })
 
+kers <- do.call("rbind", ker50_stop)
+
+# kernel 95 par individu
+ker95_stop <- lapply(juv_behav,
+                     function(x) {
+                          x <- x[x$behav == "STOP", ]
+                          KUD <- kernelUD(x,
+                                        #   h = 'href'
+                                        h = 1,
+                                        grid = 500
+                                     )
+                     KUDvol <- getvolumeUD(KUD)
+                     ver50 <- getverticeshr(KUDvol, 95)
+                     })
+
+kers95 <- do.call("rbind", ker95_stop)
+
+# ---- kernel 50 global
+juv_behav_df <- do.call("rbind", juv_behav)
+KUD <- kernelUD(juv_behav_df[juv_behav_df$behav == "STOP", ],
+               #  h = 'href'
+               h = 1,
+               grid = 500
+                )
+KUDvol <- getvolumeUD(KUD)
+ker50_glob <- getverticeshr(KUDvol, 50)
+ker95_glob <- getverticeshr(KUDvol, 95)
 # Map production - lines for movement & kernels for wintering
-x11()
+png("C:/Users/ccjuhasz/Desktop/JUV_tracks_kernel_global.png",
+    res = 300,
+    width = 30,
+    height = 20,
+    pointsize = 12,
+    units = "cm",
+    bg = "white")
+# x11()
+print(
 ggplot() + 
   theme_linedraw() +
   xlim(lon_min, lon_max) +
@@ -799,9 +1084,21 @@ ggplot() +
             mapping = aes(x = lon, y = lat, group = id),
             colour = "darkgrey",
             size = 1) +
-  geom_sf(data = st_as_sf(kers),
-          fill = "olivedrab3",
-          color = "olivedrab3",
+#   geom_sf(data = st_as_sf(kers),
+#           fill = "olivedrab3",
+#           color = "olivedrab3",
+#           alpha = .4) +
+#   geom_sf(data = st_as_sf(kers95),
+#           fill = "olivedrab3",
+#           color = "olivedrab3",
+#           alpha = .4) +
+  geom_sf(data = st_as_sf(ker50_glob),
+          fill = "#cd6832",
+          color = "#cd6832",
+          alpha = .4) +
+  geom_sf(data = st_as_sf(ker95_glob),
+          fill = "#cd6832",
+          color = "#cd6832",
           alpha = .4) +
   geom_sf(data = world,
           color = "gray75",
@@ -809,6 +1106,8 @@ ggplot() +
   theme (panel.grid.major = element_blank(),
          panel.grid.minor = element_blank(),
          legend.position = "none")
+  )
+  dev.off()
 
 
 # Overlapped map
@@ -1226,6 +1525,76 @@ lapply(group_ls, function(x) {
 # saveRDS(loc,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
 
+#### ---- Test de windRose ---- ####
+loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
+
+# --- openair
+library(openair)
+loc2 <- loc[loc$group == "2018-Nord",]
+loc2$sp <- 1
+windRose(mydata = loc2,
+         wd = "diff_wind_bird_loc",
+         ws = "sp",
+         angle = 10,
+         auto.text = F,
+         paddle = F,
+         annotate = F,
+         grid.line = list(value = 1, lty = 5, col = "grey"),
+         offset = 25 # size of the hole on the center
+     #     border = "black"
+     #     alpha = 0.1
+         )
+
+# ---- ggplot
+library(ggplot2)
+library(cowplot)
+brk <- seq(0, 360, 10)
+
+g1 <- ggplot(loc2) +
+  geom_density(mapping = aes(x = diff_wind_bird_loc),
+               fill = "olivedrab3",
+               color = "olivedrab3",
+               alpha = 0.5) +
+#   stat_density(adjust = 0.25) +
+  scale_x_continuous(breaks = seq(0, 360, 10),
+                     limits = c(0, 360)) +
+  scale_y_continuous(limits = c(0, 0.005)) +
+  coord_polar(theta = "x",
+              start = 0,
+              direction = 1,
+              clip = "on") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.y = element_blank(),
+        axis.title = element_blank()) 
+  
+g1 
+
+# ---- circular
+library(circular)
+library(circlize)
+# initialize layout
+x = rnorm(1600)
+sectors = sample(letters[1:16], 1600, replace = TRUE)
+circos.initialize(sectors, x = x)
+circos.trackHist(sectors, x = x, col = "#999999", 
+    border = "#999999")
+circos.trackHist(sectors, x = x, bin.size = 0.1, 
+    col = "#999999", border = "#999999")
+circos.trackHist(sectors, x = x, draw.density = TRUE, 
+    col = "#999999", border = "#999999")
+# ---
+x <- loc2$diff_wind_bird_loc
+x <- na.omit(x)
+# sectors = sample(1, length(x), replace = TRUE)
+circos.initialize("a", xlim = c(0, 360))
+circos.trackHist(sectors = "a",
+                 x = x,
+                 col = "#999999",
+                 border = "#999999",
+                 bin.size = 1)
+circos.trackHist(sectors, x = x, draw.density = TRUE, 
+    col = "#999999", border = "#999999")
 ####################################################################
 #### ---- PART 8 - Details à la semaine pour avril et mai ---- ####
 ################################################################### 
