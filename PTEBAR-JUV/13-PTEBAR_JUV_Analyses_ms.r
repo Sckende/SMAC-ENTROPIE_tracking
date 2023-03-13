@@ -1525,40 +1525,25 @@ lapply(group_ls, function(x) {
 # saveRDS(loc,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
 
-#### ---- Test de windRose ---- ####
+#### ---- WindRose ---- ####
 loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
+loc2 <- loc[loc$group == "2018-Nord", ]
+dim(loc2)
 
-# --- openair
-library(openair)
-loc2 <- loc[loc$group == "2018-Nord",]
-loc2$sp <- 1
-windRose(mydata = loc2,
-         wd = "diff_wind_bird_loc",
-         ws = "sp",
-         angle = 10,
-         auto.text = F,
-         paddle = F,
-         annotate = F,
-         grid.line = list(value = 1, lty = 5, col = "grey"),
-         offset = 25 # size of the hole on the center
-     #     border = "black"
-     #     alpha = 0.1
-         )
-
-# ---- ggplot
+# ---- ggplot histogram
 library(ggplot2)
-library(cowplot)
-brk <- seq(0, 360, 10)
+library(patchwork)
 
 g1 <- ggplot(loc2) +
-  geom_density(mapping = aes(x = diff_wind_bird_loc),
+  geom_histogram(mapping = aes(x = diff_wind_bird_loc),
                fill = "olivedrab3",
                color = "olivedrab3",
-               alpha = 0.5) +
-#   stat_density(adjust = 0.25) +
+               alpha = 0.5,
+               binwidth = 1,
+               breaks = seq(0, 360, 10)) +
   scale_x_continuous(breaks = seq(0, 360, 10),
                      limits = c(0, 360)) +
-  scale_y_continuous(limits = c(0, 0.005)) +
+  scale_y_continuous(limits = c(-50, 180)) +
   coord_polar(theta = "x",
               start = 0,
               direction = 1,
@@ -1568,33 +1553,8 @@ g1 <- ggplot(loc2) +
         axis.text.y = element_blank(),
         axis.title = element_blank()) 
   
-g1 
+x11(); g1 
 
-# ---- circular
-library(circular)
-library(circlize)
-# initialize layout
-x = rnorm(1600)
-sectors = sample(letters[1:16], 1600, replace = TRUE)
-circos.initialize(sectors, x = x)
-circos.trackHist(sectors, x = x, col = "#999999", 
-    border = "#999999")
-circos.trackHist(sectors, x = x, bin.size = 0.1, 
-    col = "#999999", border = "#999999")
-circos.trackHist(sectors, x = x, draw.density = TRUE, 
-    col = "#999999", border = "#999999")
-# ---
-x <- loc2$diff_wind_bird_loc
-x <- na.omit(x)
-# sectors = sample(1, length(x), replace = TRUE)
-circos.initialize("a", xlim = c(0, 360))
-circos.trackHist(sectors = "a",
-                 x = x,
-                 col = "#999999",
-                 border = "#999999",
-                 bin.size = 1)
-circos.trackHist(sectors, x = x, draw.density = TRUE, 
-    col = "#999999", border = "#999999")
 ####################################################################
 #### ---- PART 8 - Details à la semaine pour avril et mai ---- ####
 ################################################################### 

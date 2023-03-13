@@ -273,7 +273,7 @@ dir_DF$dir_bird_deg0_360 <- ifelse(dir_DF$dir_bird_deg >= 0,
 hist(dir_DF$dir_bird_deg0_360,
      breaks = seq(0, 360, 5))
 
-#### ---- Difference orientation nd and bird ---- ####
+#### ---- Difference orientation wind and bird ---- ####
 dir_DF$diff_wind_bird <- (dir_DF$dir_bird_deg0_360 - dir_DF$wind_meteo_dir0_360_loc) %% 360
 
 png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/DIFF_bird_wind_ADULTS_go_wintering.png",
@@ -302,6 +302,32 @@ ang_circ <- circular(dir_DF$diff_wind_bird,
                      modulo = "2pi")
 mean.circular(ang_circ, na.rm = T) # 222.0148°
 
+# WindRose
+
+library(ggplot2)
+library(patchwork)
+
+head(dir_DF)
+names(dir_DF)
+x11()
+ggplot(dir_DF) +
+geom_histogram(mapping = aes(diff_wind_bird),
+               fill = "olivedrab3",
+               color = "olivedrab3",
+               alpha = 0.5,
+               binwidth = 1,
+               breaks = seq(0, 360, 10)) +
+  scale_x_continuous(breaks = seq(0, 360, 10),
+                     limits = c(0, 360)) +
+  scale_y_continuous(limits = c(-10, 50)) +
+  coord_polar(theta = "x",
+              start = 0,
+              direction = 1,
+              clip = "on") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.y = element_blank(),
+        axis.title = element_blank()) 
 
 
 #### ---- Pour comparaison avec juveniles ---- ####
