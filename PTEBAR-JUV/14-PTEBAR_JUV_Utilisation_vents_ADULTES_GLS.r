@@ -1,81 +1,154 @@
+rm(list = ls())
+
 source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
 require(aniMotum)
 require(patchwork)
+# infos papier Pinet et al 2011 - Migration, wintering distribution and habitat use of an endangered tropical seabird, Barau’s petrel Pterodroma baraui
+pap <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/Infos_gls_tracks_Pinet_2011.txt",
+                  sep = "\t",
+                  h = T)
+dim(pap)
+pap <- pap[pap$STATUS == "Breed", ] # uniquement les inds en repro
+unique(pap$ID)
+pap$ID2 <- substr(pap$ID, 1, 4)
 
+# GLS data from Audrey 
 ad_gls <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_GLS_2008-2009_clean_from_Audrey.txt",
                      h = T,
                      sep = "\t")
 head(ad_gls)
 table(ad_gls$STATUT)
+unique(ad_gls$ID)
+ad_gls$ID2 <- substr(ad_gls$ID, 1, 4)
 
-ad_nr <- ad_gls[ad_gls$STATUT == "NR", ]
+# --------------- #
+# keep only individuals in Pinet ms
+ad_nr <- ad_gls[ad_gls$ID2 %in% pap$ID2,]
+unique(ad_nr$ID2)
 ad_nr$DATE <- as.POSIXct(ad_nr$DATE,
                          format = "%d/%m/%Y %H:%M")
 
-summary(ad_nr$DATE)
-table(month(ad_nr$DATE)) # from march to september
+# add dates of departure and arrival in wintering core area
+gls <- left_join(ad_nr,
+                 pap[, c("ID2", "DEPARTURE", "ARRIVAL_CORE_WINTER")],
+                 by = "ID2")
+head(gls)
+
+
+# subset loc between colony departure & wintering area arrival
+ls <- split(gls, gls$ID2)
+migr_ls <- lapply(ls, function(x) {
+  dep <- date(strptime(unique(x$DEPARTURE),
+                  "%d/%m/%Y"))
+  arr <- date(strptime(unique(x$ARRIVAL_CORE_WINTER),
+                  "%d/%m/%Y"))
+  
+  x <- x[date(x$DATE) <= arr & date(x$DATE) >= dep, ]
+  x
+})
+
+migr <- do.call("rbind",
+                migr_ls)
+
+summary(migr)
+summary(migr$DATE)
+migr <- migr[!is.na(migr$DATE), ]
+table(month(migr$DATE)) # from march to May
 
 #### ---- spatial object ---- ####
-xy <- ad_nr[,c('LON', 'LAT')]
+xy <- migr[,c('LON', 'LAT')]
 ad_nr_sp <- SpatialPointsDataFrame(coords = xy,
-                                 data = ad_nr,
-                                 proj4string = CRS("+proj=longlat +datum=WGS84"))
+                                   data = migr,
+                                   proj4string = CRS("+proj=longlat +datum=WGS84"))
 ad_nr_UTM <- spTransform(ad_nr_sp,
                          CRS('+init=epsg:32743'))
-#### ---- Objectif: recuperation des points allant de la colonie vers la zone d'hivernage ---- ####
+
+
+#### ---- Objectif: recuperation des points allant de la colonie vers la zone d'hivernage ---- #### ==== > ABANDONNE 
+# Remplacé par le script précédent avec récup des dates de Pinet
 # Strategie:
 # Production du kernel 50 par individu
 # Recuperation de la date de premiere entree dans ce kernel
 # Recuperation de tous les points antecedents
 
-ls_sp <- split(ad_nr_UTM,
-               ad_nr_UTM$ID)
+# ls_sp <- split(ad_nr_UTM,
+#                ad_nr_UTM$ID)
 
-pts_out_ls <- lapply(ls_sp, function(x) {
-    # production kernel
-    KUD_a <- kernelUD(x,
-                      h = 'href')
-    KUDvol_a <- getvolumeUD(KUD_a)
-    ver50_a <- getverticeshr(KUDvol_a, 50)
-    
-    # conversion objet sf
-    hr50_sf <- st_as_sf(ver50_a)
-    x_sf <- st_as_sf(x)
-    
-    # recuperation des points dans le polygone
-    inters <- st_intersects(x_sf,
-                            hr50_sf)
-    pts_in <- x_sf[lengths(inters) != 0, ]
-    
-    # recuperation de la date min
-    date_min <- min(pts_in$DATE)
-    
-    # recuperation des points en dehors polygone lors de l'aller
-    pts_out <- x_sf[x_sf$DATE < date_min,]
-    
-    print(mapview(list(hr50_sf, x_sf, pts_out)))
-    pts_out
-})
+# pts_out_ls <- lapply(ls_sp, function(x) {
+#     # production kernel
+#     KUD_a <- kernelUD(x,
+#                       h = 'href')
+#     KUDvol_a <- getvolumeUD(KUD_a)
+#     ver50_a <- getverticeshr(KUDvol_a, 50)
+
+#     # conversion objet sf
+#     hr50_sf <- st_as_sf(ver50_a)
+#     x_sf <- st_as_sf(x)
+
+#     # recuperation des points dans le polygone
+#     inters <- st_intersects(x_sf,
+#                             hr50_sf)
+#     pts_in <- x_sf[lengths(inters) != 0, ]
+
+#     # recuperation de la date min
+#     date_min <- min(pts_in$DATE)
+
+#     # recuperation des points en dehors polygone lors de l'aller
+#     pts_out <- x_sf[x_sf$DATE < date_min,]
+
+#     print(mapview(list(hr50_sf, x_sf, pts_out)))
+#     pts_out
+# })
 # interessant, tous les trajets par le sud, souvent dépasse la zone à l'est pour y revenir
 
 # conversion en DF
-pts_out_utm <- do.call("rbind", pts_out_ls)
-head(pts_out_utm)
-class(pts_out_utm) # class SF - UTM
+# pts_out_utm <- do.call("rbind", pts_out_ls)
+# head(pts_out_utm)
+# class(pts_out_utm) # class SF - UTM
 
 # conversion de class SF - UTM vers class SF latlon
-pts_out <- st_transform(pts_out_utm,
-                        crs = "+proj=longlat +datum=WGS84")
-mapview(pts_out)
+# pts_out <- st_transform(pts_out_utm,
+#                         crs = "+proj=longlat +datum=WGS84")
+# mapview(pts_out)
 
 # saveRDS(pts_out,
 #         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_Locs_anterieures_zone_hivernage.rds")
+# saveRDS(migr,
+#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_Locs_anterieures_zone_hivernage_PINET_STYLE.rds")
 
 #### ---- Extraction des 3 composantes de vent ---- ####
 
-pts_out <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_Locs_anterieures_zone_hivernage.rds")
+pts_out <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_Locs_anterieures_zone_hivernage_PINET_STYLE.rds")
 class(pts_out)
 table(month(pts_out$DATE)) # mars avril mai
+
+# Map
+pts_out_sf <- sf::st_as_sf(pts_out,
+                           coords = c("LON", "LAT"),
+                           crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+x11()
+mapview(pts_out_sf,
+        zcol = "ID2")
+
+# track creation
+tracks <- pts_out_sf %>%
+  group_by(ID2) %>%
+  arrange(DATE) %>%
+  summarize(do_union = FALSE) %>% # do_union = FALSE for 
+  st_cast("LINESTRING")
+
+x11(); plot(st_geometry(tracks))
+plot(st_geometry(tracks[2, ])) # <=== REPRENDRE ICI 
+mapview(pts_out_sf,
+        zcol = "ID2") + mapview(tracks,
+                                zcol = "ID2")
+
+for(i in unique(pts_out_sf$ID2)) {
+  print(mapview(pts_out_sf[pts_out_sf$ID2 == i,]) + mapview(tracks[tracks$ID2 == i,]))
+  } # <== montrer à Audrey
+
+
+verif <- pts_out_sf[pts_out_sf$ID2 == "8123", ]
 
 # ---- Creation des rasters
 env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018" 
@@ -86,9 +159,9 @@ list_names <- list.files(env_folder,
 east_ls <- list_names[str_detect(list_names,
                                  pattern = "eastward")]
 north_ls <- list_names[str_detect(list_names,
-                                 pattern = "northward")]
+                                  pattern = "northward")]
 speed_ls <- list_names[str_detect(list_names,
-                                 pattern = "speed")]
+                                  pattern = "speed")]
 
 wind_speed_stack <- terra::rast(speed_ls)
 table(duplicated(time(wind_speed_stack)))
@@ -125,12 +198,12 @@ pts_out$loc_raster_hour[pts_out$time_loc_min >= 541 & pts_out$time_loc_min <= 90
 pts_out$loc_raster_hour[pts_out$time_loc_min >= 901 & pts_out$time_loc_min <= 1260] <- "18:00:00"
 
 pts_out$loc_raster_date <- ifelse(pts_out$time_loc_min >= 1261,
-                           as.character(date(pts_out$DATE)+1),
-                           as.character(date(pts_out$DATE)))
+                                  as.character(date(pts_out$DATE)+1),
+                                  as.character(date(pts_out$DATE)))
 
 pts_out$loc_raster_layer <- paste(pts_out$loc_raster_date,
-                               pts_out$loc_raster_hour,
-                               sep = ' ')
+                                  pts_out$loc_raster_hour,
+                                  sep = ' ')
 
 
 pts_out_list <- split(pts_out,
@@ -139,32 +212,32 @@ length(pts_out_list)
 
 
 fl3 <- lapply(pts_out_list, function(x) {
-# ----- extraction at location #
-    speed_raster <- wind_speed_stack[[str_which(as.character(time(wind_speed_stack)),
-                                       unique(x$loc_raster_layer))]]
-    
-    north_raster <- wind_north_stack[[str_which(as.character(time(wind_north_stack)),
-                                       unique(x$loc_raster_layer))]]
-    
-    east_raster <- wind_east_stack[[str_which(as.character(time(wind_east_stack)),
-                                       unique(x$loc_raster_layer))]]
-# ----- fusion with df #
-    wind_speed_extr <- terra::extract(speed_raster,
-                                      terra::vect(x[, c("LON", "LAT")]))
-    wind_north_extr <- terra::extract(north_raster,
-                            terra::vect(x[, c("LON", "LAT")]))
-    wind_east_extr <- terra::extract(east_raster,
-                           terra::vect(x[, c("LON", "LAT")]))
-    
-    # ----- #
-    x$wind_speed_loc <- wind_speed_extr[, 2]
-    x$wind_north_loc <- wind_north_extr[, 2]
-    x$wind_east_loc <- wind_east_extr[, 2]
-
-# ---- #
-    print(unique(x$loc_raster_layer))
-# ----- #
-    x
+  # ----- extraction at location #
+  speed_raster <- wind_speed_stack[[str_which(as.character(time(wind_speed_stack)),
+                                              unique(x$loc_raster_layer))]]
+  
+  north_raster <- wind_north_stack[[str_which(as.character(time(wind_north_stack)),
+                                              unique(x$loc_raster_layer))]]
+  
+  east_raster <- wind_east_stack[[str_which(as.character(time(wind_east_stack)),
+                                            unique(x$loc_raster_layer))]]
+  # ----- fusion with df #
+  wind_speed_extr <- terra::extract(speed_raster,
+                                    terra::vect(x[, c("LON", "LAT")]))
+  wind_north_extr <- terra::extract(north_raster,
+                                    terra::vect(x[, c("LON", "LAT")]))
+  wind_east_extr <- terra::extract(east_raster,
+                                   terra::vect(x[, c("LON", "LAT")]))
+  
+  # ----- #
+  x$wind_speed_loc <- wind_speed_extr[, 2]
+  x$wind_north_loc <- wind_north_extr[, 2]
+  x$wind_east_loc <- wind_east_extr[, 2]
+  
+  # ---- #
+  print(unique(x$loc_raster_layer))
+  # ----- #
+  x
 })
 print("ayééé")
 
@@ -205,33 +278,33 @@ my_cols <- viridis_pal(begin = 1,
 
 rasterVis::vectorplot(raster::stack(raster(wind_east_stack[[month(time(wind_east_stack)) == 4]]),
                                     raster(wind_north_stack[[month(time(wind_north_stack)) == 4]])),
-               isField = 'dXY',
-               units = "degrees",
-               narrows = 1000,
-               lwd.arrows = 2,
-               aspX = 0.1,
-               region = raster(wind_speed_stack[[month(time(wind_speed_stack)) == 4]]),
-               at = my_at,
-               col.regions = my_cols,
-               colorkey = list(labels = list(cex = 1.5),
-                               title = list("wind speed (km/h)",
-                                            cex = 2,
-                                            vjust = 0)),
-            #    main = list(label = paste("week # ", i, " 2018", sep = ""),
-                        #    cex = 3),
-               xlab = list(label = "Longitude", 
-                           cex = 2),
-               ylab = list(label = "Latitude",
-                           cex = 2),
-               scales = list(x = list(cex = 1.5),
-                             y = list(cex = 1.5))) +
-      layer(c(sp.points(as_Spatial(pts_out[month(pts_out$DATE) == 4,]),
-                        col = "white",
-                        cex = 3,
-                        lwd = 3),
-              sp.polygons(ne_countries(),
-                    col = "#e3d0d0",
-                    fill = "#e3d0d0")))
+                      isField = 'dXY',
+                      units = "degrees",
+                      narrows = 1000,
+                      lwd.arrows = 2,
+                      aspX = 0.1,
+                      region = raster(wind_speed_stack[[month(time(wind_speed_stack)) == 4]]),
+                      at = my_at,
+                      col.regions = my_cols,
+                      colorkey = list(labels = list(cex = 1.5),
+                                      title = list("wind speed (km/h)",
+                                                   cex = 2,
+                                                   vjust = 0)),
+                      #    main = list(label = paste("week # ", i, " 2018", sep = ""),
+                      #    cex = 3),
+                      xlab = list(label = "Longitude", 
+                                  cex = 2),
+                      ylab = list(label = "Latitude",
+                                  cex = 2),
+                      scales = list(x = list(cex = 1.5),
+                                    y = list(cex = 1.5))) +
+  layer(c(sp.points(as_Spatial(pts_out[month(pts_out$DATE) == 4,]),
+                    col = "white",
+                    cex = 3,
+                    lwd = 3),
+          sp.polygons(ne_countries(),
+                      col = "#e3d0d0",
+                      fill = "#e3d0d0")))
 
 #### ---- Calcul de l'orientation des oiseaux ---- ####
 library(trajr)
@@ -239,37 +312,37 @@ library(trajr)
 l <- split(pts_out_wind, pts_out_wind$ID)
 
 dir <- lapply(l, function(x){
-    t <- as.data.frame(x)
-    # conversion sp object
-    t_sp <- SpatialPoints(t[, c("LON", "LAT")],
-                          proj4string = CRS("+proj=longlat"))
-    # obtention UTM coord
-    t_UTM <- spTransform(t_sp,
-                         CRS("+init=epsg:32743"))
-    # obtention object trajectory
-    coord <- data.frame(x = t_UTM$LON,
-                        y = t_UTM$LAT,
-                        date = as.numeric(t$DATE))
-    trj <- TrajFromCoords(coord,
-                          timeCol = "date",
-                          spatialUnits = "m")
-    # obtention des angles
-    rad <- TrajAngles(trj,
-                      compass.direction = 0)
-    deg <- rad*180/pi
-    
-    x$dir_bird_deg <- c(deg, NA)
-    x$x_trj <- trj$x
-    x$y_trj <- trj$y
-    x
+  t <- as.data.frame(x)
+  # conversion sp object
+  t_sp <- SpatialPoints(t[, c("LON", "LAT")],
+                        proj4string = CRS("+proj=longlat"))
+  # obtention UTM coord
+  t_UTM <- spTransform(t_sp,
+                       CRS("+init=epsg:32743"))
+  # obtention object trajectory
+  coord <- data.frame(x = t_UTM$LON,
+                      y = t_UTM$LAT,
+                      date = as.numeric(t$DATE))
+  trj <- TrajFromCoords(coord,
+                        timeCol = "date",
+                        spatialUnits = "m")
+  # obtention des angles
+  rad <- TrajAngles(trj,
+                    compass.direction = 0)
+  deg <- rad*180/pi
+  
+  x$dir_bird_deg <- c(deg, NA)
+  x$x_trj <- trj$x
+  x$y_trj <- trj$y
+  x
 })
 
 dir_DF <- do.call("rbind", dir)
 head(dir_DF)
 
 dir_DF$dir_bird_deg0_360 <- ifelse(dir_DF$dir_bird_deg >= 0,
-                                dir_DF$dir_bird_deg,
-                                360 + dir_DF$dir_bird_deg) # From 0 to 360
+                                   dir_DF$dir_bird_deg,
+                                   360 + dir_DF$dir_bird_deg) # From 0 to 360
 hist(dir_DF$dir_bird_deg0_360,
      breaks = seq(0, 360, 5))
 
@@ -277,12 +350,12 @@ hist(dir_DF$dir_bird_deg0_360,
 dir_DF$diff_wind_bird <- (dir_DF$dir_bird_deg0_360 - dir_DF$wind_meteo_dir0_360_loc) %% 360
 
 png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/DIFF_bird_wind_ADULTS_go_wintering.png",
-        res = 300,
-        width = 15,
-        height = 20,
-        pointsize = 12,
-        units = "cm",
-        bg = "white")
+    res = 300,
+    width = 15,
+    height = 20,
+    pointsize = 12,
+    units = "cm",
+    bg = "white")
 hist(dir_DF$diff_wind_bird,
      breaks = seq(0, 360, 5),
      freq = F,
@@ -311,12 +384,12 @@ head(dir_DF)
 names(dir_DF)
 x11()
 ggplot(dir_DF) +
-geom_histogram(mapping = aes(diff_wind_bird),
-               fill = "olivedrab3",
-               color = "olivedrab3",
-               alpha = 0.5,
-               binwidth = 1,
-               breaks = seq(0, 360, 10)) +
+  geom_histogram(mapping = aes(diff_wind_bird),
+                 fill = "olivedrab3",
+                 color = "olivedrab3",
+                 alpha = 0.5,
+                 binwidth = 1,
+                 breaks = seq(0, 360, 10)) +
   scale_x_continuous(breaks = seq(0, 360, 10),
                      limits = c(0, 360)) +
   scale_y_continuous(limits = c(-10, 50)) +
@@ -334,12 +407,12 @@ geom_histogram(mapping = aes(diff_wind_bird),
 loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
 
 png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/COMP_DIFF_bird_wind_ADULTS_JUV_mars_mai.png",
-        res = 300,
-        width = 30,
-        height = 20,
-        pointsize = 12,
-        units = "cm",
-        bg = "white")
+    res = 300,
+    width = 30,
+    height = 20,
+    pointsize = 12,
+    units = "cm",
+    bg = "white")
 par(mfrow = c(1, 2))
 
 hist(dir_DF$diff_wind_bird,
@@ -373,28 +446,28 @@ ggplot(dat,
   scale_x_continuous(limits = c(0,360),
                      breaks = seq(0, 360, by = 45),
                      minor_breaks = seq(0, 360, by = 15))
-  
-  
-  
-  
-  
-  
-  
-  
-  library(openair)
-  library(viridis)
-  argos_2018 <- loc[loc$group %in% c("2018-Nord", "2018-Sud"), ]
-  argos_2018$wind_fake <- 1 
-  
-  png("C:/Users/ccjuhasz/Desktop/test_WR.png",
-        res = 600,
-        width = 20,
-        height = 20,
-        pointsize = 12,
-        units = "cm",
-        bg = "white")
-  
-  windRose(mydata = argos_2018,
+
+
+
+
+
+
+
+
+library(openair)
+library(viridis)
+argos_2018 <- loc[loc$group %in% c("2018-Nord", "2018-Sud"), ]
+argos_2018$wind_fake <- 1 
+
+png("C:/Users/ccjuhasz/Desktop/test_WR.png",
+    res = 600,
+    width = 20,
+    height = 20,
+    pointsize = 12,
+    units = "cm",
+    bg = "white")
+
+windRose(mydata = argos_2018,
          wd = "diff_wind_bird_loc",
          ws = "wind_fake",
          angle = 5,
@@ -402,21 +475,21 @@ ggplot(dat,
          paddle = F,
          annotate = F,
          col = "olivedrab3")
-  dev.off()
-  
-  
+dev.off()
 
-    png("C:/Users/ccjuhasz/Desktop/test_WR.png",
-        res = 600,
-        width = 20,
-        height = 20,
-        pointsize = 12,
-        units = "cm",
-        bg = "white")
 
-  dir_DF2 <- data.frame(dir = dir_DF$diff_wind_bird[!is.na(dir_DF$diff_wind_bird)],
-                           speed = 1)
-  windRose(mydata = dir_DF2,
+
+png("C:/Users/ccjuhasz/Desktop/test_WR.png",
+    res = 600,
+    width = 20,
+    height = 20,
+    pointsize = 12,
+    units = "cm",
+    bg = "white")
+
+dir_DF2 <- data.frame(dir = dir_DF$diff_wind_bird[!is.na(dir_DF$diff_wind_bird)],
+                      speed = 1)
+windRose(mydata = dir_DF2,
          wd = "dir",
          ws = "speed",
          angle = 5,
@@ -424,6 +497,6 @@ ggplot(dat,
          paddle = F,
          annotate = F,
          col = "olivedrab3")
-  dev.off()
-  hist(dir_DF2$dir,
-       breaks = seq(0, 360, 5))
+dev.off()
+hist(dir_DF2$dir,
+     breaks = seq(0, 360, 5))
