@@ -70,7 +70,7 @@ gls1 <- gls1[!is.na(gls1$DATE), ]
 # subset loc between colony departure & wintering area arrival
 ls <- split(gls1, gls1$ID2)
 
-x <- ls[[4]]
+# x <- ls[[4]]
 
 migr_ls <- lapply(ls, function(x) {
   dep <- date(strptime(unique(x$DEPARTURE),
@@ -85,6 +85,14 @@ migr_ls <- lapply(ls, function(x) {
   x
 })
 
+
+#### ---- Retrait de la 1ere loc pour 8108-GBN72 & 8105-MM14 ---- ####
+# car anterieur au départ de la colonie - détection visuelle
+
+migr_ls[["8108-GBN72"]] <- migr_ls[["8108-GBN72"]][-1,]
+migr_ls[["8105-MM14"]] <- migr_ls[["8105-MM14"]][-1,]
+
+#### ---- Obtention du DF avec loc migration vers wintering area ---- ####
 migr <- do.call("rbind",
                 migr_ls)
 
@@ -93,6 +101,9 @@ summary(migr)
 summary(migr$DATE)
 migr <- migr[!is.na(migr$DATE), ]
 table(month(migr$DATE)) # from march to May
+
+
+
 
 #### ---- spatial object ---- ####
 xy <- migr[,c('LON', 'LAT')]
@@ -104,67 +115,7 @@ migr_sp_UTM <- spTransform(migr_sp_ll,
 
 mapview(split(migr_sp_ll, migr_sp_ll$ID2))
 
-#### ---- Correction des dates & retrait des individus non utilisables ---- ####
-# VOIR
-# 8105-MM14 - remplacer date de départ de colonie par 10 avril
-# 8108-GBN72 - remplacer date de départ de colonie par 3 avril
-# 8123-GBNT1 - à retirer car les deux dates erronnées
 
-#### ---- Objectif: recuperation des points allant de la colonie vers la zone d'hivernage ---- #### ==== > ABANDONNE 
-# Remplacé par le script précédent avec récup des dates de Pinet
-# Strategie:
-# Production du kernel 50 par individu
-# Recuperation de la date de premiere entree dans ce kernel
-# Recuperation de tous les points antecedents
-
-# ls_sp <- split(ad_nr_UTM,
-#                ad_nr_UTM$ID)
-
-# pts_out_ls <- lapply(ls_sp, function(x) {
-#     # production kernel
-#     KUD_a <- kernelUD(x,
-#                       h = 'href')
-#     KUDvol_a <- getvolumeUD(KUD_a)
-#     ver50_a <- getverticeshr(KUDvol_a, 50)
-
-#     # conversion objet sf
-#     hr50_sf <- st_as_sf(ver50_a)
-#     x_sf <- st_as_sf(x)
-
-#     # recuperation des points dans le polygone
-#     inters <- st_intersects(x_sf,
-#                             hr50_sf)
-#     pts_in <- x_sf[lengths(inters) != 0, ]
-
-#     # recuperation de la date min
-#     date_min <- min(pts_in$DATE)
-
-#     # recuperation des points en dehors polygone lors de l'aller
-#     pts_out <- x_sf[x_sf$DATE < date_min,]
-
-#     print(mapview(list(hr50_sf, x_sf, pts_out)))
-#     pts_out
-# })
-# interessant, tous les trajets par le sud, souvent dépasse la zone à l'est pour y revenir
-
-# conversion en DF
-# pts_out_utm <- do.call("rbind", pts_out_ls)
-# head(pts_out_utm)
-# class(pts_out_utm) # class SF - UTM
-
-# conversion de class SF - UTM vers class SF latlon
-# pts_out <- st_transform(pts_out_utm,
-#                         crs = "+proj=longlat +datum=WGS84")
-# mapview(pts_out)
-
-# saveRDS(pts_out,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_Locs_anterieures_zone_hivernage.rds")
-# saveRDS(migr,
-#         "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_Locs_anterieures_zone_hivernage_PINET_STYLE.rds")
-
-#### ---- Extraction des 3 composantes de vent ---- ####
-
-# pts_out <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_Locs_anterieures_zone_hivernage_PINET_STYLE.rds")
 pts_out <- migr_sp_ll
 class(pts_out)
 table(month(pts_out$DATE)) # mars avril mai
@@ -177,7 +128,7 @@ x11()
 mapview(pts_out_sf,
         zcol = "ID2")
 
-# track creation
+#### ---- track creation ---- ####
 tracks <- pts_out_sf %>%
   group_by(ID2) %>%
   arrange(DATE) %>%
@@ -185,7 +136,7 @@ tracks <- pts_out_sf %>%
   st_cast("LINESTRING")
 
 x11(); plot(st_geometry(tracks))
-plot(st_geometry(tracks[2, ])) # <=== REPRENDRE ICI 
+plot(st_geometry(tracks[2, ])) 
 mapview(pts_out_sf,
         zcol = "ID2") + mapview(tracks,
                                 zcol = "ID2")
@@ -194,15 +145,7 @@ for(i in unique(pts_out_sf$ID2)) {
   print(mapview(pts_out_sf[pts_out_sf$ID2 == i,]) + mapview(tracks[tracks$ID2 == i,]))
   } # <== montrer à Audrey
 
-
-verif <- pts_out_sf[pts_out_sf$ID2 == "8123", ]
-verif1 <- pts_out_sf[pts_out_sf$ID == "8121-FS65290-GBN3-",]
-range(verif1$DATE)
-verif2 <- pts_out_sf[pts_out_sf$ID == "8121-FS65288-GBN26",]
-range(verif2$DATE)
-
-mapview(list(verif1, verif2))
-
+#### ---- Extraction of wind characteristics under locs ---- ####
 # ---- Creation des rasters
 env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018" 
 list_names <- list.files(env_folder,
@@ -402,13 +345,13 @@ hist(dir_DF$dir_bird_deg0_360,
 #### ---- Difference orientation wind and bird ---- ####
 dir_DF$diff_wind_bird <- (dir_DF$dir_bird_deg0_360 - dir_DF$wind_meteo_dir0_360_loc) %% 360
 
-png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/DIFF_bird_wind_ADULTS_go_wintering.png",
-    res = 300,
-    width = 15,
-    height = 20,
-    pointsize = 12,
-    units = "cm",
-    bg = "white")
+# png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/DIFF_bird_wind_ADULTS_go_wintering.png",
+#     res = 300,
+#     width = 15,
+#     height = 20,
+#     pointsize = 12,
+#     units = "cm",
+#     bg = "white")
 hist(dir_DF$diff_wind_bird,
      breaks = seq(0, 360, 5),
      freq = F,
@@ -418,7 +361,7 @@ lines(density(dir_DF$diff_wind_bird,
               from = 0,
               to = 360,
               na.rm = T))
-dev.off()
+# dev.off()
 
 # moyenne circulaire de la difference entre orientation ent & oiseaux
 library(circular)
@@ -426,7 +369,7 @@ ang_circ <- circular(dir_DF$diff_wind_bird,
                      type = "angles",
                      units = "degrees",
                      modulo = "2pi")
-mean.circular(ang_circ, na.rm = T) # 222.0148°
+mean.circular(ang_circ, na.rm = T) # 213.9126°
 
 # WindRose
 
@@ -435,8 +378,14 @@ library(patchwork)
 
 head(dir_DF)
 names(dir_DF)
-x11()
-ggplot(dir_DF) +
+class(dir_DF)
+
+dir2 <- as.data.frame(dir_DF)
+
+
+
+# x11()
+ggplot(dir2) +
   geom_histogram(mapping = aes(diff_wind_bird),
                  fill = "olivedrab3",
                  color = "olivedrab3",
@@ -453,19 +402,19 @@ ggplot(dir_DF) +
   theme_minimal() +
   theme(legend.position = "none",
         axis.text.y = element_blank(),
-        axis.title = element_blank()) 
+        axis.title = element_blank()) # ==> Top rendu !
 
 
 #### ---- Pour comparaison avec juveniles ---- ####
 loc <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_aniMotum_fitted_data_env_param_diff_wind_bird_dir_110max.rds")
 
-png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/COMP_DIFF_bird_wind_ADULTS_JUV_mars_mai.png",
-    res = 300,
-    width = 30,
-    height = 20,
-    pointsize = 12,
-    units = "cm",
-    bg = "white")
+# png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/COMP_DIFF_bird_wind_ADULTS_JUV_mars_mai.png",
+#     res = 300,
+#     width = 30,
+#     height = 20,
+#     pointsize = 12,
+#     units = "cm",
+#     bg = "white")
 par(mfrow = c(1, 2))
 
 hist(dir_DF$diff_wind_bird,
@@ -487,69 +436,55 @@ lines(density(loc$diff_wind_bird_loc[month(loc$date) %in% 3:5],
               from = 0,
               to = 360,
               na.rm = T))
-graphics.off()
+# graphics.off()
+
+
+# ---- windrose
+
+loc2 <- loc[!is.na(loc$diff_wind_bird_loc),]
+
+par(mfrow = c(1, 2))
+
+# ---- Juveniles
+ggplot(loc2) +
+  geom_histogram(mapping = aes(diff_wind_bird_loc),
+                 fill = "dodgerblue4",
+                 color = "dodgerblue4",
+                 alpha = 0.5,
+                 binwidth = 1,
+                 breaks = seq(0, 360, 10)) +
+  scale_x_continuous(breaks = seq(0, 360, 10),
+                     limits = c(0, 360)) +
+  scale_y_continuous(limits = c(-10, 350)) +
+  coord_polar(theta = "x",
+              start = 0,
+              direction = 1,
+              clip = "on") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.y = element_blank(),
+        axis.title = element_blank())
+
+# ---- Adults
+ggplot(dir2) +
+  geom_histogram(mapping = aes(diff_wind_bird),
+                 fill = "olivedrab3",
+                 color = "olivedrab3",
+                 alpha = 0.5,
+                 binwidth = 1,
+                 breaks = seq(0, 360, 10)) +
+  scale_x_continuous(breaks = seq(0, 360, 10),
+                     limits = c(0, 360)) +
+  scale_y_continuous(limits = c(-10, 50)) +
+  coord_polar(theta = "x",
+              start = 0,
+              direction = 1,
+              clip = "on") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.y = element_blank(),
+        axis.title = element_blank())
 
 
 
-x11()
-ggplot(dat,
-       aes(x = diff_wind_bird_loc)) +
-  geom_histogram() +
-  coord_polar() +
-  scale_x_continuous(limits = c(0,360),
-                     breaks = seq(0, 360, by = 45),
-                     minor_breaks = seq(0, 360, by = 15))
 
-
-
-
-
-
-
-
-library(openair)
-library(viridis)
-argos_2018 <- loc[loc$group %in% c("2018-Nord", "2018-Sud"), ]
-argos_2018$wind_fake <- 1 
-
-png("C:/Users/ccjuhasz/Desktop/test_WR.png",
-    res = 600,
-    width = 20,
-    height = 20,
-    pointsize = 12,
-    units = "cm",
-    bg = "white")
-
-windRose(mydata = argos_2018,
-         wd = "diff_wind_bird_loc",
-         ws = "wind_fake",
-         angle = 5,
-         auto.text = F,
-         paddle = F,
-         annotate = F,
-         col = "olivedrab3")
-dev.off()
-
-
-
-png("C:/Users/ccjuhasz/Desktop/test_WR.png",
-    res = 600,
-    width = 20,
-    height = 20,
-    pointsize = 12,
-    units = "cm",
-    bg = "white")
-
-dir_DF2 <- data.frame(dir = dir_DF$diff_wind_bird[!is.na(dir_DF$diff_wind_bird)],
-                      speed = 1)
-windRose(mydata = dir_DF2,
-         wd = "dir",
-         ws = "speed",
-         angle = 5,
-         auto.text = F,
-         paddle = F,
-         annotate = F,
-         col = "olivedrab3")
-dev.off()
-hist(dir_DF2$dir,
-     breaks = seq(0, 360, 5))
