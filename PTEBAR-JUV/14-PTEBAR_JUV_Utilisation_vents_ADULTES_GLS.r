@@ -44,7 +44,7 @@ ad_nr$DATE <- as.POSIXct(ad_nr$DATE,
 
 # add dates of departure and arrival in wintering core area
 gls <- left_join(ad_nr,
-                 pap[, c("ID", "DEPARTURE", "ARRIVAL_CORE_WINTER")],
+                 pap[, c("ID", "DEPARTURE", "ARRIVAL_CORE_WINTER", "DEPART_CORE_WINTER")],
                  by = c("ID2" = "ID"))
 head(gls)
 dim(gls)
@@ -91,6 +91,7 @@ migr_ls <- lapply(ls, function(x) {
 
 migr_ls[["8108-GBN72"]] <- migr_ls[["8108-GBN72"]][-1,]
 migr_ls[["8105-MM14"]] <- migr_ls[["8105-MM14"]][-1,]
+
 
 #### ---- Obtention du DF avec loc migration vers wintering area ---- ####
 migr <- do.call("rbind",
@@ -439,13 +440,20 @@ lines(density(loc$diff_wind_bird_loc[month(loc$date) %in% 3:5],
 # graphics.off()
 
 
-# ---- windrose
+# ---- windroses ADULTS vs JUVENILES
 
 loc2 <- loc[!is.na(loc$diff_wind_bird_loc),]
 
 par(mfrow = c(1, 2))
 
 # ---- Juveniles
+png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/WINDROSES_juveniles.png",
+    res = 300,
+    width = 30,
+    height = 20,
+    pointsize = 12,
+    units = "cm",
+    bg = "white")
 ggplot(loc2) +
   geom_histogram(mapping = aes(diff_wind_bird_loc),
                  fill = "dodgerblue4",
@@ -455,7 +463,7 @@ ggplot(loc2) +
                  breaks = seq(0, 360, 10)) +
   scale_x_continuous(breaks = seq(0, 360, 10),
                      limits = c(0, 360)) +
-  scale_y_continuous(limits = c(-10, 350)) +
+  scale_y_continuous(limits = c(-70, 350)) +
   coord_polar(theta = "x",
               start = 0,
               direction = 1,
@@ -465,8 +473,20 @@ ggplot(loc2) +
         axis.text.y = element_blank(),
         axis.title = element_blank())
 
+dev.off()
+
+
 # ---- Adults
-ggplot(dir2) +
+library(cowplot)
+# png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/WINDROSES_adults.png",
+#     res = 300,
+#     width = 30,
+#     height = 20,
+#     pointsize = 12,
+#     units = "cm",
+#     bg = "white")
+
+g1 <- ggplot(dir2) +
   geom_histogram(mapping = aes(diff_wind_bird),
                  fill = "olivedrab3",
                  color = "olivedrab3",
@@ -485,6 +505,48 @@ ggplot(dir2) +
         axis.text.y = element_blank(),
         axis.title = element_blank())
 
+ggdraw() +
+  draw_plot(g1) +
+  draw_image("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Petrel2.png",
+             x = 0.4538,
+             y = 0.46,
+             width = 0.095,
+             height = 0.095) 
+# dev.off()
 
+#### ---- production du KERNEL 90 pour les locs entre l'arrivée et le départ de la wintering core area ---- ####
 
+winter_ls <- lapply(ls, function(x) {
 
+  arr <- date(strptime(unique(x$ARRIVAL_CORE_WINTER),
+                       "%d/%m/%Y"))
+  dep <- date(strptime(unique(x$DEPART_CORE_WINTER),
+                       "%d/%m/%Y"))
+  
+  x <- x[date(x$DATE) >= arr & date(x$DATE) <= dep, ]
+  print(paste("##########", unique(x$ID2), "##########"))
+  print(paste("arrivée - ", as.character(arr), " & départ - ", as.character(dep)))
+  print(range(date(x$DATE)))
+  x
+})
+
+winter <- do.call("rbind", winter_ls)
+
+# production du kernel
+xy <- winter[,c('LON', 'LAT')]
+winter_LONLAT <- SpatialPointsDataFrame(coords = xy,
+                                        data = winter,
+                                        proj4string = CRS("+proj=longlat +datum=WGS84"))
+mapview(winter_LONLAT)
+
+KUD = kernelUD(winter_LONLAT,
+               h = 1,
+               grid = 500)
+KUDvol <- getvolumeUD(KUD)
+ver90 <- getverticeshr(KUDvol, 90)
+
+mapview(ver90)
+
+# visualisation tracks migration & kernel
+
+mapview(ver90) + mapview(tracks, color = "darkgrey")
