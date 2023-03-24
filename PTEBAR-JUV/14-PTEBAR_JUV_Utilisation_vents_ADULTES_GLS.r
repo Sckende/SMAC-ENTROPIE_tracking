@@ -19,24 +19,59 @@ ad_gls <- read.table("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos
 head(ad_gls)
 table(ad_gls$STATUT)
 unique(ad_gls$ID)
-ad_gls$ID2 <- substr(ad_gls$ID, 1, 4)
+
+# Correction des IDs
+ad_gls$ID[ad_gls$ID == "8095-FS758-8-GBNT1"] <- "8095-FS758_8-GBNT1"
+ad_gls$ID[ad_gls$ID == "8111-FS---91-MM4-R"] <- "8111-FS___91-MM4-R"
+ad_gls$ID[ad_gls$ID == "8123-FS77-86-GBNT1"] <- "8123-FS77_86-GBNT1"
+
+ID1 <- str_split(ad_gls$ID, "-")
+
+ID11 <- lapply(ID1, function(x){
+  paste(x[1], x[3], sep = "-")
+})
+
+ad_gls$ID2 <- unlist(ID11)
+unique(ad_gls$ID2)[unique(ad_gls$ID2) %in% pap$ID == F]
+unique(ad_gls$ID2)[unique(ad_gls$ID2) %in% pap$ID == T] # 16 IDS en commun au total en retirant les non-breeders et les fails - CHECK
 
 # --------------- #
 # keep only individuals in Pinet ms
-ad_nr <- ad_gls[ad_gls$ID2 %in% pap$ID2,]
+ad_nr <- ad_gls[ad_gls$ID2 %in% pap$ID,]
 unique(ad_nr$ID2)
 ad_nr$DATE <- as.POSIXct(ad_nr$DATE,
                          format = "%d/%m/%Y %H:%M")
 
 # add dates of departure and arrival in wintering core area
 gls <- left_join(ad_nr,
-                 pap[, c("ID2", "DEPARTURE", "ARRIVAL_CORE_WINTER")],
-                 by = "ID2")
+                 pap[, c("ID", "DEPARTURE", "ARRIVAL_CORE_WINTER")],
+                 by = c("ID2" = "ID"))
 head(gls)
+dim(gls)
+unique(gls$ID2)
+
+# verif
+lapply(split(gls, gls$ID2), dim)
 
 
+#### ---- Correction des dates & retrait des individus non utilisables après exploration visuelle---- ####
+# VOIR
+# 8105-MM14 - remplacer date de départ de colonie par 10 avril 2009
+# 8108-GBN72 - remplacer date de départ de colonie par 3 avril 2009
+# 8123-GBNT1 - à retirer car les deux dates erronnées
+
+gls1 <- gls[!gls$ID2 == "8123-GBNT1",]
+
+gls1$DEPARTURE[gls1$ID2 == "8105-MM14"] <- "10/04/2009"
+gls1$DEPARTURE[gls1$ID2 == "8108-GBN72"] <- "3/04/2009"
+
+summary(gls1)
+gls1 <- gls1[!is.na(gls1$DATE), ]
 # subset loc between colony departure & wintering area arrival
-ls <- split(gls, gls$ID2)
+ls <- split(gls1, gls1$ID2)
+
+x <- ls[[4]]
+
 migr_ls <- lapply(ls, function(x) {
   dep <- date(strptime(unique(x$DEPARTURE),
                   "%d/%m/%Y"))
@@ -44,12 +79,16 @@ migr_ls <- lapply(ls, function(x) {
                   "%d/%m/%Y"))
   
   x <- x[date(x$DATE) <= arr & date(x$DATE) >= dep, ]
+  print(paste("##########", unique(x$ID2), "##########"))
+  print(paste("depart - ", as.character(dep), " & arrivée - ", as.character(arr)))
+  print(range(date(x$DATE)))
   x
 })
 
 migr <- do.call("rbind",
                 migr_ls)
 
+dim(migr)
 summary(migr)
 summary(migr$DATE)
 migr <- migr[!is.na(migr$DATE), ]
@@ -57,12 +96,19 @@ table(month(migr$DATE)) # from march to May
 
 #### ---- spatial object ---- ####
 xy <- migr[,c('LON', 'LAT')]
-ad_nr_sp <- SpatialPointsDataFrame(coords = xy,
+migr_sp_ll <- SpatialPointsDataFrame(coords = xy,
                                    data = migr,
                                    proj4string = CRS("+proj=longlat +datum=WGS84"))
-ad_nr_UTM <- spTransform(ad_nr_sp,
+migr_sp_UTM <- spTransform(migr_sp_ll,
                          CRS('+init=epsg:32743'))
 
+mapview(split(migr_sp_ll, migr_sp_ll$ID2))
+
+#### ---- Correction des dates & retrait des individus non utilisables ---- ####
+# VOIR
+# 8105-MM14 - remplacer date de départ de colonie par 10 avril
+# 8108-GBN72 - remplacer date de départ de colonie par 3 avril
+# 8123-GBNT1 - à retirer car les deux dates erronnées
 
 #### ---- Objectif: recuperation des points allant de la colonie vers la zone d'hivernage ---- #### ==== > ABANDONNE 
 # Remplacé par le script précédent avec récup des dates de Pinet
@@ -118,7 +164,8 @@ ad_nr_UTM <- spTransform(ad_nr_sp,
 
 #### ---- Extraction des 3 composantes de vent ---- ####
 
-pts_out <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_Locs_anterieures_zone_hivernage_PINET_STYLE.rds")
+# pts_out <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_ADULT_Locs_anterieures_zone_hivernage_PINET_STYLE.rds")
+pts_out <- migr_sp_ll
 class(pts_out)
 table(month(pts_out$DATE)) # mars avril mai
 
@@ -149,6 +196,12 @@ for(i in unique(pts_out_sf$ID2)) {
 
 
 verif <- pts_out_sf[pts_out_sf$ID2 == "8123", ]
+verif1 <- pts_out_sf[pts_out_sf$ID == "8121-FS65290-GBN3-",]
+range(verif1$DATE)
+verif2 <- pts_out_sf[pts_out_sf$ID == "8121-FS65288-GBN26",]
+range(verif2$DATE)
+
+mapview(list(verif1, verif2))
 
 # ---- Creation des rasters
 env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018" 
