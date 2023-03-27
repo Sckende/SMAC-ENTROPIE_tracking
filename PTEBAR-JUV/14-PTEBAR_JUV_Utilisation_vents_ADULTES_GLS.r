@@ -264,45 +264,6 @@ pts_out_wind$wind_meteo_dir0_360_loc <- ifelse(pts_out_wind$wind_meteo_dir_loc >
 hist(pts_out_wind$wind_meteo_dir0_360_loc,
      breaks = seq(0, 360, 5)) # vent du sud
 
-# visualisation des points avec un vectorplot
-nlev <- 100
-my_at <- seq(from = 0,
-             to = 20,
-             length.out = nlev+1)
-my_cols <- viridis_pal(begin = 1,
-                       end = 0,
-                       option = "A")(nlev)
-
-rasterVis::vectorplot(raster::stack(raster(wind_east_stack[[month(time(wind_east_stack)) == 4]]),
-                                    raster(wind_north_stack[[month(time(wind_north_stack)) == 4]])),
-                      isField = 'dXY',
-                      units = "degrees",
-                      narrows = 1000,
-                      lwd.arrows = 2,
-                      aspX = 0.1,
-                      region = raster(wind_speed_stack[[month(time(wind_speed_stack)) == 4]]),
-                      at = my_at,
-                      col.regions = my_cols,
-                      colorkey = list(labels = list(cex = 1.5),
-                                      title = list("wind speed (km/h)",
-                                                   cex = 2,
-                                                   vjust = 0)),
-                      #    main = list(label = paste("week # ", i, " 2018", sep = ""),
-                      #    cex = 3),
-                      xlab = list(label = "Longitude", 
-                                  cex = 2),
-                      ylab = list(label = "Latitude",
-                                  cex = 2),
-                      scales = list(x = list(cex = 1.5),
-                                    y = list(cex = 1.5))) +
-  layer(c(sp.points(as_Spatial(pts_out[month(pts_out$DATE) == 4,]),
-                    col = "white",
-                    cex = 3,
-                    lwd = 3),
-          sp.polygons(ne_countries(),
-                      col = "#e3d0d0",
-                      fill = "#e3d0d0")))
-
 #### ---- Calcul de l'orientation des oiseaux ---- ####
 library(trajr)
 
@@ -616,3 +577,82 @@ g <- ggplot() +
 # x11()
 print(g)
 # dev.off()
+
+
+#### ---- carte des vents AD - from first to last dates of migration ---- ####
+# visualisation des points avec un vectorplot
+
+# Time range
+head(pts_out)
+r1 <- range(pts_out$DATE[year(pts_out$DATE) == 2008]) # from 23 March to 2 May 2008
+difftime(date(r1[1]), date(r1[2]), units = "days") # 40 + 1 days
+
+r2 <- range(pts_out$DATE[year(pts_out$DATE) == 2009]) # from 21 March to 5 May 2009
+difftime(date(r2[1]), date(r2[2]), units = "days") # 45 + 1 days
+
+# Retrieve the corresponding raster and mean
+spd_migr <- wind_speed_stack[[date(time(wind_speed_stack)) >= date(r1[1]) & date(time(wind_speed_stack)) <= date(r1[2]) | date(time(wind_speed_stack)) >= date(r2[1]) & date(time(wind_speed_stack)) <= date(r2[2])]]
+mn_spd_migr <- mean(spd_migr)
+# ----  #
+
+north_migr <- wind_north_stack[[date(time(wind_north_stack)) >= date(r1[1]) & date(time(wind_north_stack)) <= date(r1[2]) | date(time(wind_north_stack)) >= date(r2[1]) & date(time(wind_north_stack)) <= date(r2[2])]]
+mn_north_migr <- mean(north_migr)
+
+# ---- #
+
+east_migr <- wind_east_stack[[date(time(wind_east_stack)) >= date(r1[1]) & date(time(wind_east_stack)) <= date(r1[2]) | date(time(wind_east_stack)) >= date(r2[1]) & date(time(wind_east_stack)) <= date(r2[2])]]
+mn_east_migr <- mean(east_migr)
+
+# ---- carto #
+nlev <- 100
+my_at <- seq(from = 0,
+             to = 20,
+             length.out = nlev+1)
+my_cols <- viridis_pal(begin = 1,
+                       end = 0,
+                       option = "A")(nlev)
+
+png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_AD_pts_migr_WIND.png",
+    res = 300,
+    width = 50,
+    height = 40,
+    pointsize = 12,
+    unit = "cm",
+    bg = "white")
+
+# x11()
+print(
+rasterVis::vectorplot(raster::stack(raster(mn_east_migr),
+                                    raster(mn_north_migr)),
+                      isField = 'dXY',
+                      units = "degrees",
+                      narrows = 800,
+                      lwd.arrows = 1.5,
+                      aspX = 0.8,
+                      region = raster(mn_spd_migr),
+                      at = my_at,
+                      col.regions = my_cols,
+                      colorkey = list(labels = list(cex = 1.5),
+                                      title = list("wind speed (km/h)",
+                                                   cex = 2,
+                                                   vjust = 0)),
+                      #    main = list(label = paste("week # ", i, " 2018", sep = ""),
+                      #    cex = 3),
+                      xlab = list(label = "Longitude", 
+                                  cex = 2),
+                      ylab = list(label = "Latitude",
+                                  cex = 2),
+                      scales = list(x = list(cex = 1.5),
+                                    y = list(cex = 1.5))) +
+  latticeExtra::layer(c(sp.points(as_Spatial(pts_out_sf),
+                    # col = "white",
+                    col = rgb(1, 1, 1, 0.5),
+                    cex = 1,
+                    lwd = 4)),
+                    sp.polygons(ne_countries(),
+                                col = "#e3d0d0",
+                                fill = "#e3d0d0"))
+)
+
+dev.off()
+
