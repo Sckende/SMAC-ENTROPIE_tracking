@@ -447,13 +447,13 @@ loc2 <- loc[!is.na(loc$diff_wind_bird_loc),]
 par(mfrow = c(1, 2))
 
 # ---- Juveniles
-png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/WINDROSES_juveniles.png",
-    res = 300,
-    width = 30,
-    height = 20,
-    pointsize = 12,
-    units = "cm",
-    bg = "white")
+# png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/WINDROSES_juveniles.png",
+#     res = 300,
+#     width = 30,
+#     height = 20,
+#     pointsize = 12,
+#     units = "cm",
+#     bg = "white")
 ggplot(loc2) +
   geom_histogram(mapping = aes(diff_wind_bird_loc),
                  fill = "dodgerblue4",
@@ -473,7 +473,7 @@ ggplot(loc2) +
         axis.text.y = element_blank(),
         axis.title = element_blank())
 
-dev.off()
+# dev.off()
 
 
 # ---- Adults
@@ -547,6 +547,77 @@ ver90 <- getverticeshr(KUDvol, 90)
 
 mapview(ver90)
 
-# visualisation tracks migration & kernel
+#### ---- visualisation tracks ADULTES migration + kernel 90 + tracks JUVENILES ---- ####
 
 mapview(ver90) + mapview(tracks, color = "darkgrey")
+
+# tracks of juveniles
+names(loc)
+length(unique(loc$id))
+loc_sf <- sf::st_as_sf(loc,
+                       coords = c("lon", "lat"),
+                       crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+
+mapview(split(loc_sf, loc_sf$id))
+
+
+tracks_juv <- loc_sf %>%
+      group_by(id) %>%
+      arrange(date) %>%
+      summarize(do_union = FALSE) %>% # do_union = FALSE for 
+      st_cast("LINESTRING")
+
+mapview(split(tracks_juv, tracks_juv$id))
+
+# Full packagen!
+mapview(ver90, color = "deepskyblue", col.regions = "deepskyblue") + 
+  mapview(tracks, color = "darkgoldenrod2") +
+  mapview(tracks_juv, color = "olivedrab3")
+
+
+# map for ms ... maybe
+lat_min = -40
+lon_min = 30
+lat_max = 30
+lon_max = 125
+world <- sf::st_as_sf(maps::map("world",
+                                plot = FALSE,
+                                fill = TRUE))
+g <- ggplot() + 
+  theme_linedraw() +
+  xlim(lon_min, lon_max) +
+  xlab("Longitude") +
+  theme(axis.title.x = element_text(size = 14)) +
+  ylim(lat_min, lat_max) +
+  ylab("Latitude") +
+  theme(axis.title.y = element_text(size = 14)) +
+  geom_sf(data = st_as_sf(ver90),
+          fill = "deepskyblue",
+          color = "deepskyblue",
+          alpha = .4) +
+  geom_path(data = as.data.frame(pts_out),
+            mapping = aes(x = LON, y = LAT, group = ID),
+            size = 1,
+            color = "goldenrod2") +
+  geom_path(data = loc,
+            mapping = aes(x = lon, y = lat, group = id),
+            size = 1,
+            color = "olivedrab3") +
+  geom_sf(data = world,
+          color = "gray75",
+          fill = "grey75") +
+    theme (panel.grid.major = element_blank(),
+         panel.grid.minor = element_blank(),
+         legend.position = "none")
+
+
+png("C:/Users/ccjuhasz/Desktop/test.png",
+    res = 300,
+    width = 30,
+    height = 20,
+    pointsize = 12,
+    units = "cm",
+    bg = "white")
+# x11()
+print(g)
+dev.off()
