@@ -611,13 +611,8 @@ g <- ggplot() +
          legend.position = "none")
 
 
-png("C:/Users/ccjuhasz/Desktop/test.png",
-    res = 300,
-    width = 30,
-    height = 20,
-    pointsize = 12,
-    units = "cm",
-    bg = "white")
+# png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_tracks_AD_JUV_ker90ad.png",
+#     res = 300,width = 30,height = 20,pointsize = 12,units = "cm",bg = "white")
 # x11()
 print(g)
-dev.off()
+# dev.off()
