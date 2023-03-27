@@ -572,8 +572,13 @@ g <- ggplot() +
          legend.position = "none")
 
 
-# png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_tracks_AD_JUV_ker90ad.png",
-#     res = 300,width = 30,height = 20,pointsize = 12,units = "cm",bg = "white")
+# ggsave("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_tracks_AD_JUV_ker90ad.png",
+#        dpi = 300,
+#        width = 30,
+#        height = 20,
+#        pointsize = 12,
+#        units = "cm",
+#        bg = "white")
 # x11()
 print(g)
 # dev.off()
@@ -612,13 +617,17 @@ my_cols <- viridis_pal(begin = 1,
                        end = 0,
                        option = "A")(nlev)
 
-png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_AD_pts_migr_WIND.png",
-    res = 300,
-    width = 50,
-    height = 40,
-    pointsize = 12,
-    unit = "cm",
-    bg = "white")
+# install.packages('devtools')
+# devtools::install_github('r-lib/ragg')
+library(ragg)
+
+# agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_AD_pts_migr_WIND.png",
+#     res = 300,
+#     width = 50,
+#     height = 40,
+#     pointsize = 12,
+#     unit = "cm",
+#     bg = "white")
 
 # x11()
 print(
@@ -656,3 +665,227 @@ rasterVis::vectorplot(raster::stack(raster(mn_east_migr),
 
 dev.off()
 
+#### ---- carte des vents JUV - GROUPE 2018-NORD ---- ####
+# ---- Creation des rasters
+env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018" 
+list_names <- list.files(env_folder,
+                         pattern = "2018",
+                         full.names = T)
+
+east_ls <- list_names[str_detect(list_names,
+                                 pattern = "eastward")]
+north_ls <- list_names[str_detect(list_names,
+                                  pattern = "northward")]
+speed_ls <- list_names[str_detect(list_names,
+                                  pattern = "speed")]
+
+wind_speed_stack <- terra::rast(speed_ls)
+table(duplicated(time(wind_speed_stack)))
+wind_speed_stack <- wind_speed_stack[[!duplicated(time(wind_speed_stack))]]
+# time(wind_speed_stack)[order(time(wind_speed_stack))] 
+
+wind_north_stack <- terra::rast(north_ls)
+table(duplicated(time(wind_north_stack)))
+wind_north_stack <- wind_north_stack[[!duplicated(time(wind_north_stack))]]
+# time(wind_north_stack)[order(time(wind_north_stack))] 
+
+wind_east_stack <- terra::rast(east_ls)
+table(duplicated(time(wind_east_stack)))
+wind_east_stack <- wind_east_stack[[!duplicated(time(wind_east_stack))]]
+# time(wind_east_stack)[order(time(wind_east_stack))] 
+
+# locations
+names(loc_sf)
+unique(loc_sf$group)
+dim(loc_sf)
+
+nord_sf <- loc_sf[loc_sf$group == "2018-Nord", ]
+dim(nord_sf)
+unique(nord_sf$id)
+r1 <- range(nord_sf$date)
+
+# Retrieve the corresponding raster and mean
+spd_migr <- wind_speed_stack[[date(time(wind_speed_stack)) >= date(r1[1]) & date(time(wind_speed_stack)) <= date(r1[2])]]
+mn_spd_migr <- mean(spd_migr)
+# ----  #
+
+north_migr <- wind_north_stack[[date(time(wind_north_stack)) >= date(r1[1]) & date(time(wind_north_stack)) <= date(r1[2])]]
+mn_north_migr <- mean(north_migr)
+
+# ---- #
+
+east_migr <- wind_east_stack[[date(time(wind_east_stack)) >= date(r1[1]) & date(time(wind_east_stack)) <= date(r1[2])]]
+mn_east_migr <- mean(east_migr)
+
+# ---- carto #
+
+agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_JUV_NORD_WIND.png",
+        res = 300,
+        width = 50,
+        height = 40,
+        pointsize = 12,
+        unit = "cm",
+        bg = "white")
+
+# x11()
+print(
+  rasterVis::vectorplot(raster::stack(raster(mn_east_migr),
+                                      raster(mn_north_migr)),
+                        isField = 'dXY',
+                        units = "degrees",
+                        narrows = 800,
+                        lwd.arrows = 1.5,
+                        aspX = 0.5,
+                        region = raster(mn_spd_migr),
+                        at = my_at,
+                        col.regions = my_cols,
+                        colorkey = list(labels = list(cex = 1.5),
+                                        title = list("wind speed (km/h)",
+                                                     cex = 2,
+                                                     vjust = 0)),
+                        #    main = list(label = paste("week # ", i, " 2018", sep = ""),
+                        #    cex = 3),
+                        xlab = list(label = "Longitude", 
+                                    cex = 2),
+                        ylab = list(label = "Latitude",
+                                    cex = 2),
+                        scales = list(x = list(cex = 1.5),
+                                      y = list(cex = 1.5))) +
+    latticeExtra::layer(c(sp.points(as_Spatial(nord_sf),
+                                    # col = "white",
+                                    col = rgb(1, 1, 1, 0.5),
+                                    cex = 1,
+                                    lwd = 4)),
+                        sp.polygons(ne_countries(),
+                                    col = "#e3d0d0",
+                                    fill = "#e3d0d0"))
+)
+
+dev.off()
+
+# ---- windrose #
+ggsave("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/WINDROSES_juv_NORD_2018.png",
+    dpi = 300,
+    width = 30,
+    height = 30,
+    pointsize = 12,
+    units = "cm",
+    bg = "white")
+
+g1 <- ggplot(nord_sf) +
+  geom_histogram(mapping = aes(diff_wind_bird_loc),
+                 fill = "olivedrab3",
+                 color = "olivedrab3",
+                 alpha = 0.5,
+                 binwidth = 1,
+                 breaks = seq(0, 360, 10)) +
+  scale_x_continuous(breaks = seq(0, 360, 10),
+                     limits = c(0, 360)) +
+  scale_y_continuous(limits = c(-10, 160)) +
+  coord_polar(theta = "x",
+              start = 0,
+              direction = 1,
+              clip = "on") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.y = element_blank(),
+        axis.title = element_blank())
+dev.off()
+
+#### ---- carte des vents JUV - GROUPE 2018-SUD ---- ####
+names(loc_sf)
+unique(loc_sf$group)
+dim(loc_sf)
+
+sud_sf <- loc_sf[loc_sf$group == "2018-Sud", ]
+dim(sud_sf)
+unique(sud_sf$id)
+r1 <- range(sud_sf$date)
+
+# Retrieve the corresponding raster and mean
+spd_migr <- wind_speed_stack[[date(time(wind_speed_stack)) >= date(r1[1]) & date(time(wind_speed_stack)) <= date(r1[2])]]
+mn_spd_migr <- mean(spd_migr)
+# ----  #
+
+north_migr <- wind_north_stack[[date(time(wind_north_stack)) >= date(r1[1]) & date(time(wind_north_stack)) <= date(r1[2])]]
+mn_north_migr <- mean(north_migr)
+
+# ---- #
+
+east_migr <- wind_east_stack[[date(time(wind_east_stack)) >= date(r1[1]) & date(time(wind_east_stack)) <= date(r1[2])]]
+mn_east_migr <- mean(east_migr)
+
+# ---- carto #
+
+agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_JUV_SUD_WIND.png",
+        res = 300,
+        width = 50,
+        height = 40,
+        pointsize = 12,
+        unit = "cm",
+        bg = "white")
+
+# x11()
+print(
+  rasterVis::vectorplot(raster::stack(raster(mn_east_migr),
+                                      raster(mn_north_migr)),
+                        isField = 'dXY',
+                        units = "degrees",
+                        narrows = 800,
+                        lwd.arrows = 1.5,
+                        aspX = 0.5,
+                        region = raster(mn_spd_migr),
+                        at = my_at,
+                        col.regions = my_cols,
+                        colorkey = list(labels = list(cex = 1.5),
+                                        title = list("wind speed (km/h)",
+                                                     cex = 2,
+                                                     vjust = 0)),
+                        #    main = list(label = paste("week # ", i, " 2018", sep = ""),
+                        #    cex = 3),
+                        xlab = list(label = "Longitude", 
+                                    cex = 2),
+                        ylab = list(label = "Latitude",
+                                    cex = 2),
+                        scales = list(x = list(cex = 1.5),
+                                      y = list(cex = 1.5))) +
+    latticeExtra::layer(c(sp.points(as_Spatial(sud_sf),
+                                    # col = "white",
+                                    col = rgb(1, 1, 1, 0.5),
+                                    cex = 1,
+                                    lwd = 4)),
+                        sp.polygons(ne_countries(),
+                                    col = "#e3d0d0",
+                                    fill = "#e3d0d0"))
+)
+
+dev.off()
+
+# ---- windrose #
+ggsave("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/WINDROSES_juv_SUD_2018.png",
+       dpi = 300,
+       width = 30,
+       height = 30,
+       pointsize = 12,
+       units = "cm",
+       bg = "white")
+
+g1 <- ggplot(sud_sf) +
+  geom_histogram(mapping = aes(diff_wind_bird_loc),
+                 fill = "olivedrab3",
+                 color = "olivedrab3",
+                 alpha = 0.5,
+                 binwidth = 1,
+                 breaks = seq(0, 360, 10)) +
+  scale_x_continuous(breaks = seq(0, 360, 10),
+                     limits = c(0, 360)) +
+  scale_y_continuous(limits = c(-10, 90)) +
+  coord_polar(theta = "x",
+              start = 0,
+              direction = 1,
+              clip = "on") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.y = element_blank(),
+        axis.title = element_blank())
+dev.off()
