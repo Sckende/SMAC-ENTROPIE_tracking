@@ -19,13 +19,13 @@
 rm(list = ls())
 source("C:/Users/ccjuhasz/Desktop/SMAC/GITHUB/SMAC-ENTROPIE_tracking/PTEBAR-JUV/packages_list.r")
 
-sp <- raster::stack("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2019/WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__wind_speed-2018-1.nc")
+sp <- raster::stack("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018/WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__wind_speed-2018-1.nc")
 spe <- sp[["X2018.04.24.00.00.00"]]
 
-no <- raster::stack("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2019/WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__northward_wind-2018-1.nc")
+no <- raster::stack("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018/WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__northward_wind-2018-1.nc")
 nor <- no[["X2018.04.24.00.00.00"]]
 
-ea <- raster::stack("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2019/WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__eastward_wind-2018-1.nc")
+ea <- raster::stack("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018/WIND_GLO_WIND_L4_REP_OBSERVATIONS_012_006-TDS__eastward_wind-2018-1.nc")
 eas <- ea[["X2018.04.24.00.00.00"]]
 
 # ----- #
@@ -66,7 +66,7 @@ vectorplot(stack(east, north),
                  aspX = 0.15,
                  narrows = 500,
                  col.regions = my_cols) +
-    layer(sp.polygons(IndOcean_sp,
+    latticeExtra::layer(sp.polygons(IndOcean_sp,
                         col = "grey",
                         fill = "white"))
 
@@ -74,7 +74,7 @@ vectorplot(stack(east, north),
 # Juvenile data #####
 # ----- #
 
-argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_wind_dirs_n_abs_speed_2.rds")
+argos <- readRDS("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/DATA/PTEBAR_JUV_argos_with_env_DATA_wind_dirs_n_abs_speed_2.rds")
 
 head(argos)
 unique(argos$Vessel)
@@ -145,14 +145,18 @@ argos_lines2
 # ----- #
 # Map prod with wind & tracks #####
 # ----- #
-
+library(ragg)
 for (i in unique(argos_lines$Vessel)) {
     
     # x11()
-    png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/FAKIR/FAKIR-",
-                i,
-                ".png",
-                sep = ""),
+    # png(paste("C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/X-PTEBAR_argos_JUV/PTEBAR_JUV_Carto/FAKIR/FAKIR-",
+    #             i,
+    #             ".png",
+    #             sep = ""),
+  agg_png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/FAKIR/FAKIR-",
+              i,
+              ".png",
+              sep = ""),
         res = 300,
         width = 50,
         height = 40,
@@ -168,8 +172,19 @@ for (i in unique(argos_lines$Vessel)) {
                  aspX = 0.15,
                  narrows = 500,
                  col.regions = my_cols,
-                 main = i) +
-    layer(c(sp.polygons(IndOcean_sp,
+                 main = list(label = i,
+                             cex = 3),
+               colorkey = list(labels = list(cex = 1.5),
+                               title = list("wind speed (km/h)",
+                                            cex = 2,
+                                            vjust = 0)),
+               xlab = list(label = "Longitude", 
+                           cex = 2),
+               ylab = list(label = "Latitude",
+                           cex = 2),
+               scales = list(x = list(cex = 1.5),
+                             y = list(cex = 1.5))) +
+    latticeExtra::layer(c(sp.polygons(IndOcean_sp,
                         col = "grey",
                         fill = "grey"),
             sp.lines(argos_lines[argos_lines$Vessel == i, ],
@@ -178,18 +193,22 @@ for (i in unique(argos_lines$Vessel)) {
             sp.lines(argos_lines2[argos_lines2$Vessel == i, ],
                      col = "#35b835",
                      lwd = 6),
-            sp.points(argos_sp[argos_sp$Vessel == i, ],
-                      col = "darkgrey",
-                      cex = 2,
-                      lwd = 2),
+            # sp.points(argos_sp[argos_sp$Vessel == i, ],
+            #           col = "darkgrey",
+            #           cex = 2,
+            #           lwd = 2),
             sp.points(argos_sp[argos_sp$Vessel == i & as.Date(argos_sp$Date) == as.Date("2018-04-24"), ],
-                      col = "red",
-                      cex = 4,
-                      lwd = 4),
-            sp.points(argos_sp[argos_sp$Vessel == i & as.Date(argos_sp$Date) > as.Date("2018-04-24"), ],
+                      # col = "red",
                       col = "#35b835",
                       cex = 4,
-                      lwd = 4))
+                      lwd = 4,
+                      pch = 8)
+            # ,
+            # sp.points(argos_sp[argos_sp$Vessel == i & as.Date(argos_sp$Date) > as.Date("2018-04-24"), ],
+            #           col = "#35b835",
+            #           cex = 4,
+            #           lwd = 4)
+            )
     ))
     dev.off()
 }
