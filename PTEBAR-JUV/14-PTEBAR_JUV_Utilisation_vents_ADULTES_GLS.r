@@ -530,7 +530,7 @@ tracks_juv <- loc_sf %>%
 
 mapview(split(tracks_juv, tracks_juv$id))
 
-# Full packagen!
+# Full package!
 mapview(ver90, color = "deepskyblue", col.regions = "deepskyblue") + 
   mapview(tracks, color = "darkgoldenrod2") +
   mapview(tracks_juv, color = "olivedrab3")
@@ -666,6 +666,70 @@ rasterVis::vectorplot(raster::stack(raster(mn_east_migr),
 dev.off()
 
 #### ---- carte des vents JUV - GROUPE 2018-NORD ---- ####
+# ---- Production des kernels 50, comparaison avec le kernel 90 hivernage des adultes
+loc_sp <- as_Spatial(loc_sf)
+loc_sp_2018 <- loc_sp[loc_sp$group %in% c("2018-Nord", "2018-Sud"),]
+
+loc_sp_ls_2018 <- split(loc_sp_2018, loc_sp_2018$id)
+loc_k50_ls_2018 <- lapply(loc_sp_ls_2018, function(x) {
+  KUD = kernelUD(x,
+                 h = 1,
+                 grid = 500)
+  KUDvol <- getvolumeUD(KUD)
+  ver50 <- getverticeshr(KUDvol, 50)
+  ver50
+})
+length(loc_k50_ls_2018); names(loc_k50_ls_2018)
+
+for(i in 1:length(loc_k50_ls_2018)){
+  print(mapview(loc_k50_ls_2018[[i]]) + mapview(loc_sp_ls_2018[[i]]) + mapview(ver90, col.regions = "dodgerblue2"))
+}
+
+# ---- Recherche des juvéniles dont la trajectoire entre dans la zone d'hivernage des adultes (kernel90)
+# i = 2, 4, 5, 6
+
+# ---- Pour ces individus, arrêter la trajectoire à la date de première entrée dans le K90 hivernage des adultes
+loc_sf_2018 <- loc_sf[loc_sf$group %in% c("2018-Nord", "2018-Sud"), ]
+mapview(split(loc_sf_2018, loc_sf_2018$id)) + mapview(ver90)
+
+loc_2018_noTreat <-  loc_sf_2018[!loc_sf_2018$id %in% c("162073", "166561", "166563", "166565"),]
+unique(loc_2018_noTreat$id)
+loc_2018_toTreat <- loc_sf_2018[loc_sf_2018$id %in% c("162073", "166561", "166563", "166565"),]
+unique(loc_2018_toTreat$id)
+
+# extract points in k90 polygon
+
+toTreat_ls <- split(loc_2018_toTreat, loc_2018_toTreat$id)
+names(toTreat_ls)
+mapview(toTreat_ls) + mapview(ver90)
+
+pts_in_ls <- lapply(toTreat_ls, function(x) {
+  j <- st_intersection(x, st_as_sf(ver90))
+  j
+})
+mapview(ver90) + mapview(toTreat_ls) + mapview(pts_in_ls, col.regions = "goldenrod3")
+
+
+lapply(toTreat_ls, dim)
+lapply(pts_in_ls, dim)
+dts <- lapply(pts_in_ls, function(x) {
+  as.character(date(range(x$date)[1]))
+})
+
+Treated <- lapply(toTreat_ls, function(x){
+  
+  id <- unique(x$id)
+  dt <- as.Date(dts[[id]])
+  df <- x[date(x$date) < dt,]
+  df
+})
+
+mapview(Treated) + mapview(ver90)
+
+loc_2018_final <- rbind(do.call("rbind", Treated),
+                        loc_2018_noTreat)
+
+mapview(loc_2018_final) + mapview(ver90)
 # ---- Creation des rasters
 env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018" 
 list_names <- list.files(env_folder,
@@ -695,11 +759,11 @@ wind_east_stack <- wind_east_stack[[!duplicated(time(wind_east_stack))]]
 # time(wind_east_stack)[order(time(wind_east_stack))] 
 
 # locations
-names(loc_sf)
-unique(loc_sf$group)
-dim(loc_sf)
+names(loc_2018_final)
+unique(loc_2018_final$group)
+dim(loc_2018_final)
 
-nord_sf <- loc_sf[loc_sf$group == "2018-Nord", ]
+nord_sf <- loc_2018_final[loc_2018_final$group == "2018-Nord", ]
 dim(nord_sf)
 unique(nord_sf$id)
 r1 <- range(nord_sf$date)
@@ -793,11 +857,11 @@ g1 <- ggplot(nord_sf) +
 dev.off()
 
 #### ---- carte des vents JUV - GROUPE 2018-SUD ---- ####
-names(loc_sf)
-unique(loc_sf$group)
-dim(loc_sf)
+names(loc_2018_final)
+unique(loc_2018_final$group)
+dim(loc_2018_final)
 
-sud_sf <- loc_sf[loc_sf$group == "2018-Sud", ]
+sud_sf <- loc_2018_final[loc_2018_final$group == "2018-Sud", ]
 dim(sud_sf)
 unique(sud_sf$id)
 r1 <- range(sud_sf$date)
@@ -879,7 +943,7 @@ g1 <- ggplot(sud_sf) +
                  breaks = seq(0, 360, 10)) +
   scale_x_continuous(breaks = seq(0, 360, 10),
                      limits = c(0, 360)) +
-  scale_y_continuous(limits = c(-10, 90)) +
+  scale_y_continuous(limits = c(-10, 25)) +
   coord_polar(theta = "x",
               start = 0,
               direction = 1,
@@ -888,4 +952,78 @@ g1 <- ggplot(sud_sf) +
   theme(legend.position = "none",
         axis.text.y = element_blank(),
         axis.title = element_blank())
+dev.off()
+
+# ---- windrose TOTAL 2018 #
+ggsave("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/WINDROSES_juv_TOTAL_2018.png",
+       dpi = 300,
+       width = 30,
+       height = 30,
+       pointsize = 12,
+       units = "cm",
+       bg = "white")
+
+g1 <- ggplot(loc_2018_final) +
+  geom_histogram(mapping = aes(diff_wind_bird_loc),
+                 fill = "olivedrab3",
+                 color = "olivedrab3",
+                 alpha = 0.5,
+                 binwidth = 1,
+                 breaks = seq(0, 360, 10)) +
+  scale_x_continuous(breaks = seq(0, 360, 10),
+                     limits = c(0, 360)) +
+  scale_y_continuous(limits = c(-10, 155)) +
+  coord_polar(theta = "x",
+              start = 0,
+              direction = 1,
+              clip = "on") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.y = element_blank(),
+        axis.title = element_blank())
+
+# ---- carto TOTAL 2018 #
+
+agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_JUV_TOTAL_2018_WIND.png",
+        res = 300,
+        width = 50,
+        height = 40,
+        pointsize = 12,
+        unit = "cm",
+        bg = "white")
+
+# x11()
+print(
+  rasterVis::vectorplot(raster::stack(raster(mn_east_migr),
+                                      raster(mn_north_migr)),
+                        isField = 'dXY',
+                        units = "degrees",
+                        narrows = 800,
+                        lwd.arrows = 1.5,
+                        aspX = 0.5,
+                        region = raster(mn_spd_migr),
+                        at = my_at,
+                        col.regions = my_cols,
+                        colorkey = list(labels = list(cex = 1.5),
+                                        title = list("wind speed (km/h)",
+                                                     cex = 2,
+                                                     vjust = 0)),
+                        #    main = list(label = paste("week # ", i, " 2018", sep = ""),
+                        #    cex = 3),
+                        xlab = list(label = "Longitude", 
+                                    cex = 2),
+                        ylab = list(label = "Latitude",
+                                    cex = 2),
+                        scales = list(x = list(cex = 1.5),
+                                      y = list(cex = 1.5))) +
+    latticeExtra::layer(c(sp.points(as_Spatial(loc_2018_final),
+                                    # col = "white",
+                                    col = rgb(1, 1, 1, 0.5),
+                                    cex = 1,
+                                    lwd = 4)),
+                        sp.polygons(ne_countries(),
+                                    col = "#e3d0d0",
+                                    fill = "#e3d0d0"))
+)
+
 dev.off()
