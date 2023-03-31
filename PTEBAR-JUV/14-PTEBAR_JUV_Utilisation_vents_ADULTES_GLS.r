@@ -307,23 +307,57 @@ hist(dir_DF$dir_bird_deg0_360,
 #### ---- Difference orientation wind and bird ---- ####
 dir_DF$diff_wind_bird <- (dir_DF$dir_bird_deg0_360 - dir_DF$wind_meteo_dir0_360_loc) %% 360
 
-# png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/DIFF_bird_wind_ADULTS_go_wintering.png",
+# agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/DIFF_bird_wind_ADULTS_go_wintering.png",
 #     res = 300,
-#     width = 15,
-#     height = 20,
-#     pointsize = 12,
+#     width = 30,
+#     height = 30,
+#     pointsize = 18,
 #     units = "cm",
 #     bg = "white")
 hist(dir_DF$diff_wind_bird,
-     breaks = seq(0, 360, 5),
+     breaks = seq(0, 360, 10),
      freq = F,
-     main = "Diff orient° vent & adultes PTEBAR",
-     xlab = "angle (°)")
+     main = " ",
+     xlab = "angle (°)",
+     col = "goldenrod2",
+     border = adjustcolor("white", alpha.f = 0.5),
+     xaxt = "n")
+axis(side = 1,
+     at = seq(0, 360, 20))
 lines(density(dir_DF$diff_wind_bird,
               from = 0,
               to = 360,
-              na.rm = T))
+              na.rm = T),
+      col = "goldenrod4",
+      lwd = 2.5)
 # dev.off()
+
+# ---- histogram GGPLOT2#
+# ggsave("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/HISTOGRAM_AD.png",
+#        dpi = 300,
+#        width = 30,
+#        height = 30,
+#        pointsize = 12,
+#        units = "cm",
+#        bg = "white")
+
+g1 <- ggplot(as.data.frame(dir_DF), aes(diff_wind_bird)) +
+  geom_histogram(mapping = aes(y = ..density..),
+                 fill = "olivedrab3",
+                 color = "olivedrab3",
+                 alpha = 0.5,
+                 binwidth = 1,
+                 breaks = seq(0, 360, 10)
+  ) + 
+  geom_density(col = "darkgreen") +
+  scale_x_continuous(breaks = seq(0, 360, 10),
+                     limits = c(0, 360)) +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.y = element_blank(),
+        axis.title = element_blank(),
+        axis.text.x = element_text(color="black", 
+                                   size=12, angle=45))
 
 # moyenne circulaire de la difference entre orientation ent & oiseaux
 library(circular)
@@ -439,6 +473,9 @@ ggplot(loc2) +
 
 # ---- Adults
 library(cowplot)
+
+# GGPLOT2
+
 # png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/Wind_bird_diff_orientation/WINDROSES_adults.png",
 #     res = 300,
 #     width = 30,
@@ -474,6 +511,7 @@ ggdraw() +
              width = 0.095,
              height = 0.095) 
 # dev.off()
+
 
 #### ---- production du KERNEL 90 pour les locs entre l'arrivée et le départ de la wintering core area ---- ####
 
@@ -560,10 +598,14 @@ g <- ggplot() +
             mapping = aes(x = LON, y = LAT, group = ID),
             size = 1,
             color = "goldenrod2") +
-  geom_path(data = loc,
+  geom_path(data = loc[loc$group == "2018-Nord",],
             mapping = aes(x = lon, y = lat, group = id),
             size = 1,
             color = "olivedrab3") +
+  geom_path(data = loc[loc$group == "2018-Sud",],
+            mapping = aes(x = lon, y = lat, group = id),
+            size = 1,
+            color = "olivedrab4") +
   geom_sf(data = world,
           color = "gray75",
           fill = "grey75") +
@@ -663,8 +705,82 @@ rasterVis::vectorplot(raster::stack(raster(mn_east_migr),
                                 fill = "#e3d0d0"))
 )
 
-dev.off()
+# dev.off()
 
+#### ---- carte des vents AD - mean date of the migration departure ---- ####
+# visualisation des points avec un vectorplot
+
+# Time range
+head(pts_out)
+dts <- lapply(split(pts_out, pts_out$ID),
+              function(x){
+                dt <- as.character(date(x$DATE[1]))
+                dt
+              })
+
+dts_v <- as.vector(unlist(dts))
+dt_2008 <- dts_v[str_detect(dts_v, "2008")]
+dt_2009 <- dts_v[str_detect(dts_v, "2009")]
+
+mn_dt_2008 <- mean(as.Date(dt_2008, "%Y-%m-%d"))
+mn_dt_2009 <- mean(as.Date(dt_2009, "%Y-%m-%d"))
+
+# Retrieve the corresponding raster and mean
+spd_migr <- wind_speed_stack[[date(time(wind_speed_stack)) == date(mn_dt_2008) | date(time(wind_speed_stack)) == date(mn_dt_2009)]]
+mn_spd_migr <- mean(spd_migr)
+# ----  #
+
+north_migr <- wind_north_stack[[date(time(wind_north_stack)) == date(mn_dt_2008) | date(time(wind_north_stack)) == date(mn_dt_2009)]]
+mn_north_migr <- mean(north_migr)
+
+# ---- #
+
+east_migr <- wind_east_stack[[date(time(wind_east_stack)) == date(mn_dt_2008) | date(time(wind_east_stack)) == date(mn_dt_2009)]]
+mn_east_migr <- mean(east_migr)
+
+# agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_AD_pts_migr_WIND_mean_day_departure.png",
+#     res = 300,
+#     width = 50,
+#     height = 40,
+#     pointsize = 12,
+#     unit = "cm",
+#     bg = "white")
+
+# x11()
+print(
+  rasterVis::vectorplot(raster::stack(raster(mn_east_migr),
+                                      raster(mn_north_migr)),
+                        isField = 'dXY',
+                        units = "degrees",
+                        narrows = 800,
+                        lwd.arrows = 1.5,
+                        aspX = 0.5,
+                        region = raster(mn_spd_migr),
+                        at = my_at,
+                        col.regions = my_cols,
+                        colorkey = list(labels = list(cex = 1.5),
+                                        title = list("wind speed (km/h)",
+                                                     cex = 2,
+                                                     vjust = 0)),
+                        #    main = list(label = paste("week # ", i, " 2018", sep = ""),
+                        #    cex = 3),
+                        xlab = list(label = "Longitude", 
+                                    cex = 2),
+                        ylab = list(label = "Latitude",
+                                    cex = 2),
+                        scales = list(x = list(cex = 1.5),
+                                      y = list(cex = 1.5))) +
+    latticeExtra::layer(c(sp.points(as_Spatial(pts_out_sf),
+                                    # col = "white",
+                                    col = rgb(1, 1, 1, 0.5),
+                                    cex = 1,
+                                    lwd = 4)),
+                        sp.polygons(ne_countries(),
+                                    col = "#e3d0d0",
+                                    fill = "#e3d0d0"))
+)
+
+dev.off()
 #### ---- carte des vents JUV - GROUPE 2018-NORD ---- ####
 # ---- Production des kernels 50, comparaison avec le kernel 90 hivernage des adultes
 loc_sp <- as_Spatial(loc_sf)
@@ -730,6 +846,7 @@ loc_2018_final <- rbind(do.call("rbind", Treated),
                         loc_2018_noTreat)
 
 mapview(loc_2018_final) + mapview(ver90)
+
 # ---- Creation des rasters
 env_folder <- "C:/Users/ccjuhasz/Desktop/SMAC/Projet_publi/5-PTEBAR_argos_JUV/ENV_DATA_Romain/Output_R/wind_2008-2018" 
 list_names <- list.files(env_folder,
@@ -783,13 +900,13 @@ mn_east_migr <- mean(east_migr)
 
 # ---- carto #
 
-agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_JUV_NORD_WIND.png",
-        res = 300,
-        width = 50,
-        height = 40,
-        pointsize = 12,
-        unit = "cm",
-        bg = "white")
+# agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_JUV_NORD_WIND.png",
+#         res = 300,
+#         width = 50,
+#         height = 40,
+#         pointsize = 12,
+#         unit = "cm",
+#         bg = "white")
 
 # x11()
 print(
@@ -825,16 +942,74 @@ print(
                                     fill = "#e3d0d0"))
 )
 
+# dev.off()
+
+# ---- histogram #
+
+# GGPLOT2
+
+# ggsave("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/HISTOGRAM_juv_NORD_2018.png",
+#        dpi = 300,
+#        width = 30,
+#        height = 30,
+#        pointsize = 12,
+#        units = "cm",
+#        bg = "white")
+
+g1 <- 
+  ggplot(nord_sf, aes(diff_wind_bird_loc)) +
+  geom_histogram(mapping = aes(y = ..density..),
+                 fill = "olivedrab3",
+                 color = "olivedrab3",
+                 alpha = 0.5,
+                 binwidth = 1,
+                 breaks = seq(0, 360, 10)
+  ) + 
+  geom_density(col = "darkgreen") +
+  scale_x_continuous(breaks = seq(0, 360, 20),
+                     limits = c(0, 360)) +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.y = element_blank(),
+        axis.title = element_blank(),
+        axis.text.x = element_text(color="black", 
+                                   size=12,
+                                   angle=45))
+
+# no GGPLOT2
+agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/HISTOGRAM_noGGPLOT_juv_NORD_2018.png",
+        res = 300,
+        width = 30,
+        height = 30,
+        pointsize = 18,
+        unit = "cm",
+        bg = "white")
+hist(nord_sf$diff_wind_bird_loc,
+     breaks = seq(0, 360, 10),
+     freq = F,
+     main = " ",
+     xlab = "angle (°)",
+     col = "olivedrab3",
+     border = adjustcolor("white", alpha.f = 0.5),
+     xaxt = "n")
+axis(side = 1,
+     at = seq(0, 360, 20))
+lines(density(nord_sf$diff_wind_bird_loc,
+              from = 0,
+              to = 360,
+              na.rm = T),
+      col = "olivedrab4",
+      lwd = 2.5)
 dev.off()
 
 # ---- windrose #
-ggsave("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/WINDROSES_juv_NORD_2018.png",
-    dpi = 300,
-    width = 30,
-    height = 30,
-    pointsize = 12,
-    units = "cm",
-    bg = "white")
+# ggsave("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/WINDROSES_juv_NORD_2018.png",
+#     dpi = 300,
+#     width = 30,
+#     height = 30,
+#     pointsize = 12,
+#     units = "cm",
+#     bg = "white")
 
 g1 <- ggplot(nord_sf) +
   geom_histogram(mapping = aes(diff_wind_bird_loc),
@@ -854,7 +1029,7 @@ g1 <- ggplot(nord_sf) +
   theme(legend.position = "none",
         axis.text.y = element_blank(),
         axis.title = element_blank())
-dev.off()
+# dev.off()
 
 #### ---- carte des vents JUV - GROUPE 2018-SUD ---- ####
 names(loc_2018_final)
@@ -881,13 +1056,13 @@ mn_east_migr <- mean(east_migr)
 
 # ---- carto #
 
-agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_JUV_SUD_WIND.png",
-        res = 300,
-        width = 50,
-        height = 40,
-        pointsize = 12,
-        unit = "cm",
-        bg = "white")
+# agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_JUV_SUD_WIND.png",
+#         res = 300,
+#         width = 50,
+#         height = 40,
+#         pointsize = 12,
+#         unit = "cm",
+#         bg = "white")
 
 # x11()
 print(
@@ -923,16 +1098,79 @@ print(
                                     fill = "#e3d0d0"))
 )
 
-dev.off()
+# dev.off()
 
+# ---- histogram #
+
+# GGPLOT2
+
+# ggsave("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/HISTOGRAM_juv_SUD_2018.png",
+#        dpi = 300,
+#        width = 30,
+#        height = 30,
+#        pointsize = 12,
+#        units = "cm",
+#        bg = "white")
+
+g1 <- ggplot(sud_sf, aes(diff_wind_bird_loc)) +
+  geom_histogram(mapping = aes(y = ..density..),
+                 fill = "olivedrab4",
+                 color = "olivedrab4",
+                 alpha = 0.5,
+                 binwidth = 1,
+                 breaks = seq(0, 360, 10)
+                 ) + 
+  geom_density(col = "olivedrab4",
+               size = 1)
+
+g1 + theme_bw() +
+  scale_x_continuous(breaks = seq(0, 360, 20),
+                     limits = c(0, 360))  +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.text.x = element_text(color="black",
+                                   size=12),
+        axis.text.y = element_text(color="black",
+                                   size=12),
+        axis.line.x = element_line(colour = "black"))
+
+# no GGPLOT2
+# agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/HISTOGRAM_noGGPLOT_juv_SUD_2018.png",
+#         res = 300,
+#         width = 30,
+#         height = 30,
+#         pointsize = 18,
+#         unit = "cm",
+#         bg = "white")
+hist(sud_sf$diff_wind_bird_loc,
+     breaks = seq(0, 360, 10),
+     freq = F,
+     main = " ",
+     xlab = "angle (°)",
+     col = "olivedrab4",
+     border = adjustcolor("white", alpha.f = 0.5),
+     xaxt = "n")
+axis(side = 1,
+     at = seq(0, 360, 20))
+lines(density(sud_sf$diff_wind_bird_loc,
+              from = 0,
+              to = 360,
+              na.rm = T),
+      col = "darkolivegreen",
+      lwd = 2.5)
+# dev.off()
+  
 # ---- windrose #
-ggsave("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/WINDROSES_juv_SUD_2018.png",
-       dpi = 300,
-       width = 30,
-       height = 30,
-       pointsize = 12,
-       units = "cm",
-       bg = "white")
+
+# ggsave("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/WINDROSES_juv_SUD_2018.png",
+#        dpi = 300,
+#        width = 30,
+#        height = 30,
+#        pointsize = 12,
+#        units = "cm",
+#        bg = "white")
 
 g1 <- ggplot(sud_sf) +
   geom_histogram(mapping = aes(diff_wind_bird_loc),
@@ -952,16 +1190,18 @@ g1 <- ggplot(sud_sf) +
   theme(legend.position = "none",
         axis.text.y = element_blank(),
         axis.title = element_blank())
-dev.off()
+# dev.off()
 
-# ---- windrose TOTAL 2018 #
-ggsave("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/WINDROSES_juv_TOTAL_2018.png",
-       dpi = 300,
-       width = 30,
-       height = 30,
-       pointsize = 12,
-       units = "cm",
-       bg = "white")
+# ---- Carte des vents JUV - TOTAL ---- ####
+
+# ---- windrose #
+# ggsave("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/WINDROSES_juv_TOTAL_2018.png",
+#        dpi = 300,
+#        width = 30,
+#        height = 30,
+#        pointsize = 12,
+#        units = "cm",
+#        bg = "white")
 
 g1 <- ggplot(loc_2018_final) +
   geom_histogram(mapping = aes(diff_wind_bird_loc),
@@ -982,15 +1222,45 @@ g1 <- ggplot(loc_2018_final) +
         axis.text.y = element_blank(),
         axis.title = element_blank())
 
-# ---- carto TOTAL 2018 #
+# ---- carto TOTAL moyenne des vents de la première à la dernière date #
+# avec correction car 1ere date de chaque indivividu == sur colonie
 
-agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_JUV_TOTAL_2018_WIND.png",
-        res = 300,
-        width = 50,
-        height = 40,
-        pointsize = 12,
-        unit = "cm",
-        bg = "white")
+dt_min_ls <- lapply(split(loc_2018_final, loc_2018_final$id),
+                function(x){
+                  dt <- as.character(date(x$date[2]))
+                  dt
+                })
+dt_min <- min(unlist(dt_min_ls))
+
+dt_max_ls <- lapply(split(loc_2018_final, loc_2018_final$id),
+                    function(x){
+                      dt <- as.character(date(x$date[length(x$date)]))
+                      dt
+                    })
+dt_max <- max(unlist(dt_max_ls))
+
+
+r1 <- c(dt_min, dt_max)
+
+# Retrieve the corresponding raster and mean
+spd_migr <- wind_speed_stack[[date(time(wind_speed_stack)) >= date(r1[1]) & date(time(wind_speed_stack)) <= date(r1[2])]]
+mn_spd_migr <- mean(spd_migr)
+# ----  #
+
+north_migr <- wind_north_stack[[date(time(wind_north_stack)) >= date(r1[1]) & date(time(wind_north_stack)) <= date(r1[2])]]
+mn_north_migr <- mean(north_migr)
+
+# ---- #
+
+east_migr <- wind_east_stack[[date(time(wind_east_stack)) >= date(r1[1]) & date(time(wind_east_stack)) <= date(r1[2])]]
+mn_east_migr <- mean(east_migr)
+# agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_JUV_TOTAL_2018_WIND_version2.png",
+#         res = 300,
+#         width = 50,
+#         height = 40,
+#         pointsize = 12,
+#         unit = "cm",
+#         bg = "white")
 
 # x11()
 print(
@@ -1026,4 +1296,72 @@ print(
                                     fill = "#e3d0d0"))
 )
 
-dev.off()
+# dev.off()
+
+# ---- Carto TOTAL avec vent lors de la date moyenne de départ des juvéniles #
+
+class(loc_2018_final)
+dep_ls <- lapply(split(loc_2018_final, loc_2018_final$id),
+                 function(x) {
+                   dt <- as.character(date(x$date[2]))
+                   dt
+                 })
+
+mn_dt <- mean(as.Date(as.vector(unlist(dep_ls)))) # 2018-04-10
+
+# Retrieve the corresponding raster and mean
+spd_migr <- wind_speed_stack[[date(time(wind_speed_stack)) == as.Date("2018-04-10")]]
+mn_spd_migr <- mean(spd_migr)
+# ----  #
+
+north_migr <- wind_north_stack[[date(time(wind_north_stack)) == as.Date("2018-04-10")]]
+mn_north_migr <- mean(north_migr)
+
+# ---- #
+
+east_migr <- wind_east_stack[[date(time(wind_east_stack)) == as.Date("2018-04-10")]]
+mn_east_migr <- mean(east_migr)
+
+# agg_png("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/PTEBAR_JUV_TOTAL_2018_WIND_departure_day.png",
+#         res = 300,
+#         width = 50,
+#         height = 40,
+#         pointsize = 12,
+#         unit = "cm",
+#         bg = "white")
+
+# x11()
+print(
+  rasterVis::vectorplot(raster::stack(raster(mn_east_migr),
+                                      raster(mn_north_migr)),
+                        isField = 'dXY',
+                        units = "degrees",
+                        narrows = 800,
+                        lwd.arrows = 1.5,
+                        aspX = 0.5,
+                        region = raster(mn_spd_migr),
+                        at = my_at,
+                        col.regions = my_cols,
+                        colorkey = list(labels = list(cex = 1.5),
+                                        title = list("wind speed (km/h)",
+                                                     cex = 2,
+                                                     vjust = 0)),
+                        #    main = list(label = paste("week # ", i, " 2018", sep = ""),
+                        #    cex = 3),
+                        xlab = list(label = "Longitude", 
+                                    cex = 2),
+                        ylab = list(label = "Latitude",
+                                    cex = 2),
+                        scales = list(x = list(cex = 1.5),
+                                      y = list(cex = 1.5))) +
+    latticeExtra::layer(c(sp.points(as_Spatial(loc_2018_final),
+                                    # col = "white",
+                                    col = rgb(1, 1, 1, 0.5),
+                                    cex = 1,
+                                    lwd = 4)),
+                        sp.polygons(ne_countries(),
+                                    col = "#e3d0d0",
+                                    fill = "#e3d0d0"))
+)
+
+# dev.off()

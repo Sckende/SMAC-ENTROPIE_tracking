@@ -153,16 +153,16 @@ for (i in unique(argos_lines$Vessel)) {
     #             i,
     #             ".png",
     #             sep = ""),
-  agg_png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/FAKIR/FAKIR-",
-              i,
-              ".png",
-              sep = ""),
-        res = 300,
-        width = 50,
-        height = 40,
-        pointsize = 20,
-        unit = "cm",
-        bg = "white")
+  # agg_png(paste("G:/Mon Drive/Projet_Publis/TRACKING_PTEBAR_JUV/MS/PTEBAR_ARGOS_figures/FAKIR/FAKIR-",
+  #             i,
+  #             ".png",
+  #             sep = ""),
+  #       res = 300,
+  #       width = 50,
+  #       height = 40,
+  #       pointsize = 20,
+  #       unit = "cm",
+  #       bg = "white")
     print(
     vectorplot(stack(east, north),
                  isField = 'dXY',
@@ -210,7 +210,7 @@ for (i in unique(argos_lines$Vessel)) {
             #           lwd = 4)
             )
     ))
-    dev.off()
+    # dev.off()
 }
 
-graphics.off()
+# graphics.off()
